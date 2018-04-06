@@ -9,7 +9,7 @@ This library is a fork of the original Avro library, only adding a php Avro RPC 
 ## Installation
  
 ```bash
-composer require eliep/avro-rpc-php
+composer require v3d/avro-rpc-php
 ```
 
 ## Usage
@@ -85,3 +85,4 @@ phpunit test/AllTests.php
 ```
 
 These are mostly the original Avro test except for the `test/IpcTest.php` files
+

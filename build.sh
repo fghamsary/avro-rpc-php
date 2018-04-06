@@ -21,7 +21,7 @@ cd `dirname "$0"`
 
 dist_dir="../../dist/php"
 build_dir="pkg"
-version=1.7.7 #$(cat ../../share/VERSION.txt)
+version=1.8.0 #$(cat ../../share/VERSION.txt)
 libname="avro-php-$version"
 lib_dir="$build_dir/$libname"
 tarball="$libname.tar.bz2"
