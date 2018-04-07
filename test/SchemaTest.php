@@ -419,9 +419,10 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                         array("bar", "baz", "blurfl"));
     $this->assertFalse(is_array(json_decode('null', true)));
     $this->assertEquals(json_decode('{"type": "null"}', true), array("type" => 'null'));
-    foreach (array('true', 'True', 'TRUE', 'tRue') as $truthy)
+    $this->assertEquals(json_decode('true', true), true);
+    foreach (array('True', 'TRUE', 'tRue') as $truthy)
     {
-      $this->assertEquals(json_decode($truthy, true), true, $truthy);
+      $this->assertNull(json_decode($truthy, true), $truthy);
     }
     $this->assertEquals(json_decode('"boolean"'), 'boolean');
   }
