@@ -348,6 +348,13 @@ class AvroDataIOReader
     return $this->decoder->read_long();
   }
 
+  public function getSyncMaker() {
+    return $this->sync_marker;
+  }
+
+  public function getMetaDataByKey($key) {
+    return $this->metadata[$key];
+  }
 }
 
 /**
@@ -381,7 +388,7 @@ class AvroDataIOWriter
   private $encoder;
 
   /**
-   * @var AvroDatumWriter
+   * @var AvroIODatumWriter
    */
   private $datum_writer;
 
@@ -404,6 +411,11 @@ class AvroDataIOWriter
    * @var array map of object container metadata
    */
   private $metadata;
+
+  /**
+   * @var string
+   */
+  private $sync_marker;
 
   /**
    * @param AvroIO $io
@@ -433,12 +445,12 @@ class AvroDataIOWriter
     else
     {
       $dfr = new AvroDataIOReader($this->io, new AvroIODatumReader());
-      $this->sync_marker = $dfr->sync_marker;
-      $this->metadata[AvroDataIO::METADATA_CODEC_ATTR] = $dfr->metadata[AvroDataIO::METADATA_CODEC_ATTR];
+      $this->sync_marker = $dfr->getSyncMaker();
+      $this->metadata[AvroDataIO::METADATA_CODEC_ATTR] = $dfr->getMetaDataByKey(AvroDataIO::METADATA_CODEC_ATTR);
 
-      $schema_from_file = $dfr->metadata[AvroDataIO::METADATA_SCHEMA_ATTR];
+      $schema_from_file = $dfr->getMetaDataByKey(AvroDataIO::METADATA_SCHEMA_ATTR);
       $this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR] = $schema_from_file;
-      $this->datum_writer->writers_schema = AvroSchema::parse($schema_from_file);
+      $this->datum_writer->setWritersSchema(AvroSchema::parse($schema_from_file));
       $this->seek(0, SEEK_END);
     }
   }

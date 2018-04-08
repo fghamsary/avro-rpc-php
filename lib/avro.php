@@ -49,7 +49,7 @@ class Avro
    * @var string version number of Avro specification to which
    *             this implemenation complies
    */
-  const SPEC_VERSION  = '1.3.3';
+  const SPEC_VERSION  = '1.7.7';
 
   /**#@+
    * Constant to enumerate endianness.

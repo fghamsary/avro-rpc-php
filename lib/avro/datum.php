@@ -87,6 +87,13 @@ class AvroIODatumWriter
   }
 
   /**
+   * @param \AvroSchema $writers_schema The schema of the avro used for this datum writer
+   */
+  public function setWritersSchema($writers_schema) {
+    $this->writers_schema = $writers_schema;
+  }
+
+  /**
    * @param AvroSchema $writers_schema
    * @param $datum
    * @param AvroIOBinaryEncoder $encoder
@@ -943,7 +950,7 @@ class AvroIOBinaryDecoder
 
   public function skip_int() { return $this->skip_long(); }
 
-  protected function skip_long()
+  public function skip_long()
   {
     $b = $this->next_byte();
     while (0 != ($b & 0x80))
