@@ -5,7 +5,7 @@
   "license": "proprietary",
   "version": "1.8.0",
   "type": "library",
-  "homepage": "https://gitlib.v3d.fr/server/avro-rpc-php",
+  "homepage": "https://gitlab.v3d.fr/server/avro-rpc-php",
   
   "authors": [
     {
