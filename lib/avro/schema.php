@@ -685,8 +685,23 @@ class AvroMapSchema extends AvroSchema
       ? $this->values->qualified_name() : $this->values->to_avro();
 
     global $JAVA_STRING_TYPE;
-    if (!empty($JAVA_STRING_TYPE) && $JAVA_STRING_TYPE == self::JAVA_STRING_TYPE && !$this->is_values_schema_from_schemata && $this->values->type == self::STRING_TYPE)
-      $avro[self::JAVA_STRING_ANNOTATION] = self::JAVA_STRING_TYPE;
+    if (!empty($JAVA_STRING_TYPE) &&
+      $JAVA_STRING_TYPE == self::JAVA_STRING_TYPE &&
+      !$this->is_values_schema_from_schemata &&
+      (
+        $this->values->type == self::STRING_TYPE ||
+        // we should also add in case we have a union which contain a string inside a map
+        (
+          $this->values->type == self::UNION_SCHEMA &&
+          count(array_filter($this->values->schemas(), function ($itm) {
+              /** @var AvroSchema $itm */
+              return $itm->type() == self::STRING_TYPE;
+          })) == 1
+        )
+      )
+    ) {
+        $avro[self::JAVA_STRING_ANNOTATION] = self::JAVA_STRING_TYPE;
+    }
 
     return $avro;
   }
