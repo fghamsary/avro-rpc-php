@@ -186,14 +186,3 @@ class AvroSpec
   }
 
 }
-
-require_once('avro/util.php');
-require_once('avro/debug.php');
-require_once('avro/schema.php');
-require_once('avro/io.php');
-require_once('avro/gmp.php');
-require_once('avro/datum.php');
-require_once('avro/data_file.php');
-require_once('avro/protocol.php');
-require_once('avro/ipc.php');
-require_once('avro/records.php');
