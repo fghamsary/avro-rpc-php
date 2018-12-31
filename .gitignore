@@ -1,5 +1,7 @@
 *komodo*
 .idea
 
+composer.lock
+tmp
 vendor/*
 Supprimerait vendor/

@@ -17,22 +17,22 @@
  * limitations under the License.
  */
 
+use Avro\AvroDataIO;
+
 require_once('test_helper.php');
 
-class DataFileTest extends PHPUnit_Framework_TestCase
+class DataFileTest extends PHPUnit\Framework\TestCase
 {
-  private $data_files;
+  private $data_files = [];
   const REMOVE_DATA_FILES = true;
 
   static function current_timestamp() { return strftime("%Y%m%dT%H%M%S"); }
 
   protected function add_data_file($data_file)
   {
-    if (is_null($this->data_files))
-      $this->data_files = array();
     $data_file = "$data_file.".self::current_timestamp();
     $full = join(DIRECTORY_SEPARATOR, array(TEST_TEMP_DIR, $data_file));
-    $this->data_files []= $full;
+    $this->data_files[] = $full;
     return $full;
   }
 

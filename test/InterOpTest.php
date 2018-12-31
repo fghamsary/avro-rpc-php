@@ -17,9 +17,13 @@
  * limitations under the License.
  */
 
+use Avro\AvroDataIO;
+use Avro\AvroFile;
+use Avro\AvroSchema;
+
 require_once('test_helper.php');
 
-class InterOpTest extends PHPUnit_Framework_TestCase
+class InterOpTest extends PHPUnit\Framework\TestCase
 {
   var $projection_json;
   var $projection;

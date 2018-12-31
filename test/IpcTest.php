@@ -17,6 +17,12 @@
  * limitations under the License.
  */
 
+use Avro\AvroProtocol;
+use Avro\AvroRemoteException;
+use Avro\Requestor;
+use Avro\Responder;
+use Avro\SocketTransceiver;
+
 require_once('test_helper.php');
 
 /**
@@ -119,7 +125,7 @@ class TestProtocolResponder extends Responder {
 }
 
 
-class IpcTest extends PHPUnit_Framework_TestCase
+class IpcTest extends PHPUnit\Framework\TestCase
 {
   
   public function testSimpleRequestResponse()

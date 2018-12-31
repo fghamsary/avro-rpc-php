@@ -165,9 +165,10 @@ class AvroDataIO
   /**
    * @param AvroIO $io
    * @param AvroSchema $schema
-   * @returns AvroDataIOWriter
+   * @return AvroDataIOWriter
+   * @throws AvroDataIOException
    */
-  protected function open_writer($io, $schema)
+  protected static function open_writer($io, $schema)
   {
     $writer = new AvroIODatumWriter($schema);
     return new AvroDataIOWriter($io, $writer, $schema);
@@ -176,9 +177,10 @@ class AvroDataIO
   /**
    * @param AvroIO $io
    * @param AvroSchema $schema
-   * @returns AvroDataIOReader
+   * @return AvroDataIOReader
+   * @throws AvroDataIOException
    */
-  protected function open_reader($io, $schema)
+  protected static function open_reader($io, $schema)
   {
     $reader = new AvroIODatumReader(null, $schema);
     return new AvroDataIOReader($io, $reader);
@@ -244,7 +246,7 @@ class AvroDataIOReader
     $codec = AvroUtil::array_value($this->metadata, 
                                    AvroDataIO::METADATA_CODEC_ATTR);
     if ($codec && !AvroDataIO::is_valid_codec($codec))
-      throw new AvroDataIOException(sprintf('Uknown codec: %s', $codec));
+      throw new AvroDataIOException(sprintf('Unknown codec: %s', $codec));
 
     $this->block_count = 0;
     // FIXME: Seems unsanitary to set writers_schema here.

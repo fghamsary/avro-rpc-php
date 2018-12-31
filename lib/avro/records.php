@@ -8,6 +8,8 @@
 
 namespace Avro\Record;
 
+use Avro\AvroRemoteException;
+
 abstract class AvroRecord {
 
 }
@@ -31,8 +33,8 @@ abstract class AvroEnumRecord implements \JsonSerializable {
   protected abstract static function getEnumValues();
 
   public static function getItem($value) {
+    $class = get_called_class();
     if (self::hasValue($value)) {
-      $class = get_called_class();
       return new $class($value);
     } else {
       throw new \AvroException("$value is not valid for $class!");

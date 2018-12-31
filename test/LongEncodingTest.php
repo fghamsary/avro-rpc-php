@@ -16,14 +16,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use Avro\AvroGMP;
+use Avro\AvroIOBinaryDecoder;
+use Avro\AvroIOBinaryEncoder;
+use Avro\AvroSpec;
+
 require_once('test_helper.php');
 
-class LongEncodingTest extends PHPUnit_Framework_TestCase
+class LongEncodingTest extends PHPUnit\Framework\TestCase
 {
 
   function setUp()
   {
-    Avro::check_platform();
+    AvroSpec::check_platform();
   }
 
   static function is_64_bit() { return (PHP_INT_SIZE == 8); }

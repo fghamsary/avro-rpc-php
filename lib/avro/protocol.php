@@ -36,6 +36,11 @@ class AvroProtocol
   public $messages;
   public $md5string = null;
 
+  /**
+   * @param string $json The definition of the avro schema to be used
+   * @return AvroProtocol The protocol parsed based on the entry json
+   * @throws AvroProtocolParseException
+   */
   public static function parse($json)
   {
     if (is_null($json))

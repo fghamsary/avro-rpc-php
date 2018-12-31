@@ -16,9 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use Avro\AvroDebug;
+use Avro\AvroIOBinaryDecoder;
+use Avro\AvroIOBinaryEncoder;
+
 require_once('test_helper.php');
 
-class FloatIntEncodingTest extends PHPUnit_Framework_TestCase
+class FloatIntEncodingTest extends PHPUnit\Framework\TestCase
 {
   const FLOAT_TYPE = 'float';
   const DOUBLE_TYPE = 'double';
@@ -228,13 +233,13 @@ _RUBY;
   {
     if (self::FLOAT_TYPE == $type)
     {
-      $decoder = array('AvroIOBinaryDecoder', 'int_bits_to_float');
-      $encoder = array('AvroIOBinaryEncoder', 'float_to_int_bits');
+      $decoder = array(AvroIOBinaryDecoder::class, 'int_bits_to_float');
+      $encoder = array(AvroIOBinaryEncoder::class, 'float_to_int_bits');
     }
     else
     {
-      $decoder = array('AvroIOBinaryDecoder', 'long_bits_to_double');
-      $encoder = array('AvroIOBinaryEncoder', 'double_to_long_bits');
+      $decoder = array(AvroIOBinaryDecoder::class, 'long_bits_to_double');
+      $encoder = array(AvroIOBinaryEncoder::class, 'double_to_long_bits');
     }
 
     $decoded_bits_val = call_user_func($decoder, $bits);
@@ -259,13 +264,13 @@ _RUBY;
   {
     if (self::FLOAT_TYPE == $type)
     {
-      $decoder = array('AvroIOBinaryDecoder', 'int_bits_to_float');
-      $encoder = array('AvroIOBinaryEncoder', 'float_to_int_bits');
+      $decoder = array(AvroIOBinaryDecoder::class, 'int_bits_to_float');
+      $encoder = array(AvroIOBinaryEncoder::class, 'float_to_int_bits');
     }
     else
     {
-      $decoder = array('AvroIOBinaryDecoder', 'long_bits_to_double');
-      $encoder = array('AvroIOBinaryEncoder', 'double_to_long_bits');
+      $decoder = array(AvroIOBinaryDecoder::class, 'long_bits_to_double');
+      $encoder = array(AvroIOBinaryEncoder::class, 'double_to_long_bits');
     }
 
     $decoded_bits_val = call_user_func($decoder, $bits);

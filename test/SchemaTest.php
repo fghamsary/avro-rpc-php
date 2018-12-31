@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+use Avro\AvroSchema;
+use Avro\AvroSchemaParseException;
+
 require_once('test_helper.php');
 
 class SchemaExample
@@ -38,7 +41,7 @@ class SchemaExample
   }
 }
 
-class SchemaTest extends PHPUnit_Framework_TestCase
+class SchemaTest extends PHPUnit\Framework\TestCase
 {
   static $examples = array();
   static $valid_examples = array();

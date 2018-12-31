@@ -17,9 +17,17 @@
  * limitations under the License.
  */
 
+use Avro\AvroDebug;
+use Avro\AvroIOBinaryDecoder;
+use Avro\AvroIOBinaryEncoder;
+use Avro\AvroIODatumReader;
+use Avro\AvroIODatumWriter;
+use Avro\AvroSchema;
+use Avro\AvroStringIO;
+
 require_once('test_helper.php');
 
-class DatumIOTest extends PHPUnit_Framework_TestCase
+class DatumIOTest extends PHPUnit\Framework\TestCase
 {
   /**
    * @dataProvider data_provider

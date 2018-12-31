@@ -17,9 +17,17 @@
  * limitations under the License.
  */
 
+use Avro\AvroDataIOReader;
+use Avro\AvroDataIOWriter;
+use Avro\AvroDebug;
+use Avro\AvroIODatumReader;
+use Avro\AvroIODatumWriter;
+use Avro\AvroSchema;
+use Avro\AvroStringIO;
+
 require_once('test_helper.php');
 
-class StringIOTest extends PHPUnit_Framework_TestCase
+class StringIOTest extends PHPUnit\Framework\TestCase
 {
 
   public function test_write()

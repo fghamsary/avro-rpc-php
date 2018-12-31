@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+use Avro\AvroDataIO;
+
 require_once('test_helper.php');
 
 $data_file = join(DIRECTORY_SEPARATOR, array(AVRO_BUILD_DATA_DIR, 'php.avro'));

@@ -17,10 +17,13 @@
  * limitations under the License.
  */
 
+use Avro\AvroProtocol;
+use Avro\AvroSchemaParseException;
+
 require_once('test_helper.php');
 
 // near-verbatim port of test_protocol.py
-class ProtocolFileTest extends PHPUnit_Framework_TestCase
+class ProtocolFileTest extends PHPUnit\Framework\TestCase
 {
 	protected function setUp() {
 	}
