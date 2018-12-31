@@ -29,10 +29,22 @@ namespace Avro;
  */
 class AvroProtocol
 {
+  /**
+   * @var string
+   */
   public $name;
+  /**
+   * @var string
+   */
   public $namespace;
   public $doc = null;
+  /**
+   * @var AvroNamedSchemata[]
+   */
   public $schemata;
+  /**
+   * @var AvroProtocolMessage[]
+   */
   public $messages;
   public $md5string = null;
 
@@ -132,6 +144,9 @@ class AvroProtocolMessage {
    * @var AvroRecordSchema $request
    */
   public $request;
+  /**
+   * @var AvroSchema|null
+   */
   public $response = null;
   public $errors = null;
   

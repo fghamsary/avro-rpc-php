@@ -19,6 +19,9 @@
 
 namespace Avro;
 
+use Avro\Record\AvroEnumRecord;
+use Avro\Record\AvroRecord;
+
 /**
  * Avro Schema and and Avro Schema support classes.
  * @package Avro
@@ -447,12 +450,18 @@ class AvroSchema
             return true;
         return false;
       case self::ENUM_SCHEMA:
-        return in_array($datum, $expected_schema->symbols());
+        return in_array((string)$datum, $expected_schema->symbols());
       case self::FIXED_SCHEMA:
         return (is_string($datum)
                 && (strlen($datum) == $expected_schema->size()));
       case self::RECORD_SCHEMA:
+        if ($datum instanceof AvroRecord) {
+          return $datum->getName() === $expected_schema->qualified_name();
+        }
       case self::ERROR_SCHEMA:
+        if ($datum instanceof AvroEnumRecord) {
+          return $datum->getName() === $expected_schema->qualified_name();
+        }
       case self::REQUEST_SCHEMA:
         if (is_array($datum))
         {
@@ -1337,7 +1346,7 @@ class AvroRecordSchema extends AvroNamedSchema
   }
 
   /**
-   * @returns array the schema definitions of the fields of this AvroRecordSchema
+   * @returns AvroField[] array the schema definitions of the fields of this AvroRecordSchema
    */
   public function fields() { return $this->fields; }
 

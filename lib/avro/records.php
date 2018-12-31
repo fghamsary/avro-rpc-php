@@ -11,14 +11,15 @@ namespace Avro\Record;
 use Avro\AvroRemoteException;
 
 abstract class AvroRecord {
-
+  public abstract static function getName();
 }
 
 abstract class AvroErrorRecord extends AvroRemoteException {
-
+  public abstract static function getName();
 }
 
 abstract class AvroEnumRecord implements \JsonSerializable {
+  public abstract static function getName();
 
   /** @var string */
   protected $value;
