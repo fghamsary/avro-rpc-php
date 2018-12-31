@@ -19,6 +19,8 @@
 
 namespace Avro;
 
+use Avro\Record\IAvroRecordBase;
+
 /**
  * Classes for reading and writing Avro data to AvroIO objects.
  *
@@ -224,8 +226,13 @@ class AvroIODatumWriter
 
   private function write_record($writers_schema, $datum, $encoder)
   {
-    foreach ($writers_schema->fields() as $field)
-      $this->write_data($field->type(), $datum[$field->name()], $encoder);
+    foreach ($writers_schema->fields() as $field) {
+      if ($datum instanceof IAvroRecordBase) {
+        $this->write_data($field->type(), $datum->_internalGetValue($field->name()), $encoder);
+      } else {
+        $this->write_data($field->type(), $datum[$field->name()], $encoder);
+      }
+    }
   }
 
   /**#@-*/
@@ -657,32 +664,43 @@ class AvroIODatumReader
   public function read_record($writers_schema, $readers_schema, $decoder)
   {
     $readers_fields = $readers_schema->fields_hash();
-    $record = array();
-    foreach ($writers_schema->fields() as $writers_field)
-    {
+    $recordClassName = $readers_schema->qualified_name();
+    $classBasedRecord = false;
+    if (class_exists($recordClassName)) {
+      /** @var IAvroRecordBase $record */
+      $record = $recordClassName::newInstance();
+      $classBasedRecord = true;
+    } else {
+      $record = array();
+    }
+    foreach ($writers_schema->fields() as $writers_field) {
       $type = $writers_field->type();
-      if (isset($readers_fields[$writers_field->name()]))
-        $record[$writers_field->name()]
-          = $this->read_data($type,
-                             $readers_fields[$writers_field->name()]->type(),
-                             $decoder);
-      else
+      if (isset($readers_fields[$writers_field->name()])) {
+        $value = $this->read_data($type, $readers_fields[$writers_field->name()]->type(), $decoder);
+        if ($classBasedRecord) {
+          $record->_internalSetValue($writers_field->name(), $value);
+        } else {
+          $record[$writers_field->name()] = $value;
+        }
+      } else {
         $this->skip_data($type, $decoder);
+      }
     }
     // Fill in default values
-    if (count($readers_fields) > count($record))
-    {
+    if (count($readers_fields) > count($record)) {
       $writers_fields = $writers_schema->fields_hash();
-      foreach ($readers_fields as $field_name => $field)
-      {
-        if (!isset($writers_fields[$field_name]))
-        {
-          if ($field->has_default_value())
-            $record[$field->name()]
-              = $this->read_default_value($field->type(),
-                                          $field->default_value());
-          else
-            null; // FIXME: unset
+      foreach ($readers_fields as $field_name => $field) {
+        if (!isset($writers_fields[$field_name])) {
+          if ($field->has_default_value()) {
+            $value = $this->read_default_value($field->type(), $field->default_value());
+            if ($classBasedRecord) {
+              $record->_internalSetValue($field->name(), $value);
+            } else {
+              $record[$field->name()] = $value;
+            }
+          } else {
+            error_log("There is a problem in the Avro definition");
+          }
         }
       }
     }
@@ -736,15 +754,26 @@ class AvroIODatumReader
       case AvroSchema::FIXED_SCHEMA:
         return $default_value;
       case AvroSchema::RECORD_SCHEMA:
-        $record = array();
+        $classBasedRecord = false;
+        $recordClassName = $field_schema->qualified_name();
+        if (class_exists($recordClassName)) {
+          /** @var IAvroRecordBase $record */
+          $record = $recordClassName::newInstance();
+          $classBasedRecord = true;
+        } else {
+          $record = array();
+        }
         foreach ($field_schema->fields() as $field)
         {
           $field_name = $field->name();
           if (!$json_val = $default_value[$field_name])
             $json_val = $field->default_value();
-
-          $record[$field_name] = $this->read_default_value($field->type(),
-                                                           $json_val);
+          $value = $this->read_default_value($field->type(), $json_val);
+          if ($classBasedRecord) {
+            $record->_internalSetValue($field_name, $value);
+          } else {
+            $record[$field_name] = $value;
+          }
         }
         return $record;
     default:

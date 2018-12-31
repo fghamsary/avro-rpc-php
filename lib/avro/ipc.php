@@ -19,6 +19,7 @@
 
 namespace Avro;
 
+use Avro\Record\AvroErrorRecord;
 /**
  * Avro Requester/Responder and associated support classes.
  * @package Avro
@@ -71,7 +72,7 @@ class AvroRemoteException extends AvroException {
   
   private $avro_error;
   
-  public function __construct($avro_error, $message = null, $code = 0, Exception $previous = null)
+  public function __construct($avro_error, $message = null, $code = 0, \Exception $previous = null)
   {
     parent::__construct($message, $code, $previous);
     $this->avro_error = $avro_error;
@@ -179,10 +180,11 @@ class Requestor {
       $decoder = new AvroIOBinaryDecoder($io);
       $call_response_exists = $this->read_handshake_response($decoder);
       if ($call_response_exists) {
-         $call_response = $this->read_call_response($message_name, $decoder);
+        $call_response = $this->read_call_response($message_name, $decoder);
         return $call_response;
-      } else
+      } else {
         return $this->request($message_name, $request_datum);
+      }
     }
   }
   
@@ -313,9 +315,13 @@ class Requestor {
       $datum_reader = new AvroIODatumReader($remote_message_schema->response, $local_message_schema->response);
       return $datum_reader->read($decoder);
     } else {
-      
       $datum_reader = new AvroIODatumReader($remote_message_schema->errors, $local_message_schema->errors);
-      throw new AvroRemoteException($datum_reader->read($decoder));
+      $error = $datum_reader->read($decoder);
+      if ($error instanceof AvroErrorRecord) {
+        throw $error;
+      } else {
+        throw new AvroRemoteException($error);
+      }
     }
   }
   
@@ -418,7 +424,7 @@ class Responder {
         
       } catch (AvroRemoteException $e) {
         $error = $e;
-      } catch (Exception $e) {
+      } catch (\Exception $e) {
         $error = new AvroRemoteException($e->getMessage());
       }
       

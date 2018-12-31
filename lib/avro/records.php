@@ -10,16 +10,97 @@ namespace Avro\Record;
 
 use Avro\AvroRemoteException;
 
-abstract class AvroRecord {
-  public abstract static function getName();
+interface IAvroRecordBase extends \Countable {
+  /**
+   * @return string Get the name of the current record type
+   */
+  public static function getName();
+
+  /**
+   * @return $this Instances new record based on the type selected
+   */
+  public static function newInstance();
+
+  /**
+   * @param string $field The field which we want the value for
+   * @return mixed
+   */
+  public function _internalGetValue($field);
+
+  /**
+   * @param string $field The field which should be set
+   * @param mixed $value The value which should be set
+   * @return $this
+   */
+  public function _internalSetValue($field, $value);
 }
 
-abstract class AvroErrorRecord extends AvroRemoteException {
+trait TAvroRecordBase {
+
+  private $iFieldsSet = 0;
+
+  public function _internalGetValue($field) {
+    $fieldGetter = 'get' . ucfirst($field);
+    return $this->$fieldGetter;
+  }
+
+  public function _internalSetValue($field, $value) {
+    $this->iFieldsSet++;
+    $fieldSetter = 'set' . ucfirst($field);
+    return $this->$fieldSetter($value);
+  }
+
+  /**
+   * @return int the number of fields that have been set via _internalSetValue
+   */
+  public function count() {
+    return $this->iFieldsSet;
+  }
+
+}
+
+abstract class AvroRecord implements IAvroRecordBase {
+  use TAvroRecordBase;
   public abstract static function getName();
+
+  /**
+   * @return static Creates new instance of the current record type
+   */
+  public static function newInstance() {
+    return new static();
+  }
+
+}
+
+abstract class AvroErrorRecord extends AvroRemoteException implements IAvroRecordBase {
+  use TAvroRecordBase;
+  public abstract static function getName();
+
+  /**
+   * @return static Creates new instance of the current error type
+   */
+  public static function newInstance() {
+    return new static(null);
+  }
+
+  /**
+   * @return static Creates new instance of the current error type
+   */
+  public static function newError($avroError) {
+    return new static($avroError);
+  }
 }
 
 abstract class AvroEnumRecord implements \JsonSerializable {
   public abstract static function getName();
+
+  /**
+   * @param string $value The value of the enum
+   * @return static The correct item based on the enum value
+   */
+  public static function newValue($value) {
+    return new static($value);
+  }
 
   /** @var string */
   protected $value;

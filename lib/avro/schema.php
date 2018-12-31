@@ -505,7 +505,7 @@ class AvroSchema
     {
       throw $e;
     }
-    catch (Exception $e)
+    catch (\Exception $e)
     {
       throw new AvroSchemaParseException(
         sprintf('Sub-schema is not a valid Avro schema. Bad schema: %s',
