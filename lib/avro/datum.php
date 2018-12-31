@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+namespace Avro;
+
 /**
  * Classes for reading and writing Avro data to AvroIO objects.
  *
@@ -240,14 +242,14 @@ class AvroIOBinaryEncoder
   /**
    * Performs encoding of the given float value to a binary string
    *
-   * XXX: This is <b>not</b> endian-aware! The {@link Avro::check_platform()}
+   * XXX: This is <b>not</b> endian-aware! The {@link AvroSpec::check_platform()}
    * called in {@link AvroIOBinaryEncoder::__construct()} should ensure the
    * library is only used on little-endian platforms, which ensure the little-endian
    * encoding required by the Avro spec.
    *
    * @param float $float
    * @returns string bytes
-   * @see Avro::check_platform()
+   * @see AvroSpec::check_platform()
    */
   static function float_to_int_bits($float)
   {
@@ -298,7 +300,7 @@ class AvroIOBinaryEncoder
    */
   function __construct($io)
   {
-    Avro::check_platform();
+    AvroSpec::check_platform();
     $this->io = $io;
   }
 
@@ -326,7 +328,7 @@ class AvroIOBinaryEncoder
    */
   function write_long($n)
   {
-    if (Avro::uses_gmp())
+    if (AvroSpec::uses_gmp())
       $this->write(AvroGMP::encode_long($n));
     else
       $this->write(self::encode_long($n));
@@ -863,7 +865,7 @@ class AvroIOBinaryDecoder
    */
   public function __construct($io)
   {
-    Avro::check_platform();
+    AvroSpec::check_platform();
     $this->io = $io;
   }
 
@@ -904,7 +906,7 @@ class AvroIOBinaryDecoder
       $bytes []= $byte;
     }
 
-    if (Avro::uses_gmp())
+    if (AvroSpec::uses_gmp())
       return AvroGMP::decode_long_from_array($bytes);
 
     return self::decode_long_from_array($bytes);

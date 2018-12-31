@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+namespace Avro;
+
 /**
  * Avro library top-level file.
  *
@@ -30,7 +32,7 @@
  * General Avro exceptions.
  * @package Avro
  */
-class AvroException extends Exception {}
+class AvroException extends \Exception {}
 
 /**
  * Library-level class for PHP Avro port.
@@ -38,18 +40,18 @@ class AvroException extends Exception {}
  * Contains library details such as version number and platform checks.
  *
  * This port is an implementation of the
- * {@link http://avro.apache.org/docs/1.3.3/spec.html Avro 1.3.3 Specification}
+ * {@link http://avro.apache.org/docs/1.8.2/spec.html Avro 1.8.2 Specification}
  *
  * @package Avro
  *
  */
-class Avro
+class AvroSpec
 {
   /**
    * @var string version number of Avro specification to which
    *             this implemenation complies
    */
-  const SPEC_VERSION  = '1.7.7';
+  const SPEC_VERSION  = '1.8.2';
 
   /**#@+
    * Constant to enumerate endianness.
@@ -77,8 +79,8 @@ class Avro
 
   /**
    * @var int
-   * Mode used to handle bigintegers. After Avro::check_64_bit() has been called,
-   * (usually via a call to Avro::check_platform(), set to
+   * Mode used to handle bigintegers. After AvroSpec::check_64_bit() has been called,
+   * (usually via a call to AvroSpec::check_platform(), set to
    * self::GMP_BIGINTEGER_MODE on 32-bit platforms that have GMP available,
    * and to self::PHP_BIGINTEGER_MODE otherwise.
    */
@@ -114,8 +116,8 @@ class Avro
 
   /**
    * @returns boolean true if the PHP GMP extension is used and false otherwise.
-   * @internal Requires Avro::check_64_bit() (exposed via Avro::check_platform())
-   *           to have been called to set Avro::$biginteger_mode.
+   * @internal Requires AvroSpec::check_64_bit() (exposed via AvroSpec::check_platform())
+   *           to have been called to set AvroSpec::$biginteger_mode.
    */
   static function uses_gmp()
   {
@@ -136,7 +138,7 @@ class Avro
 
   /**
    * Determines the endianness of the host platform and memoizes
-   * the result to Avro::$endianness.
+   * the result to AvroSpec::$endianness.
    *
    * Based on a similar check perfomed in http://pear.php.net/package/Math_BinaryUtils
    *
@@ -194,3 +196,4 @@ require_once('avro/datum.php');
 require_once('avro/data_file.php');
 require_once('avro/protocol.php');
 require_once('avro/ipc.php');
+require_once('avro/records.php');

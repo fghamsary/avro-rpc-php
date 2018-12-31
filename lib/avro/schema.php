@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+namespace Avro;
+
 /**
  * Avro Schema and and Avro Schema support classes.
  * @package Avro
@@ -1080,6 +1082,13 @@ class AvroNamedSchemata
     $schemata = new AvroNamedSchemata($this->schemata);
     $schemata->schemata[$name] = $schema;
     return $schemata;
+  }
+
+  /**
+   * @return string[] returns the list of records in the schema
+   */
+  public function get_schema_names() {
+    return array_keys($this->schemata);
   }
   
   public function to_avro()

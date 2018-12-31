@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+namespace Avro;
+
 /**
  * Avro Requester/Responder and associated support classes.
  * @package Avro
@@ -871,5 +873,3 @@ class SocketServer {
     }
   }
 }
-  
-

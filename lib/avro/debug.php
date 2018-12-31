@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+namespace Avro;
+
 /**
  * @package Avro
  */

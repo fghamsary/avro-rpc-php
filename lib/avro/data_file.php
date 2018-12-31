@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+namespace Avro;
+
 /**
  * Classes handling reading and writing from and to AvroIO objects
  * @package Avro
