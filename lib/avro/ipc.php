@@ -105,7 +105,10 @@ class Requestor {
    * @var Transceiver
    */
   protected $transceiver;
-  
+
+  /**
+   * @var AvroProtocol
+   */
   protected $local_protocol;
   
   protected $remote_protocol = array();
@@ -121,6 +124,8 @@ class Requestor {
   protected $handshake_requestor_reader;
   protected $meta_writer;
   protected $meta_reader;
+
+  protected $namespace;
   
   /**
    * Initializes a new requestor object
@@ -130,6 +135,7 @@ class Requestor {
   public function __construct(AvroProtocol $local_protocol, Transceiver $transceiver)
   {
     $this->local_protocol = $local_protocol;
+    $this->namespace = $local_protocol->namespace;
     $this->transceiver = $transceiver;
     $this->handshake_requestor_writer = new AvroIODatumWriter(AvroSchema::parse(HANDSHAKE_REQUEST_SCHEMA_JSON));
     $this->handshake_requestor_reader = new AvroIODatumReader(AvroSchema::parse(HANDSHAKE_RESPONSE_SCHEMA_JSON));
@@ -313,9 +319,11 @@ class Requestor {
     // No error raised on the server
     if (!$decoder->read_boolean()) {
       $datum_reader = new AvroIODatumReader($remote_message_schema->response, $local_message_schema->response);
+      $datum_reader->set_default_namespace($this->namespace);
       return $datum_reader->read($decoder);
     } else {
       $datum_reader = new AvroIODatumReader($remote_message_schema->errors, $local_message_schema->errors);
+      $datum_reader->set_default_namespace($this->namespace);
       $error = $datum_reader->read($decoder);
       if ($error instanceof AvroErrorRecord) {
         throw $error;

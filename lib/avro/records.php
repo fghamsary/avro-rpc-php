@@ -41,7 +41,7 @@ trait TAvroRecordBase {
 
   public function _internalGetValue($field) {
     $fieldGetter = 'get' . ucfirst($field);
-    return $this->$fieldGetter;
+    return $this->$fieldGetter();
   }
 
   public function _internalSetValue($field, $value) {

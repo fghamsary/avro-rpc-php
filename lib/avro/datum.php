@@ -487,6 +487,11 @@ class AvroIODatumReader
   private $readers_schema;
 
   /**
+   * @var string The default namespace which should be used to search for classes
+   */
+  private $default_namespace = '\\';
+
+  /**
    * @param AvroSchema $writers_schema
    * @param AvroSchema $readers_schema
    */
@@ -494,6 +499,10 @@ class AvroIODatumReader
   {
     $this->writers_schema = $writers_schema;
     $this->readers_schema = $readers_schema;
+  }
+
+  public function set_default_namespace($default_namespace) {
+    $this->default_namespace = $default_namespace;
   }
 
   /**
@@ -664,7 +673,7 @@ class AvroIODatumReader
   public function read_record($writers_schema, $readers_schema, $decoder)
   {
     $readers_fields = $readers_schema->fields_hash();
-    $recordClassName = $readers_schema->qualified_name();
+    $recordClassName = $this->default_namespace . $readers_schema->qualified_name();
     $classBasedRecord = false;
     if (class_exists($recordClassName)) {
       /** @var IAvroRecordBase $record */
