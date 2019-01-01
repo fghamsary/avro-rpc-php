@@ -51,10 +51,16 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase
     self::$FLOAT_POS_INF  = (float) INF;
     self::$FLOAT_NEG_INF  = (float) -INF;
 
-    self::$LONG_BITS_NAN     = strrev(pack('H*', '7ff8000000000000'));
+    self::$LONG_BITS_NAN    = [
+      strrev(pack('H*', '7ff8000000000000')),
+      strrev(pack('H*', 'fff8000000000000'))
+    ];
     self::$LONG_BITS_POS_INF = strrev(pack('H*', '7ff0000000000000'));
     self::$LONG_BITS_NEG_INF = strrev(pack('H*', 'fff0000000000000'));
-    self::$INT_BITS_NAN      = strrev(pack('H*', '7fc00000'));
+    self::$INT_BITS_NAN      = [
+      strrev(pack('H*', '7fc00000')),
+      strrev(pack('H*', 'ffc00000'))
+    ];
     self::$INT_BITS_POS_INF  = strrev(pack('H*', '7f800000'));
     self::$INT_BITS_NEG_INF  = strrev(pack('H*', 'ff800000'));
   }
@@ -260,7 +266,7 @@ _RUBY;
                                 'ROUND TRIP BITS', $val, $round_trip_value));
   }
 
-  function assert_encode_nan_values($type, $val, $bits)
+  function assert_encode_nan_values($type, $val, $bits_array)
   {
     if (self::FLOAT_TYPE == $type)
     {
@@ -273,16 +279,22 @@ _RUBY;
       $encoder = array(AvroIOBinaryEncoder::class, 'double_to_long_bits');
     }
 
-    $decoded_bits_val = call_user_func($decoder, $bits);
+    $decoded_bits_val = call_user_func($decoder, $bits_array[0]);
+    $this->assertTrue(is_nan($decoded_bits_val),
+                      sprintf("%s\n expected: '%f'\n    given: '%f'",
+                              'DECODED BITS', $val, $decoded_bits_val));
+
+    $decoded_bits_val = call_user_func($decoder, $bits_array[1]);
     $this->assertTrue(is_nan($decoded_bits_val),
                       sprintf("%s\n expected: '%f'\n    given: '%f'",
                               'DECODED BITS', $val, $decoded_bits_val));
 
     $encoded_val_bits = call_user_func($encoder, $val);
-    $this->assertEquals($bits, $encoded_val_bits,
-                        sprintf("%s\n expected: '%s'\n    given: '%s'",
+    $this->assertContains($encoded_val_bits, $bits_array,
+                        sprintf("%s\n expected: '%s' OR '%s'\n    given: '%s'",
                                 'ENCODED VAL',
-                                AvroDebug::hex_string($bits),
+                                AvroDebug::hex_string($bits_array[0]),
+                                AvroDebug::hex_string($bits_array[1]),
                                 AvroDebug::hex_string($encoded_val_bits)));
 
     $round_trip_value = call_user_func($decoder, $encoded_val_bits);
