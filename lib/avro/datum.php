@@ -19,6 +19,7 @@
 
 namespace Avro;
 
+use Avro\Record\AvroEnumRecord;
 use Avro\Record\IAvroRecordBase;
 
 /**
@@ -211,7 +212,7 @@ class AvroIODatumWriter
 
   private function write_enum($writers_schema, $datum, $encoder)
   {
-    $datum_index = $writers_schema->symbol_index($datum);
+    $datum_index = $writers_schema->symbol_index((string)$datum);
     return $encoder->write_int($datum_index);
   }
 
@@ -654,8 +655,11 @@ class AvroIODatumReader
   {
     $symbol_index = $decoder->read_int();
     $symbol = $writers_schema->symbol_by_index($symbol_index);
-    if (!$readers_schema->has_symbol($symbol))
-      null; // FIXME: unset wrt schema resolution
+    $enumName = $this->default_namespace . $writers_schema->qualified_name();
+    if (class_exists($enumName)) {
+      /** @var AvroEnumRecord $enumName */
+      $symbol = $enumName::getItem($symbol);
+    }
     return $symbol;
   }
 

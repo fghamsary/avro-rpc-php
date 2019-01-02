@@ -8,6 +8,7 @@
 
 namespace Avro\Record;
 
+use Avro\AvroException;
 use Avro\AvroRemoteException;
 
 interface IAvroRecordBase extends \Countable {
@@ -94,14 +95,6 @@ abstract class AvroErrorRecord extends AvroRemoteException implements IAvroRecor
 abstract class AvroEnumRecord implements \JsonSerializable {
   public abstract static function getName();
 
-  /**
-   * @param string $value The value of the enum
-   * @return static The correct item based on the enum value
-   */
-  public static function newValue($value) {
-    return new static($value);
-  }
-
   /** @var string */
   protected $value;
 
@@ -115,11 +108,10 @@ abstract class AvroEnumRecord implements \JsonSerializable {
   protected abstract static function getEnumValues();
 
   public static function getItem($value) {
-    $class = get_called_class();
     if (self::hasValue($value)) {
-      return new $class($value);
+      return new static($value);
     } else {
-      throw new \AvroException("$value is not valid for $class!");
+      throw new AvroException("$value is not valid for " . static::class . '!');
     }
   }
 
