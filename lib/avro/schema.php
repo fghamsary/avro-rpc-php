@@ -20,6 +20,7 @@
 namespace Avro;
 
 use Avro\Record\AvroEnumRecord;
+use Avro\Record\AvroErrorRecord;
 use Avro\Record\AvroRecord;
 
 /**
@@ -459,7 +460,7 @@ class AvroSchema
           return $datum->getName() === $expected_schema->qualified_name();
         }
       case self::ERROR_SCHEMA:
-        if ($datum instanceof AvroEnumRecord) {
+        if ($datum instanceof AvroErrorRecord) {
           return $datum->getName() === $expected_schema->qualified_name();
         }
       case self::REQUEST_SCHEMA:

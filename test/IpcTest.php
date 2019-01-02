@@ -19,11 +19,14 @@
 
 use Avro\AvroProtocol;
 use Avro\AvroRemoteException;
+use Avro\Record\AvroErrorRecord;
 use Avro\Requestor;
 use Avro\Responder;
 use Avro\SocketTransceiver;
+use Avro\Test\AlwaysRaised;
 
 require_once('test_helper.php');
+require_once 'AlwaysRaised.php';
 
 /**
  * Basic Transceiver to connect to a TestServer
@@ -113,7 +116,7 @@ class TestProtocolResponder extends Responder {
       
       case "testRequestResponseException":
         if ($request["exception"]["cause"] == "callback")
-          throw new AvroRemoteException(array("exception" => "raised on callback cause"));
+          throw new AlwaysRaised("raised on callback cause");
         else
           throw new AvroRemoteException("System exception");
         break;
@@ -183,10 +186,10 @@ class IpcTest extends PHPUnit\Framework\TestCase
     $exception_raised = false;
     try {
       $response = $requestor->request('testRequestResponseException', array("exception" => array("cause" => "callback")));
-    } catch (AvroRemoteException $e) {
+    } catch (AlwaysRaised $e) {
       $exception_raised = true;
-      $exception_datum = $e->getDatum();
-      $this->assertEquals("raised on callback cause", $exception_datum["exception"]);
+      $exception_datum = $e->getException();
+      $this->assertEquals("raised on callback cause", $exception_datum);
     }
 
     $this->assertTrue($exception_raised);
@@ -195,7 +198,7 @@ class IpcTest extends PHPUnit\Framework\TestCase
       $response = $requestor->request('testRequestResponseException', array("exception" => array("cause" => "system")));
     } catch (AvroRemoteException $e) {
       $exception_raised = true;
-      $exception_datum = $e->getDatum();
+      $exception_datum = $e->getMessage();
       $this->assertEquals("System exception", $exception_datum);
     }
     $this->assertTrue($exception_raised);
@@ -203,7 +206,7 @@ class IpcTest extends PHPUnit\Framework\TestCase
   
   private $protocol = <<<PROTO
 {
- "namespace": "examples.protocol",
+ "namespace": "avro.test",
  "protocol": "TestProtocol",
 
  "types": [

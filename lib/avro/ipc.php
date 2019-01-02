@@ -69,19 +69,7 @@ const BUFFER_SIZE = 8192;
  * @package Avro
  */
 class AvroRemoteException extends AvroException {
-  
-  private $avro_error;
-  
-  public function __construct($avro_error, $message = null, $code = 0, \Exception $previous = null)
-  {
-    parent::__construct($message, $code, $previous);
-    $this->avro_error = $avro_error;
-  }
-  
-  public function getDatum()
-  {
-    return $this->avro_error;
-  }
+
 }
 
 /**
@@ -135,7 +123,9 @@ class Requestor {
   public function __construct(AvroProtocol $local_protocol, Transceiver $transceiver)
   {
     $this->local_protocol = $local_protocol;
-    $this->namespace = $local_protocol->namespace;
+    $namespace_token = explode(".", $local_protocol->namespace);
+    array_walk($namespace_token, function(&$token) { $token = ucfirst($token); });
+    $this->namespace =  implode("\\", $namespace_token) . "\\";
     $this->transceiver = $transceiver;
     $this->handshake_requestor_writer = new AvroIODatumWriter(AvroSchema::parse(HANDSHAKE_REQUEST_SCHEMA_JSON));
     $this->handshake_requestor_reader = new AvroIODatumReader(AvroSchema::parse(HANDSHAKE_RESPONSE_SCHEMA_JSON));
@@ -444,7 +434,11 @@ class Responder {
         $datum_writer->write($response_datum, $encoder);
       } else {
         $datum_writer = new AvroIODatumWriter($remote_message->errors);
-        $datum_writer->write($error->getDatum(), $encoder);
+        if ($error instanceof AvroErrorRecord) {
+          $datum_writer->write($error, $encoder);
+        } else {
+          $datum_writer->write($error->getMessage(), $encoder);
+        }
       }
       
     } catch (AvroException $e) {

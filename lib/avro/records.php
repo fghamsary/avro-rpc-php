@@ -81,14 +81,7 @@ abstract class AvroErrorRecord extends AvroRemoteException implements IAvroRecor
    * @return static Creates new instance of the current error type
    */
   public static function newInstance() {
-    return new static(null);
-  }
-
-  /**
-   * @return static Creates new instance of the current error type
-   */
-  public static function newError($avroError) {
-    return new static($avroError);
+    return new static();
   }
 }
 
