@@ -37,7 +37,7 @@ class AlwaysRaised extends AvroErrorRecord {
     $this->exception = $exception;
   }
 
-  public static function getName() {
+  public static function _getSimpleAvroClassName() {
     return 'AlwaysRaised';
   }
 }
