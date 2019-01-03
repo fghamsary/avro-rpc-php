@@ -15,7 +15,7 @@ interface IAvroRecordBase extends \Countable {
   /**
    * @return string Get the name of the current record type
    */
-  public static function getName();
+  public static function _getSimpleAvroClassName();
 
   /**
    * @return $this Instances new record based on the type selected
@@ -62,7 +62,7 @@ trait TAvroRecordBase {
 
 abstract class AvroRecord implements IAvroRecordBase {
   use TAvroRecordBase;
-  public abstract static function getName();
+  public abstract static function _getSimpleAvroClassName();
 
   /**
    * @return static Creates new instance of the current record type
@@ -75,7 +75,7 @@ abstract class AvroRecord implements IAvroRecordBase {
 
 abstract class AvroErrorRecord extends AvroRemoteException implements IAvroRecordBase {
   use TAvroRecordBase;
-  public abstract static function getName();
+  public abstract static function _getSimpleAvroClassName();
 
   /**
    * @return static Creates new instance of the current error type
@@ -86,7 +86,7 @@ abstract class AvroErrorRecord extends AvroRemoteException implements IAvroRecor
 }
 
 abstract class AvroEnumRecord implements \JsonSerializable {
-  public abstract static function getName();
+  public abstract static function _getSimpleAvroClassName();
 
   /** @var string */
   protected $value;

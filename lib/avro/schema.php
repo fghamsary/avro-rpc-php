@@ -457,11 +457,11 @@ class AvroSchema
                 && (strlen($datum) == $expected_schema->size()));
       case self::RECORD_SCHEMA:
         if ($datum instanceof AvroRecord) {
-          return $datum->getName() === $expected_schema->qualified_name();
+          return $datum->_getSimpleAvroClassName() === $expected_schema->qualified_name();
         }
       case self::ERROR_SCHEMA:
         if ($datum instanceof AvroErrorRecord) {
-          return $datum->getName() === $expected_schema->qualified_name();
+          return $datum->_getSimpleAvroClassName() === $expected_schema->qualified_name();
         }
       case self::REQUEST_SCHEMA:
         if (is_array($datum))
