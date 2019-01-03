@@ -29,10 +29,10 @@ $avroProtocol = AvroProtocol::parse($protocol);
 // Connect to the server
 $client = NettyFramedSocketTransceiver::create($serverHost, $serverPort);
 // Retrieve a client
-$requestor = new Requestor($avroProtocol, $client);
+$requester = new Requester($avroProtocol, $client);
 ```
 ### Request the server
-Simply use the `request` method of the `Requestor` instance.
+Simply use the `request` method of the `Requester` instance.
 This method has two parameters:
 
   - the message name as defined in your avro protocol
@@ -64,7 +64,7 @@ for example, if your protocol is:
 
 ```php
 try {
-  $response = $requestor->request('testSimpleRequestResponse', array("message" => array("subject" => "pong")));
+  $response = $requester->request('testSimpleRequestResponse', array("message" => array("subject" => "pong")));
   echo "Response received: ".json_encode($response)."\n";
 } catch (AvroRemoteException $e) {
   // an error occured on the server while handling the request.
