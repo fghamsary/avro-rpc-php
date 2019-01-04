@@ -29,7 +29,7 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase
 
   function setUp()
   {
-    AvroSpec::check_platform();
+    AvroSpec::checkPlatform();
   }
 
   static function is_64_bit() { return (PHP_INT_SIZE == 8); }

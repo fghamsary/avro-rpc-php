@@ -1,27 +1,12 @@
 <?php
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Created by IntelliJ IDEA.
+ * User: fghamsary
+ * Date: 04/01/2019
+ * Time: 14:14
  */
 
 namespace Avro;
-
-/**
- * @package Avro
- */
 
 /**
  * Methods for handling 64-bit operations using the GMP extension.
@@ -42,10 +27,10 @@ class AvroGMP {
   /**
    * @returns resource GMP resource for zero
    */
-  private static function gmp_0()
-  {
-    if (!isset(self::$gmp_0))
+  private static function gmp_0() {
+    if (!isset(self::$gmp_0)) {
       self::$gmp_0 = gmp_init('0');
+    }
     return self::$gmp_0;
   }
 
@@ -57,10 +42,10 @@ class AvroGMP {
   /**
    * @returns resource GMP resource for one (1)
    */
-  private static function gmp_1()
-  {
-    if (!isset(self::$gmp_1))
+  private static function gmp_1() {
+    if (!isset(self::$gmp_1)) {
       self::$gmp_1 = gmp_init('1');
+    }
     return self::$gmp_1;
   }
 
@@ -72,10 +57,10 @@ class AvroGMP {
   /**
    * @returns resource GMP resource for two (2)
    */
-  private static function gmp_2()
-  {
-    if (!isset(self::$gmp_2))
+  private static function gmp_2() {
+    if (!isset(self::$gmp_2)) {
       self::$gmp_2 = gmp_init('2');
+    }
     return self::$gmp_2;
   }
 
@@ -87,10 +72,10 @@ class AvroGMP {
   /**
    * @returns resource GMP resource for 0x7f
    */
-  private static function gmp_0x7f()
-  {
-    if (!isset(self::$gmp_0x7f))
+  private static function gmp_0x7f() {
+    if (!isset(self::$gmp_0x7f)) {
       self::$gmp_0x7f = gmp_init('0x7f');
+    }
     return self::$gmp_0x7f;
   }
 
@@ -102,10 +87,10 @@ class AvroGMP {
   /**
    * @returns resource GMP resource for 64-bit ~0x7f
    */
-  private static function gmp_n0x7f()
-  {
-    if (!isset(self::$gmp_n0x7f))
+  private static function gmp_n0x7f() {
+    if (!isset(self::$gmp_n0x7f)) {
       self::$gmp_n0x7f = gmp_init('0xffffffffffffff80');
+    }
     return self::$gmp_n0x7f;
   }
 
@@ -117,19 +102,18 @@ class AvroGMP {
   /**
    * @returns resource GMP resource for 64-bits of 1
    */
-  private static function gmp_0xfs()
-  {
-    if (!isset(self::$gmp_0xfs))
+  private static function gmp_0xfs() {
+    if (!isset(self::$gmp_0xfs)) {
       self::$gmp_0xfs = gmp_init('0xffffffffffffffff');
+    }
     return self::$gmp_0xfs;
   }
 
   /**
-   * @param GMP resource
-   * @returns GMP resource 64-bit two's complement of input.
+   * @param $g resource GMP
+   * @return resource GMP 64-bit two's complement of input.
    */
-  static function gmp_twos_complement($g)
-  {
+  static function gmp_twos_complement($g) {
     return gmp_neg(gmp_sub(gmp_pow(self::gmp_2(), 64), $g));
   }
 
@@ -137,21 +121,23 @@ class AvroGMP {
    * @interal Only works up to shift 63 (doesn't wrap bits around).
    * @param resource|int|string $g
    * @param int $shift number of bits to shift left
-   * @returns resource $g shifted left
+   * @return resource $g shifted left
    */
-  static function shift_left($g, $shift)
-  {
-    if (0 == $shift)
+  static function shift_left($g, $shift) {
+    if (0 == $shift) {
       return $g;
+    }
 
-    if (0 > gmp_sign($g))
+    if (0 > gmp_sign($g)) {
       $g = self::gmp_twos_complement($g);
+    }
 
     $m = gmp_mul($g, gmp_pow(self::gmp_2(), $shift));
     $m = gmp_and($m, self::gmp_0xfs());
-    if (gmp_testbit($m, 63))
+    if (gmp_testbit($m, 63)) {
       $m = gmp_neg(gmp_add(gmp_and(gmp_com($m), self::gmp_0xfs()),
-                           self::gmp_1()));
+        self::gmp_1()));
+    }
     return $m;
   }
 
@@ -159,17 +145,16 @@ class AvroGMP {
    * Arithmetic right shift
    * @param resource|int|string $g
    * @param int $shift number of bits to shift right
-   * @returns resource $g shifted right $shift bits
+   * @return resource $g shifted right $shift bits
    */
-  static function shift_right($g, $shift)
-  {
-    if (0 == $shift)
+  static function shift_right($g, $shift) {
+    if (0 == $shift) {
       return $g;
+    }
 
-    if (0 <= gmp_sign($g))
+    if (0 <= gmp_sign($g)) {
       $m = gmp_div($g, gmp_pow(self::gmp_2(), $shift));
-    else // negative
-    {
+    } else { // negative
       $g = gmp_and($g, self::gmp_0xfs());
       $m = gmp_div($g, gmp_pow(self::gmp_2(), $shift));
       $m = gmp_and($m, self::gmp_0xfs());
@@ -177,24 +162,21 @@ class AvroGMP {
         gmp_setbit($m, $i);
 
       $m = gmp_neg(gmp_add(gmp_and(gmp_com($m), self::gmp_0xfs()),
-                           self::gmp_1()));
+        self::gmp_1()));
     }
-
     return $m;
   }
 
   /**
-   * @param int|str $n integer (or string representation of integer) to encode
+   * @param int|string $n integer (or string representation of integer) to encode
    * @return string $bytes of the long $n encoded per the Avro spec
    */
-  static function encode_long($n)
-  {
+  static function encode_long($n) {
     $g = gmp_init($n);
     $g = gmp_xor(self::shift_left($g, 1),
-                 self::shift_right($g, 63));
+      self::shift_right($g, 63));
     $bytes = '';
-    while (0 != gmp_cmp(self::gmp_0(), gmp_and($g, self::gmp_n0x7f())))
-    {
+    while (0 != gmp_cmp(self::gmp_0(), gmp_and($g, self::gmp_n0x7f()))) {
       $bytes .= chr(gmp_intval(gmp_and($g, self::gmp_0x7f())) | 0x80);
       $g = self::shift_right($g, 7);
     }
@@ -204,21 +186,19 @@ class AvroGMP {
 
   /**
    * @param int[] $bytes array of ascii codes of bytes to decode
-   * @return string represenation of decoded long.
+   * @return integer long representation of decoded long.
    */
-  static function decode_long_from_array($bytes)
-  {
+  static function decode_long_from_array($bytes) {
     $b = array_shift($bytes);
     $g = gmp_init($b & 0x7f);
     $shift = 7;
-    while (0 != ($b & 0x80))
-    {
+    while (0 != ($b & 0x80)) {
       $b = array_shift($bytes);
       $g = gmp_or($g, self::shift_left(($b & 0x7f), $shift));
       $shift += 7;
     }
     $val = gmp_xor(self::shift_right($g, 1), gmp_neg(gmp_and($g, 1)));
-    return gmp_strval($val);
+    return (int)gmp_strval($val);
   }
 
 }
