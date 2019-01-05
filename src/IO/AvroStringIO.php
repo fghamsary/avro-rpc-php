@@ -45,8 +45,7 @@ class AvroStringIO extends AvroIO {
 
     if (is_string($str)) {
       $this->stringBuffer .= $str;
-    }
-    else {
+    } else {
       throw new AvroIOException(sprintf('constructor argument must be a string: %s', gettype($str)));
     }
   }
@@ -76,13 +75,15 @@ class AvroStringIO extends AvroIO {
    */
   public function read($len) {
     $this->checkClosed();
-    $read='';
-    for($i=$this->currentIndex; $i<($this->currentIndex+$len); $i++)
+    $read = '';
+    for ($i = $this->currentIndex; $i < ($this->currentIndex + $len); $i++) {
       $read .= $this->stringBuffer[$i];
-    if (strlen($read) < $len)
+    }
+    if (strlen($read) < $len) {
       $this->currentIndex = $this->length();
-    else
+    } else {
       $this->currentIndex += $len;
+    }
     return $read;
   }
 
@@ -100,18 +101,21 @@ class AvroStringIO extends AvroIO {
     // Prevent seeking before BOF
     switch ($whence) {
       case self::SEEK_SET:
-        if (0 > $offset)
+        if (0 > $offset) {
           throw new AvroIOException('Cannot seek before beginning of file.');
+        }
         $this->currentIndex = $offset;
         break;
       case self::SEEK_CUR:
-        if (0 > $this->currentIndex + $whence)
+        if (0 > $this->currentIndex + $whence) {
           throw new AvroIOException('Cannot seek before beginning of file.');
+        }
         $this->currentIndex += $offset;
         break;
       case self::SEEK_END:
-        if (0 > $this->length() + $offset)
+        if (0 > $this->length() + $offset) {
           throw new AvroIOException('Cannot seek before beginning of file.');
+        }
         $this->currentIndex = $this->length() + $offset;
         break;
       default:

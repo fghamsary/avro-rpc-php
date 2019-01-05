@@ -188,7 +188,7 @@ class AvroGMP {
    * @param int[] $bytes array of ascii codes of bytes to decode
    * @return integer long representation of decoded long.
    */
-  static function decode_long_from_array($bytes) {
+  static function decodeLongFromArray($bytes) {
     $b = array_shift($bytes);
     $g = gmp_init($b & 0x7f);
     $shift = 7;

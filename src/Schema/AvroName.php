@@ -124,7 +124,7 @@ class AvroName {
     $name_and_namespace = self::extractNamespace($this->fullname);
     $this->name = $name_and_namespace[0];
     $this->namespace = $name_and_namespace[1];
-    $this->qualifiedName = ($this->namespace === null || $this->namespace == $defaultNamespace) ?
+    $this->qualifiedName = ($this->namespace === null || $this->namespace === $defaultNamespace) ?
       $this->name :
       $this->fullname;
   }

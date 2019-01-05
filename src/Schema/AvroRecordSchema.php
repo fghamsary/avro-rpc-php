@@ -9,10 +9,14 @@
 namespace Avro\Schema;
 
 use Avro\AvroUtil;
+use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOBinaryDecoder;
 use Avro\IO\AvroIOBinaryEncoder;
+use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
 use Avro\IO\Exception\AvroIOException;
+use Avro\Record\AvroRecordHelper;
 use Avro\Record\IAvroRecordBase;
 
 /**
@@ -130,14 +134,114 @@ class AvroRecordSchema extends AvroNamedSchema {
   }
 
   /**
+   * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
+   * @param AvroSchema $readersSchema other schema to be checked with
+   * @return boolean true if this schema is compatible with the readersSchema supplied
+   */
+  public function schemaMatches(AvroSchema $readersSchema) {
+    if ($readersSchema instanceof AvroRecordSchema) {
+      return $this->getFullname() === $readersSchema->getFullname();
+    }
+    return false;
+  }
+
+  /**
+   * Reads data from the decoder with the current format
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   * @param AvroSchema $readersSchema the local schema which may be different from remote schema which is being used to read the data
+   * @return mixed the data read from the decoder based on current schema
+   * @throws AvroException if the type is not known for this schema
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   */
+  public function readData(AvroIOBinaryDecoder $decoder, AvroSchema $readersSchema) {
+    if ($readersSchema instanceof AvroRecordSchema) {
+      $readersFields = $readersSchema->getFields();
+      $record = AvroRecordHelper::getNewRecordInstance($readersSchema);
+      $classBasedRecord = $record instanceof IAvroRecordBase;
+      $setFieldValue = function ($name, $value) use ($record, $classBasedRecord) {
+        if ($classBasedRecord) {
+          $record->_internalSetValue($name, $value);
+        } else {
+          $record[$name] = $value;
+        }
+      };
+      foreach ($this->getFields() as $fieldName => $writersField) {
+        $fieldType = $writersField->getFieldType();
+        if (isset($readersFields[$fieldName])) {
+          $value = $fieldType->read($decoder, $readersFields[$fieldName]->getFieldType());
+          $setFieldValue($fieldName, $value);
+        } else {
+          $fieldType->skipData($decoder);
+        }
+      }
+      // Fill in default values
+      if (count($readersFields) > count($record)) {
+        $writersFields = $this->getFields();
+        foreach ($readersFields as $fieldName => $field) {
+          if (!isset($writersFields[$fieldName])) {
+            if ($field->hasDefaultValue()) {
+              $value = $field->getFieldType()->readDefaultValue($field->getDefaultValue());
+              $setFieldValue($fieldName, $value);
+            } else {
+              error_log("There is a problem in the Avro definition");
+            }
+          }
+        }
+      }
+      return $record;
+    } else {
+      throw new AvroIOSchemaMatchException($this, $readersSchema);
+    }
+  }
+
+  /**
+   * Skips a data based on the current schema from the decoder
+   *
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   *
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function skipData(AvroIOBinaryDecoder $decoder) {
+    foreach ($this->getFields() as $field) {
+      $field->getFieldType()->skipData($decoder);
+    }
+  }
+
+  /**
+   * Converts the $defaultValue to the corresponding format of the value needed for this schema
+   *
+   * @param mixed $defaultValue the value from which the defaultValue should be generated
+   *
+   * @return mixed the correct format of the value
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function readDefaultValue($defaultValue) {
+    $fieldsList = $this->getFields();
+    $record = AvroRecordHelper::getNewRecordInstance($this);
+    $classBasedRecord = $record instanceof IAvroRecordBase;
+    foreach ($fieldsList as $name => $field) {
+      $fieldValue = AvroUtil::arrayValue($defaultValue, $name) ?: $field->getDefaultValue();
+      $value = $field->getFieldType()->readDefaultValue($fieldValue);
+      if ($classBasedRecord) {
+        $record->_internalSetValue($name, $value);
+      } else {
+        $record[$name] = $value;
+      }
+    }
+    return $record;
+  }
+
+  /**
    * @return array
    */
   public function toAvro() {
     $avro = parent::toAvro();
     $fieldsAvro = [];
-    foreach ($this->fields as $field)
+    foreach ($this->getFields() as $field) {
       $fieldsAvro[] = $field->toAvro();
-    if (AvroSchema::REQUEST_SCHEMA == $this->type) {
+    }
+    if (AvroSchema::REQUEST_SCHEMA == $this->getType()) {
       return $fieldsAvro;
     }
     $avro[AvroSchema::FIELDS_ATTR] = $fieldsAvro;

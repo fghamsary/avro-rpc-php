@@ -12,8 +12,6 @@ use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\IO\AvroIO;
 use Avro\IO\AvroIOBinaryEncoder;
-use Avro\IO\AvroIODatumReader;
-use Avro\IO\AvroIODatumWriter;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
 use Avro\IO\AvroStringIO;
@@ -33,7 +31,7 @@ class AvroDataIOWriter {
   /**
    * @returns string a new, unique sync marker.
    */
-  private static function generate_sync_marker() {
+  private static function generateSyncMarker() {
     // From http://php.net/manual/en/function.mt-rand.php comments
     return pack('S8',
       mt_rand(0, 0xffff), mt_rand(0, 0xffff),
@@ -54,9 +52,9 @@ class AvroDataIOWriter {
   private $encoder;
 
   /**
-   * @var AvroIODatumWriter
+   * @var AvroSchema
    */
-  private $datum_writer;
+  private $writerSchema;
 
   /**
    * @var AvroStringIO buffer for writing
@@ -66,12 +64,12 @@ class AvroDataIOWriter {
   /**
    * @var AvroIOBinaryEncoder encoder for buffer
    */
-  private $buffer_encoder; // AvroIOBinaryEncoder
+  private $bufferEncoder;
 
   /**
    * @var int count of items written to block
    */
-  private $block_count;
+  private $blockCount;
 
   /**
    * @var array map of object container metadata
@@ -81,44 +79,42 @@ class AvroDataIOWriter {
   /**
    * @var string
    */
-  private $sync_marker;
+  private $syncMarker;
 
   /**
    * @param AvroIO $io
-   * @param AvroIODatumWriter $datum_writer
-   * @param AvroSchema $writers_schema
+   * @param AvroSchema $writersSchema
    * @throws AvroDataIOException
    * @throws AvroException
    * @throws AvroSchemaParseException
    * @throws AvroIOSchemaMatchException
    * @throws AvroIOException
    */
-  public function __construct(AvroIO $io, AvroIODatumWriter $datum_writer, AvroSchema $writers_schema = null) {
+  public function __construct(AvroIO $io, AvroSchema $writersSchema = null) {
     if (!($io instanceof AvroIO)) {
       throw new AvroDataIOException('io must be instance of AvroIO');
     }
 
     $this->io = $io;
     $this->encoder = new AvroIOBinaryEncoder($this->io);
-    $this->datum_writer = $datum_writer;
     $this->buffer = new AvroStringIO();
-    $this->buffer_encoder = new AvroIOBinaryEncoder($this->buffer);
-    $this->block_count = 0;
-    $this->metadata = array();
+    $this->bufferEncoder = new AvroIOBinaryEncoder($this->buffer);
+    $this->blockCount = 0;
+    $this->metadata = [];
 
-    if ($writers_schema) {
-      $this->sync_marker = self::generate_sync_marker();
+    if ($writersSchema !== null) {
+      $this->syncMarker = self::generateSyncMarker();
       $this->metadata[AvroDataIO::METADATA_CODEC_ATTR] = AvroDataIO::NULL_CODEC;
-      $this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR] = strval($writers_schema);
-      $this->write_header();
+      $this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR] = strval($writersSchema);
+      $this->writerSchema = $writersSchema;
+      $this->writeHeader();
     } else {
-      $dfr = new AvroDataIOReader($this->io, new AvroIODatumReader());
-      $this->sync_marker = $dfr->getSyncMaker();
+      $dfr = new AvroDataIOReader($this->io);
+      $this->syncMarker = $dfr->getSyncMaker();
+      $schemaFromFile = $dfr->getMetaDataByKey(AvroDataIO::METADATA_SCHEMA_ATTR);
       $this->metadata[AvroDataIO::METADATA_CODEC_ATTR] = $dfr->getMetaDataByKey(AvroDataIO::METADATA_CODEC_ATTR);
-
-      $schema_from_file = $dfr->getMetaDataByKey(AvroDataIO::METADATA_SCHEMA_ATTR);
-      $this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR] = $schema_from_file;
-      $this->datum_writer->setWritersSchema(AvroSchema::parse($schema_from_file));
+      $this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR] = $schemaFromFile;
+      $this->writerSchema = AvroSchema::parse($schemaFromFile);
       $this->seek(0, SEEK_END);
     }
   }
@@ -127,13 +123,11 @@ class AvroDataIOWriter {
    * @param mixed $datum
    * @throws AvroDataIOException
    * @throws AvroException
-   * @throws AvroSchemaParseException
    * @throws AvroIOTypeException
    */
   public function append($datum) {
-    $this->datum_writer->write($datum, $this->buffer_encoder);
-    $this->block_count++;
-
+    $this->writerSchema->write($datum, $this->bufferEncoder);
+    $this->blockCount++;
     if ($this->buffer->length() >= AvroDataIO::SYNC_INTERVAL) {
       $this->writeBlock();
     }
@@ -171,8 +165,8 @@ class AvroDataIOWriter {
    *           Why wait until we're writing data?
    */
   private function writeBlock() {
-    if ($this->block_count > 0) {
-      $this->encoder->writeLong($this->block_count);
+    if ($this->blockCount > 0) {
+      $this->encoder->writeLong($this->blockCount);
       $to_write = strval($this->buffer);
       $this->encoder->writeLong(strlen($to_write));
 
@@ -185,9 +179,9 @@ class AvroDataIOWriter {
             $this->metadata[AvroDataIO::METADATA_CODEC_ATTR]));
       }
 
-      $this->write($this->sync_marker);
+      $this->write($this->syncMarker);
       $this->buffer->truncate();
-      $this->block_count = 0;
+      $this->blockCount = 0;
     }
   }
 
@@ -197,11 +191,10 @@ class AvroDataIOWriter {
    * @throws AvroIOTypeException
    * @throws AvroSchemaParseException
    */
-  private function write_header() {
+  private function writeHeader() {
     $this->write(AvroDataIO::magic());
-    $this->datum_writer->writeData(AvroDataIO::metadataSchema(),
-      $this->metadata, $this->encoder);
-    $this->write($this->sync_marker);
+    AvroDataIO::metadataSchema()->write($this->metadata, $this->encoder);
+    $this->write($this->syncMarker);
   }
 
   /**

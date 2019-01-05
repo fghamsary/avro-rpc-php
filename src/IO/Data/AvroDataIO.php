@@ -12,11 +12,10 @@ use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\IO\AvroFile;
 use Avro\IO\AvroIO;
-use Avro\IO\AvroIODatumReader;
-use Avro\IO\AvroIODatumWriter;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\Exception\AvroDataIOException;
 use Avro\IO\Exception\AvroIOException;
+use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroSchema;
 
 /**
@@ -38,8 +37,7 @@ class AvroDataIO {
   const SYNC_SIZE = 16;
 
   /**
-   * @var int   count of items per block, arbitrarily set to 4000 * SYNC_SIZE
-   * @todo make this value configurable
+   * @var int count of items per block, arbitrarily set to 4000 * SYNC_SIZE
    */
   const SYNC_INTERVAL = 64000;
 
@@ -169,9 +167,8 @@ class AvroDataIO {
    * @throws AvroIOSchemaMatchException
    * @throws AvroSchemaParseException
    */
-  protected static function openWriter($io, $schema) {
-    $writer = new AvroIODatumWriter($schema);
-    return new AvroDataIOWriter($io, $writer, $schema);
+  protected static function openWriter(AvroIO $io, AvroSchema $schema) {
+    return new AvroDataIOWriter($io, $schema);
   }
 
   /**
@@ -184,8 +181,7 @@ class AvroDataIO {
    * @throws AvroSchemaParseException
    */
   protected static function openReader($io, $schema) {
-    $reader = new AvroIODatumReader(null, $schema);
-    return new AvroDataIOReader($io, $reader);
+    return new AvroDataIOReader($io, $schema);
   }
 
 }

@@ -134,7 +134,7 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase
   {
     $this->skip_if_no_gmp();
     $ary = array_map('ord', str_split($bytes));
-    $val = AvroGMP::decode_long_from_array($ary);
+    $val = AvroGMP::decodeLongFromArray($ary);
     $this->assertEquals($expected_val, $val);
   }
 

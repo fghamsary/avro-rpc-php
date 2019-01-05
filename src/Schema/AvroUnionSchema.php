@@ -8,7 +8,9 @@
 
 namespace Avro\Schema;
 
+use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOBinaryDecoder;
 use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOTypeException;
 use Avro\IO\Exception\AvroIOException;
@@ -138,6 +140,63 @@ class AvroUnionSchema extends AvroSchema {
     }
     $encoder->writeLong($datum_schema_index);
     $datum_schema->writeDatum($datum, $encoder);
+  }
+
+  /**
+   * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
+   * @param AvroSchema $readersSchema other schema to be checked with
+   * @return boolean true if this schema is compatible with the readersSchema supplied
+   */
+  public function schemaMatches(AvroSchema $readersSchema) {
+    // if the readers schema is also union we say they are compatible
+    if ($readersSchema instanceof AvroUnionSchema) {
+      return true;
+    }
+    // if not it the readers schema should be compatible with one of the current schemas possible in definition
+    foreach ($this->getSchemas() as $schema) {
+      if ($schema->schemaMatches($readersSchema)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Reads data from the decoder with the current format
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   * @param AvroSchema $readersSchema the local schema which may be different from remote schema which is being used to read the data
+   * @return mixed the data read from the decoder based on current schema
+   * @throws AvroException if the type is not known for this schema
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   */
+  public function readData(AvroIOBinaryDecoder $decoder, AvroSchema $readersSchema) {
+    $schemaIndex = $decoder->readLong();
+    $selectedWritersSchema = $this->getSchemaByIndex($schemaIndex);
+    return $selectedWritersSchema->read($decoder, $readersSchema);
+  }
+
+  /**
+   * Skips a data based on the current schema from the decoder
+   *
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   *
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function skipData(AvroIOBinaryDecoder $decoder) {
+    $this->getSchemaByIndex($decoder->readLong())->skipData($decoder);
+  }
+
+  /**
+   * Converts the $defaultValue to the corresponding format of the value needed for this schema
+   *
+   * @param mixed $defaultValue the value from which the defaultValue should be generated
+   *
+   * @return mixed the correct format of the value
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function readDefaultValue($defaultValue) {
+    return $this->getSchemaByIndex(0)->readDefaultValue($defaultValue);
   }
 
   /**

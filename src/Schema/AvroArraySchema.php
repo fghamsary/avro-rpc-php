@@ -8,8 +8,11 @@
 
 namespace Avro\Schema;
 
+use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOBinaryDecoder;
 use Avro\IO\AvroIOBinaryEncoder;
+use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
 use Avro\IO\Exception\AvroIOException;
 
@@ -93,6 +96,89 @@ class AvroArraySchema extends AvroSchema {
       }
     }
     $encoder->writeLong(0);
+  }
+
+  /**
+   * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
+   * @param AvroSchema $readersSchema other schema to be checked with
+   * @return boolean true if this schema is compatible with the readersSchema supplied
+   */
+  public function schemaMatches(AvroSchema $readersSchema) {
+    if ($readersSchema instanceof AvroArraySchema) {
+      return $this->getItemsSchema()->schemaMatches($readersSchema->getItemsSchema());
+    }
+    return false;
+  }
+
+  /**
+   * Reads array data from the decoder with the current format
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   * @param AvroSchema $readersSchema the local schema which may be different from remote schema which is being used to read the data
+   * @return array the data read from the decoder based on current schema
+   * @throws AvroException if the type is not known for this schema
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   * @throws AvroIOSchemaMatchException if the schema between reader and writer are not the same
+   */
+  public function readData(AvroIOBinaryDecoder $decoder, AvroSchema $readersSchema) {
+    if ($readersSchema instanceof AvroArraySchema) {
+      $items = [];
+      $blockCount = $decoder->readLong();
+      $writersItemsSchema = $this->getItemsSchema();
+      $readersItemSchema = $readersSchema->getItemsSchema();
+      while ($blockCount !== 0) {
+        if ($blockCount < 0) {
+          $blockCount = -$blockCount;
+          $decoder->skipLong(); // Read (and ignore) block size
+        }
+        for ($i = 0; $i < $blockCount; $i++) {
+          $items[] = $writersItemsSchema->read($decoder, $readersItemSchema);
+        }
+        $blockCount = $decoder->readLong();
+      }
+      return $items;
+    } else {
+      throw new AvroIOSchemaMatchException($this, $readersSchema);
+    }
+  }
+
+  /**
+   * Skips a data based on the current schema from the decoder
+   *
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   *
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function skipData(AvroIOBinaryDecoder $decoder) {
+    $blockCount = $decoder->readLong();
+    $itemSchema = $this->getItemsSchema();
+    while ($blockCount !== 0) {
+      if ($blockCount < 0) {
+        $blockCount = -$blockCount;
+        $decoder->skipLong(); // Read (and ignore) block size
+      }
+      for ($i = 0; $i < $blockCount; $i++) {
+        $itemSchema->skipData($decoder);
+      }
+      $blockCount = $decoder->readLong();
+    }
+  }
+
+  /**
+   * Converts the $defaultValue to the corresponding format of the value needed for this schema
+   *
+   * @param mixed $defaultValue the value from which the defaultValue should be generated
+   *
+   * @return mixed the correct format of the value
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function readDefaultValue($defaultValue) {
+    $result = [];
+    $itemSchema = $this->getItemsSchema();
+    foreach ($defaultValue as $jsonVal) {
+      $result[] = $itemSchema->readDefaultValue($jsonVal);
+    }
+    return $result;
   }
 
   /**

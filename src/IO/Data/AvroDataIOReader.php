@@ -13,9 +13,9 @@ use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\IO\AvroIO;
 use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIODatumReader;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\Exception\AvroDataIOException;
+use Avro\IO\Exception\AvroIOException;
 use Avro\Schema\AvroSchema;
 
 /**
@@ -38,14 +38,14 @@ class AvroDataIOReader {
   private $decoder;
 
   /**
-   * @var AvroIODatumReader
+   * @var AvroSchema
    */
-  private $datum_reader;
+  private $readersSchema;
 
   /**
    * @var string
    */
-  private $sync_marker;
+  private $syncMarker;
 
   /**
    * @var array object container metadata
@@ -55,67 +55,50 @@ class AvroDataIOReader {
   /**
    * @var int count of items in block
    */
-  private $block_count;
+  private $blockCount;
 
   /**
    * @param AvroIO $io source from which to read
-   * @param AvroIODatumReader $datum_reader reader that understands
-   *                                        the data schema
    * @throws AvroDataIOException if $io is not an instance of AvroIO
    * @throws AvroException
    * @throws AvroIOSchemaMatchException
    * @throws AvroSchemaParseException if schema is not parsable
-   * @uses read_header()
+   * @uses readHeader()
    */
-  public function __construct(AvroIO $io, AvroIODatumReader $datum_reader) {
-
+  public function __construct(AvroIO $io) {
     if (!($io instanceof AvroIO)) {
       throw new AvroDataIOException('io must be instance of AvroIO');
     }
-
     $this->io = $io;
     $this->decoder = new AvroIOBinaryDecoder($this->io);
-    $this->datum_reader = $datum_reader;
-    $this->read_header();
-
+    $this->readHeader();
     $codec = AvroUtil::arrayValue($this->metadata, AvroDataIO::METADATA_CODEC_ATTR);
     if ($codec && !AvroDataIO::isValidCodec($codec)) {
       throw new AvroDataIOException(sprintf('Unknown codec: %s', $codec));
     }
-
-    $this->block_count = 0;
-    // FIXME: Seems unsanitary to set writers_schema here.
-    // Can't constructor take it as an argument?
-    $this->datum_reader->set_writers_schema(
-      AvroSchema::parse($this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR]));
+    $this->blockCount = 0;
+    $this->readersSchema = AvroSchema::parse($this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR]);
   }
 
   /**
    * Reads header of object container
-   * @throws AvroDataIOException if the file is not an Avro data file.
    * @throws AvroException
+   * @throws AvroSchemaParseException
    * @throws AvroIOSchemaMatchException
+   * @throws AvroDataIOException if the file is not an Avro data file.
+   * @throws AvroIOException
    */
-  private function read_header() {
+  private function readHeader() {
     $this->seek(0, AvroIO::SEEK_SET);
-
     $magic = $this->read(AvroDataIO::magic_size());
-
     if (strlen($magic) < AvroDataIO::magic_size()) {
-      throw new AvroDataIOException(
-        'Not an Avro data file: shorter than the Avro magic block');
+      throw new AvroDataIOException('Not an Avro data file: shorter than the Avro magic block');
     }
-
     if (AvroDataIO::magic() != $magic) {
-      throw new AvroDataIOException(
-        sprintf('Not an Avro data file: %s does not match %s',
-          $magic, AvroDataIO::magic()));
+      throw new AvroDataIOException(sprintf('Not an Avro data file: %s does not match %s', $magic, AvroDataIO::magic()));
     }
-
-    $this->metadata = $this->datum_reader->read_data(AvroDataIO::metadataSchema(),
-      AvroDataIO::metadataSchema(),
-      $this->decoder);
-    $this->sync_marker = $this->read(AvroDataIO::SYNC_SIZE);
+    $this->metadata = AvroDataIO::metadataSchema()->read($this->decoder);
+    $this->syncMarker = $this->read(AvroDataIO::SYNC_SIZE);
   }
 
   /**
@@ -124,23 +107,21 @@ class AvroDataIOReader {
    * @throws AvroException
    */
   public function data() {
-    $data = array();
+    $data = [];
     while (true) {
-      if (0 == $this->block_count) {
+      if (0 == $this->blockCount) {
         if ($this->isEof()) {
           break;
         }
-
         if ($this->skipSync()) {
           if ($this->isEof()) {
             break;
           }
         }
-
         $this->readBlockHeader();
       }
-      $data [] = $this->datum_reader->read($this->decoder);
-      $this->block_count -= 1;
+      $data[] = $this->readersSchema->read($this->decoder);
+      $this->blockCount -= 1;
     }
     return $data;
   }
@@ -157,7 +138,7 @@ class AvroDataIOReader {
    * @uses AvroIO::seek()
    * @param int $offset the offset from which the
    * @param $whence
-   * @throws \Avro\IO\Exception\AvroIOException
+   * @throws AvroIOException
    */
   private function seek($offset, $whence) {
     return $this->io->seek($offset, $whence);
@@ -167,7 +148,7 @@ class AvroDataIOReader {
    * @uses AvroIO::read()
    * @param int $len the number of bytes to be read
    * @return string
-   * @throws \Avro\IO\Exception\AvroIOException
+   * @throws AvroIOException
    */
   private function read($len) {
     return $this->io->read($len);
@@ -182,11 +163,11 @@ class AvroDataIOReader {
 
   /**
    * @return bool
-   * @throws \Avro\IO\Exception\AvroIOException
+   * @throws AvroIOException
    */
   private function skipSync() {
-    $proposed_sync_marker = $this->read(AvroDataIO::SYNC_SIZE);
-    if ($proposed_sync_marker != $this->sync_marker) {
+    $proposedSyncMarker = $this->read(AvroDataIO::SYNC_SIZE);
+    if ($proposedSyncMarker != $this->syncMarker) {
       $this->seek(-AvroDataIO::SYNC_SIZE, AvroIO::SEEK_CUR);
       return false;
     }
@@ -200,12 +181,12 @@ class AvroDataIOReader {
    * @throws AvroException
    */
   private function readBlockHeader() {
-    $this->block_count = $this->decoder->read_long();
-    return $this->decoder->read_long();
+    $this->blockCount = $this->decoder->readLong();
+    return $this->decoder->readLong();
   }
 
   public function getSyncMaker() {
-    return $this->sync_marker;
+    return $this->syncMarker;
   }
 
   public function getMetaDataByKey($key) {

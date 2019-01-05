@@ -11,9 +11,12 @@ namespace Avro\Schema;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOBinaryDecoder;
 use Avro\IO\AvroIOBinaryEncoder;
+use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\Exception\AvroIOException;
 use Avro\Record\AvroEnumRecord;
+use Avro\Record\AvroRecordHelper;
 
 /**
  * Class AvroEnumSchema enum schema representation
@@ -112,6 +115,60 @@ class AvroEnumSchema extends AvroNamedSchema {
    */
   public function writeDatum($datum, AvroIOBinaryEncoder $encoder) {
     $encoder->writeInt($this->symbolIndex((string)$datum));
+  }
+
+  /**
+   * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
+   * @param AvroSchema $readersSchema other schema to be checked with
+   * @return boolean true if this schema is compatible with the readersSchema supplied
+   */
+  public function schemaMatches(AvroSchema $readersSchema) {
+    if ($readersSchema instanceof AvroEnumSchema) {
+      return $this->getFullname() === $readersSchema->getFullname();
+    }
+    return false;
+  }
+
+  /**
+   * Reads data from the decoder with the current format
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   * @param AvroSchema $readersSchema the local schema which may be different from remote schema which is being used to read the data
+   * @return mixed the data read from the decoder based on current schema
+   * @throws AvroException if the type is not known for this schema
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   */
+  public function readData(AvroIOBinaryDecoder $decoder, AvroSchema $readersSchema) {
+    if ($readersSchema instanceof AvroEnumSchema) {
+      $symbolIndex = $decoder->readInt();
+      $symbol = $this->symbolByIndex($symbolIndex);
+      return AvroRecordHelper::getNewEnumInstance($this, $symbol);
+    } else {
+      throw new AvroIOSchemaMatchException($this, $readersSchema);
+    }
+  }
+
+  /**
+   * Skips a data based on the current schema from the decoder
+   *
+   * @param AvroIOBinaryDecoder $decoder the decoder to be used
+   *
+   * @throws AvroIOException thrown if there was a problem while reading the data from decoder
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function skipData(AvroIOBinaryDecoder $decoder) {
+    $decoder->skipInt();
+  }
+
+  /**
+   * Converts the $defaultValue to the corresponding format of the value needed for this schema
+   *
+   * @param mixed $defaultValue the value from which the defaultValue should be generated
+   *
+   * @return mixed the correct format of the value
+   * @throws AvroException in case of any error in the reading of data or conversion
+   */
+  public function readDefaultValue($defaultValue) {
+    return AvroRecordHelper::getNewEnumInstance($this, $defaultValue);
   }
 
   /**
