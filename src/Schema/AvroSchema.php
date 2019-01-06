@@ -434,6 +434,13 @@ abstract class AvroSchema {
   }
 
   /**
+   * @return mixed schema type which should be used for Avro definitions in most cases Avro complete definition is necessary
+   */
+  public function getSchemaName() {
+    return $this->toAvro();
+  }
+
+  /**
    * @return mixed
    */
   public function toAvro() {

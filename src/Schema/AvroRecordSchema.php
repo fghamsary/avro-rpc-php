@@ -35,17 +35,17 @@ class AvroRecordSchema extends AvroNamedSchema {
    * @param string $doc
    * @param array $fields
    * @param AvroNamedSchemata &$schemata
-   * @param string $schema_type schema type name
+   * @param string $schemaType schema type name
    * @throws AvroSchemaParseException
    */
-  public function __construct(AvroName $name, $doc, $fields, &$schemata = null, $schema_type = AvroSchema::RECORD_SCHEMA) {
+  public function __construct(AvroName $name, $doc, $fields, &$schemata = null, $schemaType = AvroSchema::RECORD_SCHEMA) {
     if ($fields === null) {
       throw new AvroSchemaParseException('Record schema requires a non-empty fields attribute');
     }
-    if (AvroSchema::REQUEST_SCHEMA == $schema_type) {
-      parent::__construct($schema_type, $name);
+    if (AvroSchema::REQUEST_SCHEMA === $schemaType) {
+      parent::__construct($schemaType, $name);
     } else {
-      parent::__construct($schema_type, $name, $doc, $schemata);
+      parent::__construct($schemaType, $name, $doc, $schemata);
     }
     $this->fields = self::parseFields($fields, $name->getNamespace(), $schemata);
   }

@@ -50,6 +50,13 @@ abstract class AvroNamedSchema extends AvroSchema {
   }
 
   /**
+   * @return string in case of a named schema the qualified name is enough to be identified
+   */
+  public function getSchemaName() {
+    return $this->getQualifiedName();
+  }
+
+  /**
    * @return array
    */
   public function toAvro() {

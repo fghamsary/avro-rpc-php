@@ -101,12 +101,12 @@ class AvroName {
   private $qualifiedName;
 
   /**
-   * @param string $name
-   * @param string $namespace
-   * @param string $defaultNamespace
+   * @param string $name the name schema used for this named schema
+   * @param string|null $namespace the namespace defined for this named schema
+   * @param string|null $defaultNamespace the default namespace for this protocol
    * @throws AvroSchemaParseException
    */
-  public function __construct($name, $namespace, $defaultNamespace) {
+  public function __construct(string $name, string $namespace = null, string $defaultNamespace = null) {
     if (!is_string($name) || empty($name)) {
       throw new AvroSchemaParseException('Name must be a non-empty string.');
     }
