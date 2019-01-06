@@ -101,28 +101,27 @@ class AvroField {
   /**
    * @var boolean whether or not the AvroNamedSchema of this field is defined in the AvroNamedSchemata instance
    */
-  private $is_type_from_schemata;
+  private $isTypeFromSchemata;
 
   /**
    * @param string $name
    * @param AvroSchema $schema
-   * @param boolean $is_type_from_schemata
-   * @param $has_default
+   * @param boolean $isTypeFromSchemata
+   * @param $hasDefault
    * @param string $default
    * @param string $order
    * @throws AvroSchemaParseException
    * @todo Check validity of $default value
    * @todo Check validity of $order value
    */
-  public function __construct(string $name, $schema, $is_type_from_schemata,
-                              $has_default, $default, $order = null) {
+  public function __construct($name, $schema, $isTypeFromSchemata, $hasDefault, $default, $order = null) {
     if (!AvroName::isWellFormedName($name)) {
       throw new AvroSchemaParseException('Field requires a "name" attribute');
     }
     $this->fieldType = $schema;
-    $this->is_type_from_schemata = $is_type_from_schemata;
+    $this->isTypeFromSchemata = $isTypeFromSchemata;
     $this->name = $name;
-    $this->hasDefault = $has_default;
+    $this->hasDefault = $hasDefault;
     if ($this->hasDefault) {
       $this->default = $default;
     }
@@ -136,7 +135,7 @@ class AvroField {
   public function toAvro() {
     $avro = [
       AvroField::FIELD_NAME_ATTR => $this->name,
-      AvroSchema::TYPE_ATTR => $this->is_type_from_schemata ? $this->fieldType->getQualifiedName() : $this->fieldType->toAvro()
+      AvroSchema::TYPE_ATTR => $this->isTypeFromSchemata ? $this->fieldType->getQualifiedName() : $this->fieldType->toAvro()
     ];
     if (isset($this->default)) {
       $avro[AvroField::DEFAULT_ATTR] = $this->default;

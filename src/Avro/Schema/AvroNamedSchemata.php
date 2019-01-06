@@ -19,6 +19,7 @@ use Avro\Exception\AvroSchemaParseException;
  * @package Avro\Schema
  */
 class AvroNamedSchemata {
+
   /**
    * @var AvroNamedSchema[]
    */
@@ -27,7 +28,7 @@ class AvroNamedSchemata {
   /**
    * @param AvroNamedSchemata[] $schemata
    */
-  public function __construct($schemata = array()) {
+  public function __construct(array $schemata = array()) {
     $this->schemata = $schemata;
   }
 
@@ -63,22 +64,20 @@ class AvroNamedSchemata {
   }
 
   /**
-   * Creates a new AvroNamedSchemata instance of this schemata instance
-   * with the given $schema appended.
+   * Creates a new AvroNamedSchemata instance of this schemata instance with the given $schema appended.
+   *
    * @param AvroNamedSchema $schema to add to this existing schemata
-   * @return AvroNamedSchemata
+   *
    * @throws AvroSchemaParseException
    */
-  public function cloneWithNewSchema(AvroNamedSchema $schema) {
+  public function addNewSchema(AvroNamedSchema $schema) {
     $name = $schema->getFullname();
     if (AvroSchema::isValidType($name)) {
       throw new AvroSchemaParseException(sprintf('Name "%s" is a reserved type name', $name));
     } elseif ($this->hasName($name)) {
       throw new AvroSchemaParseException(sprintf('Name "%s" is already in use', $name));
     }
-    $schemata = new AvroNamedSchemata($this->schemata);
-    $schemata->schemata[$name] = $schema;
-    return $schemata;
+    $this->schemata[$name] = $schema;
   }
 
   /**

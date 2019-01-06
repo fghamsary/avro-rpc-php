@@ -19,24 +19,18 @@
 
 define('AVRO_TEST_HELPER_DIR', dirname(__FILE__));
 
-require_once(join(DIRECTORY_SEPARATOR, 
-                  array(dirname(AVRO_TEST_HELPER_DIR), 'lib', 'avro.php')));
+require_once(join(DIRECTORY_SEPARATOR,
+  [dirname(AVRO_TEST_HELPER_DIR), 'vendor', 'autoload.php']));
 
-define('TEST_TEMP_DIR', join(DIRECTORY_SEPARATOR, 
-                             array(AVRO_TEST_HELPER_DIR, 'tmp')));
+define('TEST_TEMP_DIR', join(DIRECTORY_SEPARATOR, [AVRO_TEST_HELPER_DIR, 'tmp']));
 
-define('AVRO_BASE_DIR', dirname(dirname(dirname(AVRO_TEST_HELPER_DIR))));
-define('AVRO_SHARE_DIR', join(DIRECTORY_SEPARATOR,
-                               array(AVRO_BASE_DIR, 'share')));
-define('AVRO_BUILD_DIR', join(DIRECTORY_SEPARATOR,
-                               array(AVRO_BASE_DIR, 'build')));
-define('AVRO_BUILD_DATA_DIR', join(DIRECTORY_SEPARATOR,
-                                    array(AVRO_BUILD_DIR, 'interop', 'data')));
-define('AVRO_TEST_SCHEMAS_DIR', join(DIRECTORY_SEPARATOR,
-                                     array(AVRO_SHARE_DIR, 'test', 'schemas')));
-define('AVRO_INTEROP_SCHEMA', join(DIRECTORY_SEPARATOR,
-                                   array(AVRO_TEST_SCHEMAS_DIR, 'interop.avsc')));
+define('AVRO_BASE_DIR', dirname(AVRO_TEST_HELPER_DIR));
+define('AVRO_SHARE_DIR', join(DIRECTORY_SEPARATOR, [AVRO_BASE_DIR, 'share']));
+define('AVRO_DATA_DIR', join(DIRECTORY_SEPARATOR, [AVRO_SHARE_DIR, 'data']));
+define('AVRO_TEST_SCHEMAS_DIR', join(DIRECTORY_SEPARATOR, [AVRO_SHARE_DIR, 'schemas']));
+define('AVRO_INTEROP_SCHEMA', join(DIRECTORY_SEPARATOR, [AVRO_TEST_SCHEMAS_DIR, 'interop.avsc']));
 
 $tz = ini_get('date.timezone');
-if (empty($x))
+if (empty($x)) {
   date_default_timezone_set('America/New_York');
+}

@@ -12,8 +12,8 @@ use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\IO\AvroIO;
-use Avro\IO\AvroIOBinaryDecoder;
 use Avro\IO\AvroIOSchemaMatchException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
 use Avro\IO\Exception\AvroDataIOException;
 use Avro\IO\Exception\AvroIOException;
 use Avro\Schema\AvroSchema;
@@ -43,6 +43,11 @@ class AvroDataIOReader {
   private $readersSchema;
 
   /**
+   * @var AvroSchema
+   */
+  private $writersSchema;
+
+  /**
    * @var string
    */
   private $syncMarker;
@@ -59,25 +64,27 @@ class AvroDataIOReader {
 
   /**
    * @param AvroIO $io source from which to read
+   * @param AvroSchema|null $readersSchema the schema which should be used to read the data from $io
    * @throws AvroDataIOException if $io is not an instance of AvroIO
    * @throws AvroException
    * @throws AvroIOSchemaMatchException
    * @throws AvroSchemaParseException if schema is not parsable
    * @uses readHeader()
    */
-  public function __construct(AvroIO $io) {
+  public function __construct(AvroIO $io, AvroSchema $readersSchema = null) {
     if (!($io instanceof AvroIO)) {
       throw new AvroDataIOException('io must be instance of AvroIO');
     }
     $this->io = $io;
     $this->decoder = new AvroIOBinaryDecoder($this->io);
+    $this->readersSchema = $readersSchema;
     $this->readHeader();
     $codec = AvroUtil::arrayValue($this->metadata, AvroDataIO::METADATA_CODEC_ATTR);
     if ($codec && !AvroDataIO::isValidCodec($codec)) {
       throw new AvroDataIOException(sprintf('Unknown codec: %s', $codec));
     }
     $this->blockCount = 0;
-    $this->readersSchema = AvroSchema::parse($this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR]);
+    $this->writersSchema = AvroSchema::parse($this->metadata[AvroDataIO::METADATA_SCHEMA_ATTR]);
   }
 
   /**
@@ -90,8 +97,8 @@ class AvroDataIOReader {
    */
   private function readHeader() {
     $this->seek(0, AvroIO::SEEK_SET);
-    $magic = $this->read(AvroDataIO::magic_size());
-    if (strlen($magic) < AvroDataIO::magic_size()) {
+    $magic = $this->read(AvroDataIO::magicSize());
+    if (strlen($magic) < AvroDataIO::magicSize()) {
       throw new AvroDataIOException('Not an Avro data file: shorter than the Avro magic block');
     }
     if (AvroDataIO::magic() != $magic) {
@@ -120,7 +127,7 @@ class AvroDataIOReader {
         }
         $this->readBlockHeader();
       }
-      $data[] = $this->readersSchema->read($this->decoder);
+      $data[] = $this->writersSchema->read($this->decoder, $this->readersSchema);
       $this->blockCount -= 1;
     }
     return $data;

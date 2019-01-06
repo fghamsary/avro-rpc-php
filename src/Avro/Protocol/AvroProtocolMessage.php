@@ -10,7 +10,9 @@ namespace Avro\Protocol;
 
 
 use Avro\AvroUtil;
+use Avro\Exception\AvroSchemaParseException;
 use Avro\Schema\AvroName;
+use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
 use Avro\Schema\AvroUnionSchema;
@@ -53,6 +55,14 @@ class AvroProtocolMessage {
    */
   private $isOneWay = false;
 
+  /**
+   * AvroProtocolMessage constructor.
+   * @param string $name the name of the message on the protocol
+   * @param array $avro the definition which will be parsed
+   * @param AvroProtocol $protocol
+   * @throws AvroSchemaParseException
+   * @throws AvroProtocolParseException
+   */
   public function __construct(string $name, array $avro, AvroProtocol $protocol) {
     $namespace = $protocol->getNamespace();
     $this->name = new AvroName($name, null, $protocol->getNamespace());
@@ -66,7 +76,7 @@ class AvroProtocolMessage {
     $response = AvroUtil::arrayValue($avro, 'response');
     if ($response !== null) {
       if (!is_array($response)) {
-        $this->response = $protocol->getSchemata()->schemaByName(new AvroName($response, $namespace, $namespace));
+        $this->response = $protocol->getSchemata()->schemaByName(new AvroName($response, null, $namespace));
       } else {
         $this->response = AvroSchema::realParse($response, $namespace, $protocol->getSchemata());
       }
@@ -93,7 +103,7 @@ class AvroProtocolMessage {
           throw new AvroProtocolParseException("Errors must be an array");
         }
         foreach ($errorDefinitions as $errorType) {
-          $errorSchema = $protocol->getSchemata()->schemaByName(new AvroName($errorType, $namespace, $namespace));
+          $errorSchema = $protocol->getSchemata()->schemaByName(new AvroName($errorType, null, $namespace));
           if ($errorSchema === null) {
             throw new AvroProtocolParseException("Error type $errorType is unknown");
           }
@@ -110,6 +120,13 @@ class AvroProtocolMessage {
 
   public function isOneWay() {
     return $this->isOneWay;
+  }
+
+  /**
+   * @return string the name of message in the protocol
+   */
+  public function getName() {
+    return $this->name->getName();
   }
 
   /**

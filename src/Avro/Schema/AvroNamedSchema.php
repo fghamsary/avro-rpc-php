@@ -32,10 +32,10 @@ abstract class AvroNamedSchema extends AvroSchema {
    * @param string $type
    * @param AvroName $name
    * @param string $doc documentation string
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata $schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct($type, $name, $doc = null, &$schemata = null) {
+  public function __construct($type, $name, $doc = null, AvroNamedSchemata $schemata = null) {
     parent::__construct($type);
     $this->name = $name;
 
@@ -45,7 +45,7 @@ abstract class AvroNamedSchema extends AvroSchema {
     $this->doc = $doc;
 
     if ($schemata !== null) {
-      $schemata = $schemata->cloneWithNewSchema($this);
+      $schemata->addNewSchema($this);
     }
   }
 
@@ -62,7 +62,7 @@ abstract class AvroNamedSchema extends AvroSchema {
   public function toAvro() {
     $avro = parent::toAvro();
     $avro[AvroSchema::NAME_ATTR] = $this->name->getName();
-    if ($this->name->getNamespace() !== null) {
+    if ($this->name->getNamespace() !== null && !$this->name->isDefaultNamespace()) {
       $avro[AvroSchema::NAMESPACE_ATTR] = $this->name->getNamespace();
     }
     if ($this->doc !== null) {

@@ -10,9 +10,9 @@ namespace Avro\Schema;
 
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOTypeException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 
 /**

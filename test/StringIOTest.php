@@ -17,21 +17,17 @@
  * limitations under the License.
  */
 
-use Avro\AvroDataIOReader;
-use Avro\AvroDataIOWriter;
+use Avro\IO\Data\AvroDataIOReader;
+use Avro\IO\Data\AvroDataIOWriter;
 use Avro\AvroDebug;
-use Avro\AvroIODatumReader;
-use Avro\AvroIODatumWriter;
-use Avro\AvroSchema;
-use Avro\AvroStringIO;
+use Avro\Schema\AvroSchema;
+use Avro\IO\AvroStringIO;
 
 require_once('test_helper.php');
 
-class StringIOTest extends PHPUnit\Framework\TestCase
-{
+class StringIOTest extends PHPUnit\Framework\TestCase {
 
-  public function test_write()
-  {
+  public function testWrite() {
     $strio = new AvroStringIO();
     $this->assertEquals(0, $strio->tell());
     $str = 'foo';
@@ -40,38 +36,31 @@ class StringIOTest extends PHPUnit\Framework\TestCase
     $this->assertEquals($strlen, $strio->tell());
   }
 
-  public function test_seek()
-  {
+  public function testSeek() {
     $this->markTestIncomplete('This test has not been implemented yet.');
   }
 
-  public function test_tell()
-  {
+  public function testTell() {
     $this->markTestIncomplete('This test has not been implemented yet.');
   }
 
-  public function test_read()
-  {
+  public function testRead() {
     $this->markTestIncomplete('This test has not been implemented yet.');
   }
 
-  public function test_string_rep()
-  {
-    $writers_schema_json = '"null"';
-    $writers_schema = AvroSchema::parse($writers_schema_json);
-    $datum_writer = new AvroIODatumWriter($writers_schema);
+  public function testStringRep() {
+    $writersSchemaJson = '"null"';
+    $writersSchema = AvroSchema::parse($writersSchemaJson);
     $strio = new AvroStringIO();
     $this->assertEquals('', $strio->string());
-    $dw = new AvroDataIOWriter($strio, $datum_writer, $writers_schema_json);
-    $dw->close(); 
+    $dw = new AvroDataIOWriter($strio, $writersSchema);
+    $dw->close();
 
-    $this->assertEquals(57, strlen($strio->string()), 
-                        AvroDebug::ascii_string($strio->string()));
+    $this->assertEquals(57, strlen($strio->string()), AvroDebug::asciiString($strio->string()));
 
     $read_strio = new AvroStringIO($strio->string());
 
-    $datum_reader = new AvroIODatumReader();
-    $dr = new AvroDataIOReader($read_strio, $datum_reader);
+    $dr = new AvroDataIOReader($read_strio);
     $read_data = $dr->data();
     $datum_count = count($read_data);
     $this->assertEquals(0, $datum_count);

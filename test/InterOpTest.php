@@ -17,63 +17,60 @@
  * limitations under the License.
  */
 
-use Avro\AvroDataIO;
-use Avro\AvroFile;
-use Avro\AvroSchema;
+use Avro\IO\AvroFile;
+use Avro\Schema\AvroSchema;
+use Avro\IO\Data\AvroDataIO;
 
 require_once('test_helper.php');
 
-class InterOpTest extends PHPUnit\Framework\TestCase
-{
-  var $projection_json;
+class InterOpTest extends PHPUnit\Framework\TestCase {
+  var $projectionJson;
   var $projection;
 
-  public function setUp()
-  {
-    $interop_schema_file_name = AVRO_INTEROP_SCHEMA;
-    $this->projection_json = file_get_contents($interop_schema_file_name);
-    $this->projection = AvroSchema::parse($this->projection_json);
+  public function setUp() {
+    $interopSchemaFileName = AVRO_INTEROP_SCHEMA;
+    $this->projectionJson = file_get_contents($interopSchemaFileName);
+    $this->projection = AvroSchema::parse($this->projectionJson);
   }
 
-  public function file_name_provider()
-  {
-    $data_dir = AVRO_BUILD_DATA_DIR;
-    $data_files = array();
-    if (!($dh = opendir($data_dir)))
-      die("Could not open data dir '$data_dir'\n");
+  public function fileNameProvider() {
+    $dataDir = AVRO_DATA_DIR;
+    $dataFiles = [];
+    if (!($dh = opendir($dataDir))) {
+      die("Could not open data dir '$dataDir'\n");
+    }
 
     /* TODO This currently only tries to read files of the form 'language.avro',
      * but not 'language_deflate.avro' as the PHP implementation is not yet
      * able to read deflate data files. When deflate support is added, change
      * this to match *.avro. */
-    while ($file = readdir($dh))
-      if (0 < preg_match('/^[a-z]+\.avro$/', $file))
-        $data_files []= join(DIRECTORY_SEPARATOR, array($data_dir, $file));
+    while ($file = readdir($dh)) {
+      if (0 < preg_match('/^[a-z]+\.avro$/', $file)) {
+        $dataFiles[] = join(DIRECTORY_SEPARATOR, [$dataDir, $file]);
+      }
+    }
     closedir($dh);
 
-    $ary = array();
-    foreach ($data_files as $df)
-      $ary []= array($df);
+    $ary = [];
+    foreach ($dataFiles as $df) {
+      $ary[] = [$df];
+    }
     return $ary;
   }
 
   /**
-   *  @dataProvider file_name_provider
+   * @dataProvider fileNameProvider
    */
-  public function test_read($file_name)
-  {
-
-    $dr = AvroDataIO::open_file(
-      $file_name, AvroFile::READ_MODE, $this->projection_json);
+  public function testRead($fileName) {
+    $dr = AvroDataIO::openFile($fileName, AvroFile::READ_MODE, $this->projectionJson);
 
     $data = $dr->data();
 
-    $this->assertNotEquals(0, count($data),
-                           sprintf("no data read from %s", $file_name));
+    $this->assertNotEquals(0, count($data), sprintf("no data read from %s", $fileName));
 
-    foreach ($data as $idx => $datum)
-      $this->assertNotNull($datum, sprintf("null datum from %s", $file_name));
-
+    foreach ($data as $idx => $datum) {
+      $this->assertNotNull($datum, sprintf("null datum from %s", $fileName));
+    }
   }
 
 }

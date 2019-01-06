@@ -11,10 +11,10 @@ namespace Avro\Schema;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 use Avro\Record\AvroRecordHelper;
 use Avro\Record\IAvroRecordBase;
@@ -34,13 +34,16 @@ class AvroRecordSchema extends AvroNamedSchema {
    * @param AvroName $name
    * @param string $doc
    * @param array $fields
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null $schemata
    * @param string $schemaType schema type name
    * @throws AvroSchemaParseException
    */
-  public function __construct(AvroName $name, $doc, $fields, &$schemata = null, $schemaType = AvroSchema::RECORD_SCHEMA) {
+  public function __construct(AvroName $name, $doc, $fields, AvroNamedSchemata $schemata = null, $schemaType = AvroSchema::RECORD_SCHEMA) {
     if ($fields === null) {
       throw new AvroSchemaParseException('Record schema requires a non-empty fields attribute');
+    }
+    if ($schemata === null) {
+      $schemata = new AvroNamedSchemata();
     }
     if (AvroSchema::REQUEST_SCHEMA === $schemaType) {
       parent::__construct($schemaType, $name);
@@ -53,11 +56,11 @@ class AvroRecordSchema extends AvroNamedSchema {
   /**
    * @param mixed $fieldData
    * @param string $defaultNamespace namespace of enclosing schema
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null $schemata
    * @return AvroField[] indexed by the name of the fields
    * @throws AvroSchemaParseException
    */
-  static function parseFields($fieldData, $defaultNamespace, &$schemata) {
+  static function parseFields($fieldData, $defaultNamespace, $schemata) {
     $fields = [];
     foreach ($fieldData as $index => $field) {
       $name = AvroUtil::arrayValue($field, AvroField::FIELD_NAME_ATTR);
@@ -75,15 +78,15 @@ class AvroRecordSchema extends AvroNamedSchema {
         throw new AvroSchemaParseException(sprintf("Field name %s is already in use", $name));
       }
 
-      $is_schema_from_schemata = false;
+      $isSchemaFromSchemata = false;
       $fieldSchema = null;
       if (is_string($type) &&
         $fieldSchema = $schemata->schemaByName(new AvroName($type, null, $defaultNamespace))) {
-        $is_schema_from_schemata = true;
+        $isSchemaFromSchemata = true;
       } else {
         $fieldSchema = self::subParse($type, $defaultNamespace, $schemata);
       }
-      $fields[$name] = new AvroField($name, $fieldSchema, $is_schema_from_schemata, $hasDefault, $default, $order);
+      $fields[$name] = new AvroField($name, $fieldSchema, $isSchemaFromSchemata, $hasDefault, $default, $order);
     }
     return $fields;
   }
@@ -107,7 +110,7 @@ class AvroRecordSchema extends AvroNamedSchema {
     }
     if (is_array($datum)) {
       foreach ($this->getFields() as $name => $field) {
-        if (!array_key_exists($name, $datum) || $field->getFieldType()->isValidDatum($datum[$name])) {
+        if (!array_key_exists($name, $datum) || !$field->getFieldType()->isValidDatum($datum[$name])) {
           return false;
         }
       }
@@ -158,7 +161,7 @@ class AvroRecordSchema extends AvroNamedSchema {
       $readersFields = $readersSchema->getFields();
       $record = AvroRecordHelper::getNewRecordInstance($readersSchema);
       $classBasedRecord = $record instanceof IAvroRecordBase;
-      $setFieldValue = function ($name, $value) use ($record, $classBasedRecord) {
+      $setFieldValue = function ($name, $value) use (&$record, $classBasedRecord) {
         if ($classBasedRecord) {
           $record->_internalSetValue($name, $value);
         } else {

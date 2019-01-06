@@ -10,9 +10,9 @@ namespace Avro\Schema;
 
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOSchemaMatchException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 
 /**
@@ -30,17 +30,14 @@ class AvroFixedSchema extends AvroNamedSchema {
    * @param AvroName $name
    * @param string $doc Set to null, as fixed schemas don't have doc strings
    * @param int $size byte count of this fixed schema data value
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null $schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct(AvroName $name, $doc, $size, &$schemata = null) {
+  public function __construct(AvroName $name, $doc, $size, $schemata = null) {
     if (!is_integer($size)) {
       throw new AvroSchemaParseException('Fixed Schema requires a valid integer for "size" attribute');
     }
-    if (!empty($doc)) {
-      throw new AvroSchemaParseException('Fixed Schema does not support "doc" attribute');
-    }
-    parent::__construct(AvroSchema::FIXED_SCHEMA, $name, $doc, $schemata);
+    parent::__construct(AvroSchema::FIXED_SCHEMA, $name, null, $schemata);
     return $this->size = $size;
   }
 
@@ -121,6 +118,13 @@ class AvroFixedSchema extends AvroNamedSchema {
    */
   public function readDefaultValue($defaultValue) {
     return $defaultValue;
+  }
+
+  /**
+   * @return array fixed schema is special as we really need the complete avro definition for the type and not just the name
+   */
+  public function getSchemaName() {
+    return $this->toAvro();
   }
 
   /**

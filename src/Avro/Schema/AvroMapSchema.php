@@ -10,10 +10,10 @@ namespace Avro\Schema;
 
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 
 /**
@@ -42,11 +42,14 @@ class AvroMapSchema extends AvroSchema {
   /**
    * @param string|AvroSchema $values
    * @param string|null $defaultNamespace namespace of enclosing schema
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null $schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct($values, $defaultNamespace = null, &$schemata = null) {
+  public function __construct($values, $defaultNamespace = null, $schemata = null) {
     parent::__construct(AvroSchema::MAP_SCHEMA);
+    if ($schemata === null) {
+      $schemata = new AvroNamedSchemata();
+    }
 
     $this->is_values_schema_from_schemata = false;
     $valueSchema = null;

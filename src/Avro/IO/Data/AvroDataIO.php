@@ -109,12 +109,12 @@ HRSJ;
    * @todo Avro implementations are required to implement deflate codec as well,
    *       so implement it already!
    */
-  private static $valid_codecs = array(self::NULL_CODEC);
+  private static $validCodecs = array(self::NULL_CODEC);
 
   /**
    * @var AvroSchema cached version of metadata schema object
    */
-  private static $metadata_schema;
+  private static $metadataSchema;
 
   /**
    * @return string the initial "magic" segment of an Avro container file header.
@@ -124,10 +124,9 @@ HRSJ;
   }
 
   /**
-   * @return int count of bytes in the initial "magic" segment of the
-   *              Avro container file header
+   * @return int count of bytes in the initial "magic" segment of the Avro container file header
    */
-  public static function magic_size() {
+  public static function magicSize() {
     return strlen(self::magic());
   }
 
@@ -136,17 +135,17 @@ HRSJ;
    * @throws AvroSchemaParseException
    */
   public static function metadataSchema() {
-    if (self::$metadata_schema === null) {
-      self::$metadata_schema = AvroSchema::parse(self::METADATA_SCHEMA_JSON);
+    if (self::$metadataSchema === null) {
+      self::$metadataSchema = AvroSchema::parse(self::METADATA_SCHEMA_JSON);
     }
-    return self::$metadata_schema;
+    return self::$metadataSchema;
   }
 
   /**
-   * @param string $file_path file_path of file to open
+   * @param string $filePath file_path of file to open
    * @param string $mode one of AvroFile::READ_MODE or AvroFile::WRITE_MODE
-   * @param string $schema_json JSON of writer's schema
-   * @return AvroDataIOWriter instance of AvroDataIOWriter
+   * @param string $schemaJson JSON of writer's schema
+   * @return AvroDataIOWriter|AvroDataIOReader instance as read or write mode is requested
    *
    * @throws AvroDataIOException if $writers_schema is not provided
    *         or if an invalid $mode is given.
@@ -155,19 +154,19 @@ HRSJ;
    * @throws AvroIOSchemaMatchException
    * @throws AvroSchemaParseException
    */
-  public static function open_file($file_path, $mode = AvroFile::READ_MODE, $schema_json = null) {
-    $schema = $schema_json !== null ? AvroSchema::parse($schema_json) : null;
+  public static function openFile($filePath, $mode = AvroFile::READ_MODE, $schemaJson = null) {
+    $schema = $schemaJson !== null ? AvroSchema::parse($schemaJson) : null;
 
     switch ($mode) {
       case AvroFile::WRITE_MODE:
         if ($schema === null) {
           throw new AvroDataIOException('Writing an Avro file requires a schema.');
         }
-        $file = new AvroFile($file_path, AvroFile::WRITE_MODE);
+        $file = new AvroFile($filePath, AvroFile::WRITE_MODE);
         $io = self::openWriter($file, $schema);
         break;
       case AvroFile::READ_MODE:
-        $file = new AvroFile($file_path, AvroFile::READ_MODE);
+        $file = new AvroFile($filePath, AvroFile::READ_MODE);
         $io = self::openReader($file, $schema);
         break;
       default:
@@ -185,7 +184,7 @@ HRSJ;
    * @return array array of valid codecs
    */
   private static function validCodecs() {
-    return self::$valid_codecs;
+    return self::$validCodecs;
   }
 
   /**

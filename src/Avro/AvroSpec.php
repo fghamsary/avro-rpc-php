@@ -125,7 +125,7 @@ class AvroSpec {
         break;
       default:
         throw new AvroException(
-          sprintf('Error determining platform endianness: %s', AvroDebug::hex_string($packed))
+          sprintf('Error determining platform endianness: %s', AvroDebug::hexString($packed))
         );
     }
   }

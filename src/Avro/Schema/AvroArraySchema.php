@@ -10,10 +10,10 @@ namespace Avro\Schema;
 
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 
 /**
@@ -38,12 +38,14 @@ class AvroArraySchema extends AvroSchema {
    * @param string|mixed $items AvroNamedSchema name or object form
    *        of decoded JSON schema representation.
    * @param string $defaultNamespace namespace of enclosing schema
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null $schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct($items, $defaultNamespace, &$schemata = null) {
+  public function __construct($items, $defaultNamespace, $schemata = null) {
     parent::__construct(AvroSchema::ARRAY_SCHEMA);
-
+    if ($schemata === null) {
+      $schemata = new AvroNamedSchemata();
+    }
     $this->is_items_schema_from_schemata = false;
     $itemsSchema = null;
     if (is_string($items) &&

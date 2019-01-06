@@ -11,9 +11,9 @@ namespace Avro\Schema;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOSchemaMatchException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 use Avro\Record\AvroEnumRecord;
 use Avro\Record\AvroRecordHelper;
@@ -32,10 +32,10 @@ class AvroEnumSchema extends AvroNamedSchema {
    * @param AvroName $name
    * @param string $doc
    * @param string[] $symbols
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null $schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct($name, $doc, $symbols, &$schemata = null) {
+  public function __construct($name, $doc, $symbols, AvroNamedSchemata $schemata = null) {
     if (!AvroUtil::isList($symbols)) {
       throw new AvroSchemaParseException('Enum Schema symbols are not a list');
     }

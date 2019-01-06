@@ -43,17 +43,17 @@ class AvroFile extends AvroIO {
   /**
    * AvroFile constructor.
    *
-   * @param $file_path
+   * @param $filePath
    * @param string $mode
    *
    * @throws AvroIOException
    */
-  public function __construct($file_path, $mode = self::READ_MODE) {
+  public function __construct($filePath, $mode = self::READ_MODE) {
     /**
      * XXX: should we check for file existence (in case of reading)
      * or anything else about the provided file_path argument?
      */
-    $this->filePath = $file_path;
+    $this->filePath = $filePath;
     switch ($mode) {
       case self::WRITE_MODE:
         $this->fileHandle = fopen($this->filePath, self::FOPEN_WRITE_MODE);

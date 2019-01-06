@@ -21,11 +21,6 @@ class AvroProtocol {
   /**
    * @var string the name of the protocol
    */
-  private $protocol;
-
-  /**
-   * @var string the name of the protocol
-   */
   private $name;
 
   /**
@@ -72,7 +67,7 @@ class AvroProtocol {
     $this->doc = AvroUtil::arrayValue($avro,'doc');
     $types = AvroUtil::arrayValue($avro, 'types');
     if ($types !== null) {
-      $types = AvroSchema::realParse($types, $this->namespace, $this->schemata);
+      AvroSchema::realParse($types, $this->namespace, $this->schemata);
     }
     $messages = AvroUtil::arrayValue($avro, 'messages');
     if ($messages !== null && is_array($messages)) {

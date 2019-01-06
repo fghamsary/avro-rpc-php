@@ -8,7 +8,7 @@
 
 namespace Avro\Record;
 
-use Avro\AvroRemoteException;
+use Avro\Exception\AvroRemoteException;
 
 /**
  * Class AvroErrorRecord base class for all Exceptions defined as error in the avro schema

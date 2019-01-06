@@ -11,11 +11,11 @@ namespace Avro\Schema;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
 use Avro\IO\Exception\AvroIOException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 
 /**
  * Base class for schema definition and each element of avro
@@ -293,7 +293,7 @@ abstract class AvroSchema {
 
   /**
    * @param string $json JSON-encoded schema
-   * @uses self::real_parse()
+   * @uses self::realParse()
    * @return AvroSchema
    * @throws AvroSchemaParseException
    */
@@ -305,15 +305,11 @@ abstract class AvroSchema {
   /**
    * @param array|string $avro JSON-decoded schema string is for primitive types only
    * @param string|null $defaultNamespace namespace of enclosing schema
-   * @param AvroNamedSchemata &$schemata reference to named schemas
+   * @param AvroNamedSchemata|null $schemata reference to named schemas
    * @return AvroSchema
    * @throws AvroSchemaParseException
    */
-  static function realParse($avro, $defaultNamespace = null, &$schemata = null) {
-    if ($schemata === null) {
-      $schemata = new AvroNamedSchemata();
-    }
-
+  static function realParse($avro, $defaultNamespace = null, AvroNamedSchemata $schemata = null) {
     if (is_array($avro)) {
       $type = AvroUtil::arrayValue($avro, self::TYPE_ATTR);
 
@@ -362,34 +358,6 @@ abstract class AvroSchema {
   }
 
   /**
-   * @param AvroSchema $expected_schema
-   * @param $datum
-   * @return boolean true if $datum is valid for $expected_schema
-   *                 and false otherwise.
-   * @throws AvroSchemaParseException
-   */
-  public static function is_valid_datum($expected_schema, $datum) {
-    switch ($expected_schema->type) {
-      case self::RECORD_SCHEMA:
-      case self::ERROR_SCHEMA:
-        if ($datum instanceof IAvroRecordBase) {
-          return $datum->_getSimpleAvroClassName() === $expected_schema->qualified_name();
-        }
-      case self::REQUEST_SCHEMA:
-        if (is_array($datum)) {
-          foreach ($expected_schema->fields() as $field)
-            if (!array_key_exists($field->name(), $datum) || !self::is_valid_datum($field->type(), $datum[$field->name()])) {
-              return false;
-            }
-          return true;
-        }
-        return false;
-      default:
-        throw new AvroSchemaParseException(sprintf('%s is not allowed.', $expected_schema));
-    }
-  }
-
-  /**
    * @internal Should only be called from within the constructor of
    *           a class which extends AvroSchema
    * @param string $type a schema type name
@@ -401,12 +369,12 @@ abstract class AvroSchema {
   /**
    * @param mixed $avro
    * @param string $defaultNamespace namespace of enclosing schema
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null &$schemata
    * @return AvroSchema
    * @uses AvroSchema::real_parse()
    * @throws AvroSchemaParseException
    */
-  protected static function subParse($avro, $defaultNamespace, &$schemata = null) {
+  protected static function subParse($avro, $defaultNamespace, AvroNamedSchemata $schemata = null) {
     try {
       return self::realParse($avro, $defaultNamespace, $schemata);
     } catch (AvroSchemaParseException $e) {

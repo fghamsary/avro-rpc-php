@@ -11,9 +11,9 @@ namespace Avro\IPC;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroRemoteException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroStringIO;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Data\AvroDataIO;
 use Avro\Protocol\AvroProtocol;
 use Avro\Protocol\AvroProtocolMessage;
@@ -203,10 +203,10 @@ abstract class Responder {
 
   /**
    * Processes one procedure call
-   * @param AvroProtocolMessage $local_message
+   * @param AvroProtocolMessage $localMessage
    * @param mixed $request Call request
    * @return mixed Call response
    * @throws AvroRemoteException
    */
-  public abstract function invoke( $local_message, $request);
+  public abstract function invoke(AvroProtocolMessage $localMessage, $request);
 }

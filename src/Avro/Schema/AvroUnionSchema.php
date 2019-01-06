@@ -10,9 +10,9 @@ namespace Avro\Schema;
 
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
-use Avro\IO\AvroIOBinaryDecoder;
-use Avro\IO\AvroIOBinaryEncoder;
 use Avro\IO\AvroIOTypeException;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Exception\AvroIOException;
 
 /**
@@ -39,12 +39,14 @@ class AvroUnionSchema extends AvroSchema {
   /**
    * @param AvroSchema[] $schemas list of schemas in the union
    * @param string $defaultNamespace namespace of enclosing schema
-   * @param AvroNamedSchemata &$schemata
+   * @param AvroNamedSchemata|null &$schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct($schemas, $defaultNamespace, &$schemata = null) {
+  public function __construct($schemas, $defaultNamespace, AvroNamedSchemata $schemata = null) {
     parent::__construct(AvroSchema::UNION_SCHEMA);
-
+    if ($schemata === null) {
+      $schemata = new AvroNamedSchemata();
+    }
     $this->schemaFromSchemataIndices = [];
     $schemaTypes = [];
     foreach ($schemas as $index => $schema) {

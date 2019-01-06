@@ -6,10 +6,11 @@
  * Time: 14:04
  */
 
-namespace Avro\IO;
+namespace Avro\IO\Binary;
 
 use Avro\AvroGMP;
 use Avro\AvroSpec;
+use Avro\IO\AvroIO;
 use Avro\IO\Exception\AvroIOException;
 
 /**

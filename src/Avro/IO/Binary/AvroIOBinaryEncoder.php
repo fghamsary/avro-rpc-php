@@ -6,7 +6,7 @@
  * Time: 14:02
  */
 
-namespace Avro\IO;
+namespace Avro\IO\Binary;
 
 use Avro\AvroGMP;
 use Avro\AvroSpec;
@@ -104,7 +104,7 @@ class AvroIOBinaryEncoder {
    */
   function writeLong($n) {
     if (AvroSpec::usesGmp()) {
-      $this->write(AvroGMP::encode_long($n));
+      $this->write(AvroGMP::encodeLong($n));
     } else {
       $this->write(self::encodeLong($n));
     }

@@ -29,10 +29,9 @@ require_once('ProtocolFileTest.php');
 require_once('IpcTest.php');
 // InterOpTest tests are run separately.
 
-class AllTests
-{
-  public static function suite()
-  {
+class AllTests {
+
+  public static function suite() {
     $suite = new PHPUnit\Framework\TestSuite('AvroAllTests');
     $suite->addTestSuite('DataFileTest');
     $suite->addTestSuite('SchemaTest');
@@ -46,4 +45,5 @@ class AllTests
     $suite->addTestSuite('IpcTest');
     return $suite;
   }
+
 }

@@ -18,120 +18,139 @@
  */
 
 use Avro\AvroDebug;
-use Avro\AvroIOBinaryDecoder;
-use Avro\AvroIOBinaryEncoder;
-use Avro\AvroIODatumReader;
-use Avro\AvroIODatumWriter;
-use Avro\AvroSchema;
-use Avro\AvroStringIO;
+use Avro\IO\AvroStringIO;
+use Avro\IO\Binary\AvroIOBinaryDecoder;
+use Avro\IO\Binary\AvroIOBinaryEncoder;
+use Avro\Schema\AvroSchema;
 
 require_once('test_helper.php');
 
-class DatumIOTest extends PHPUnit\Framework\TestCase
-{
+class DatumIOTest extends PHPUnit\Framework\TestCase {
   /**
-   * @dataProvider data_provider
+   * @dataProvider dataProvider
    */
-  function test_datum_round_trip($schema_json, $datum, $binary)
-  {
+  function testDatumRoundTrip($schema_json, $datum, $binary) {
     $schema = AvroSchema::parse($schema_json);
     $written = new AvroStringIO();
     $encoder = new AvroIOBinaryEncoder($written);
-    $writer = new AvroIODatumWriter($schema);
 
-    $writer->write($datum, $encoder);
+    $schema->write($datum, $encoder);
     $output = strval($written);
     $this->assertEquals($binary, $output,
-                        sprintf("expected: %s\n  actual: %s",
-                                AvroDebug::ascii_string($binary, 'hex'),
-                                AvroDebug::ascii_string($output, 'hex')));
+      sprintf("expected: %s\n  actual: %s",
+        AvroDebug::asciiString($binary, 'hex'),
+        AvroDebug::asciiString($output, 'hex'))
+    );
 
     $read = new AvroStringIO($binary);
     $decoder = new AvroIOBinaryDecoder($read);
-    $reader = new AvroIODatumReader($schema);
-    $read_datum = $reader->read($decoder);
+    $read_datum = $schema->read($decoder);
     $this->assertEquals($datum, $read_datum);
   }
 
-  function data_provider()
-  {
-    return array(array('"null"', null, ''),
+  function dataProvider() {
+    return [
+      ['"null"', null, ''],
 
-                 array('"boolean"', true, "\001"),
-                 array('"boolean"', false, "\000"),
+      ['"boolean"', true, "\001"],
+      ['"boolean"', false, "\000"],
 
-                 array('"int"', (int) -2147483648, "\xFF\xFF\xFF\xFF\x0F"),
-                 array('"int"', -1, "\001"),
-                 array('"int"', 0, "\000"),
-                 array('"int"', 1, "\002"),
-                 array('"int"', 2147483647, "\xFE\xFF\xFF\xFF\x0F"),
+      ['"int"', (int) -2147483648, "\xFF\xFF\xFF\xFF\x0F"],
+      ['"int"', -1, "\001"],
+      ['"int"', 0, "\000"],
+      ['"int"', 1, "\002"],
+      ['"int"', 2147483647, "\xFE\xFF\xFF\xFF\x0F"],
 
-                 // array('"long"', (int) -9223372036854775808, "\001"),
-                 array('"long"', -1, "\001"),
-                 array('"long"',  0, "\000"),
-                 array('"long"',  1, "\002"),
-                 // array('"long"', 9223372036854775807, "\002")
+      // array('"long"', (int) -9223372036854775808, "\001"),
+      ['"long"', -1, "\001"],
+      ['"long"', 0, "\000"],
+      ['"long"', 1, "\002"],
+      // array('"long"', 9223372036854775807, "\002")
 
-                 array('"float"', (float) -10.0, "\000\000 \301"),
-                 array('"float"', (float)  -1.0, "\000\000\200\277"),
-                 array('"float"', (float)   0.0, "\000\000\000\000"),
-                 array('"float"', (float)   2.0, "\000\000\000@"),
-                 array('"float"', (float)   9.0, "\000\000\020A"),
+      ['"float"', (float) -10.0, "\000\000 \301"],
+      ['"float"', (float) -1.0, "\000\000\200\277"],
+      ['"float"', (float) 0.0, "\000\000\000\000"],
+      ['"float"', (float) 2.0, "\000\000\000@"],
+      ['"float"', (float) 9.0, "\000\000\020A"],
 
-                 array('"double"', (double) -10.0, "\000\000\000\000\000\000$\300"),
-                 array('"double"', (double) -1.0, "\000\000\000\000\000\000\360\277"),
-                 array('"double"', (double) 0.0, "\000\000\000\000\000\000\000\000"),
-                 array('"double"', (double) 2.0, "\000\000\000\000\000\000\000@"),
-                 array('"double"', (double) 9.0, "\000\000\000\000\000\000\"@"),
+      ['"double"', (double) -10.0, "\000\000\000\000\000\000$\300"],
+      ['"double"', (double) -1.0, "\000\000\000\000\000\000\360\277"],
+      ['"double"', (double) 0.0, "\000\000\000\000\000\000\000\000"],
+      ['"double"', (double) 2.0, "\000\000\000\000\000\000\000@"],
+      ['"double"', (double) 9.0, "\000\000\000\000\000\000\"@"],
 
-                 array('"string"', 'foo', "\x06foo"),
-                 array('"bytes"', "\x01\x02\x03", "\x06\x01\x02\x03"),
+      ['"string"', 'foo', "\x06foo"],
+      ['"bytes"', "\x01\x02\x03", "\x06\x01\x02\x03"],
 
-                 array('{"type":"array","items":"int"}',
-                       array(1,2,3),
-                       "\x06\x02\x04\x06\x00"),
-                 array('{"type":"map","values":"int"}',
-                       array('foo' => 1, 'bar' => 2, 'baz' => 3),
-                       "\x06\x06foo\x02\x06bar\x04\x06baz\x06\x00"),
-                 array('["null", "int"]', 1, "\x02\x02"),
-                 array('{"name":"fix","type":"fixed","size":3}',
-                       "\xAA\xBB\xCC", "\xAA\xBB\xCC"),
-                 array('{"name":"enm","type":"enum","symbols":["A","B","C"]}',
-                       'B', "\x02"),
-                 array('{"name":"rec","type":"record","fields":[{"name":"a","type":"int"},{"name":"b","type":"boolean"}]}',
-                       array('a' => 1, 'b' => false),
-                       "\x02\x00")
-      );
+      [
+        '{"type":"array","items":"int"}',
+        [1, 2, 3],
+        "\x06\x02\x04\x06\x00"
+      ],
+      [
+        '{"type":"map","values":"int"}',
+        ['foo' => 1, 'bar' => 2, 'baz' => 3],
+        "\x06\x06foo\x02\x06bar\x04\x06baz\x06\x00"
+      ],
+      ['["null", "int"]', 1, "\x02\x02"],
+      [
+        '{"name":"fix","type":"fixed","size":3}',
+        "\xAA\xBB\xCC",
+        "\xAA\xBB\xCC"
+      ],
+      [
+        '{"name":"enm","type":"enum","symbols":["A","B","C"]}',
+        'B',
+        "\x02"
+      ],
+      [
+        '{"name":"rec","type":"record","fields":[{"name":"a","type":"int"},{"name":"b","type":"boolean"}]}',
+        ['a' => 1, 'b' => false],
+        "\x02\x00"
+      ]
+    ];
   }
 
-  function default_provider()
-  {
-    return array(array('"null"', 'null', null),
-                 array('"boolean"', 'true', true),
-                 array('"int"', '1', 1),
-                 array('"long"', '2000', 2000),
-                 array('"float"', '1.1', (float) 1.1),
-                 array('"double"', '200.2', (double) 200.2),
-                 array('"string"', '"quux"', 'quux'),
-                 array('"bytes"', '"\u00FF"', "\xC3\xBF"),
-                 array('{"type":"array","items":"int"}',
-                       '[5,4,3,2]', array(5,4,3,2)),
-                 array('{"type":"map","values":"int"}',
-                       '{"a":9}', array('a' => 9)),
-                 array('["int","string"]', '8', 8),
-                 array('{"name":"x","type":"enum","symbols":["A","V"]}',
-                       '"A"', 'A'),
-                 array('{"name":"x","type":"fixed","size":4}', '"\u00ff"', "\xC3\xBF"),
-                 array('{"name":"x","type":"record","fields":[{"name":"label","type":"int"}]}',
-                       '{"label":7}', array('label' => 7)));
+  function defaultProvider() {
+    return [
+      ['"null"', 'null', null],
+      ['"boolean"', 'true', true],
+      ['"int"', '1', 1],
+      ['"long"', '2000', 2000],
+      ['"float"', '1.1', (float) 1.1],
+      ['"double"', '200.2', (double) 200.2],
+      ['"string"', '"quux"', 'quux'],
+      ['"bytes"', '"\u00FF"', "\xC3\xBF"],
+      [
+        '{"type":"array","items":"int"}',
+        '[5,4,3,2]',
+        [5, 4, 3, 2]
+      ],
+      [
+        '{"type":"map","values":"int"}',
+        '{"a":9}',
+        ['a' => 9]
+      ],
+      ['["int","string"]', '8', 8],
+      [
+        '{"name":"x","type":"enum","symbols":["A","V"]}',
+        '"A"',
+        'A'
+      ],
+      ['{"name":"x","type":"fixed","size":4}', '"\u00ff"', "\xC3\xBF"],
+      [
+        '{"name":"x","type":"record","fields":[{"name":"label","type":"int"}]}',
+        '{"label":7}',
+        ['label' => 7]
+      ]
+    ];
   }
 
   /**
-   * @dataProvider default_provider
+   * @dataProvider defaultProvider
    */
-  function test_field_default_value($field_schema_json,
-                                    $default_json, $default_value)
-  {
+  function testFieldDefaultValue($field_schema_json,
+                                 $default_json, $default_value) {
     $writers_schema_json = '{"name":"foo","type":"record","fields":[]}';
     $writers_schema = AvroSchema::parse($writers_schema_json);
 
@@ -140,13 +159,12 @@ class DatumIOTest extends PHPUnit\Framework\TestCase
       $field_schema_json, $default_json);
     $readers_schema = AvroSchema::parse($readers_schema_json);
 
-    $reader = new AvroIODatumReader($writers_schema, $readers_schema);
-    $record = $reader->read(new AvroIOBinaryDecoder(new AvroStringIO()));
-    if (array_key_exists('f', $record))
+    $record = $writers_schema->read(new AvroIOBinaryDecoder(new AvroStringIO()), $readers_schema);
+    if (array_key_exists('f', $record)) {
       $this->assertEquals($default_value, $record['f']);
-    else
-      $this->assertTrue(false, sprintf('expected field record[f]: %s',
-                                       print_r($record, true))) ;
+    } else {
+      $this->assertTrue(false, sprintf('expected field record[f]: %s', print_r($record, true)));
+    }
   }
 
 }

@@ -101,12 +101,17 @@ class AvroName {
   private $qualifiedName;
 
   /**
+   * @var bool true if this name is in default namespace
+   */
+  private $defaultNamespace = false;
+
+  /**
    * @param string $name the name schema used for this named schema
    * @param string|null $namespace the namespace defined for this named schema
    * @param string|null $defaultNamespace the default namespace for this protocol
    * @throws AvroSchemaParseException
    */
-  public function __construct(string $name, string $namespace = null, string $defaultNamespace = null) {
+  public function __construct($name, string $namespace = null, string $defaultNamespace = null) {
     if (!is_string($name) || empty($name)) {
       throw new AvroSchemaParseException('Name must be a non-empty string.');
     }
@@ -121,12 +126,11 @@ class AvroName {
     } else {
       $this->fullname = $name;
     }
-    $name_and_namespace = self::extractNamespace($this->fullname);
-    $this->name = $name_and_namespace[0];
-    $this->namespace = $name_and_namespace[1];
-    $this->qualifiedName = ($this->namespace === null || $this->namespace === $defaultNamespace) ?
-      $this->name :
-      $this->fullname;
+    $nameAndNamespace = self::extractNamespace($this->fullname);
+    $this->name = $nameAndNamespace[0];
+    $this->namespace = $nameAndNamespace[1];
+    $this->defaultNamespace = $this->namespace === null || $this->namespace === $defaultNamespace;
+    $this->qualifiedName = $this->defaultNamespace ? $this->name : $this->fullname;
   }
 
   /**
@@ -146,7 +150,7 @@ class AvroName {
   /**
    * @return string
    */
-  public function getFullname() {
+  public function getFullname(): string {
     return $this->fullname;
   }
 
@@ -154,15 +158,22 @@ class AvroName {
    * @returns string fullname
    * @uses $this->fullname()
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->getFullname();
   }
 
   /**
    * @return string name qualified for its context
    */
-  public function getQualifiedName() {
+  public function getQualifiedName(): string {
     return $this->qualifiedName;
+  }
+
+  /**
+   * @return bool true if the namespace of the current AvroName is the same as default name space of schema
+   */
+  public function isDefaultNamespace(): bool {
+    return $this->defaultNamespace;
   }
 
 }
