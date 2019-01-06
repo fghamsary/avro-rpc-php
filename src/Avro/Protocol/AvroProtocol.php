@@ -82,6 +82,12 @@ class AvroProtocol {
     }
   }
 
+  /**
+   * Returns the schema of fields as an array for the request based on the definition
+   *
+   * @param string $method the name of the method
+   * @return array the schema of the fields based on the definition
+   */
   public function requestSchemas(string $method) {
     $schemas = [];
     $messages = $this->messages;
@@ -90,6 +96,14 @@ class AvroProtocol {
       $schemas[] = $field->getFieldType();
     }
     return $schemas;
+  }
+
+  /**
+   * @param string $method the name of the method that should be checked from the protocol
+   * @return AvroProtocolMessage|null the message corresponding to the method name provided or null if not found
+   */
+  public function getRequestMessageByName(string $method) {
+    return AvroUtil::arrayValue($this->messages, $method);
   }
 
   /**

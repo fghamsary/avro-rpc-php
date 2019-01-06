@@ -12,7 +12,6 @@ use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\IO\AvroIOBinaryDecoder;
 use Avro\IO\AvroIOBinaryEncoder;
-use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroIOTypeException;
 use Avro\IO\Exception\AvroIOException;
 
