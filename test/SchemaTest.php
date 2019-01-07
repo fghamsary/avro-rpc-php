@@ -446,6 +446,7 @@ class SchemaTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider schemaExamplesProvider
+   * @param $example
    */
   function testParse($example) {
     AvroPrimitiveSchema::setJavaStringType(false);

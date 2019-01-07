@@ -18,19 +18,32 @@
  */
 
 use Avro\AvroDebug;
+use Avro\Exception\AvroException;
+use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\AvroStringIO;
 use Avro\IO\Binary\AvroIOBinaryDecoder;
 use Avro\IO\Binary\AvroIOBinaryEncoder;
+use Avro\IO\Exception\AvroIOException;
 use Avro\Schema\AvroSchema;
 
 require_once('test_helper.php');
 
 class DatumIOTest extends PHPUnit\Framework\TestCase {
+
   /**
    * @dataProvider dataProvider
+   * @param $schemaJson
+   * @param $datum
+   * @param $binary
+   * @throws AvroException
+   * @throws AvroIOException
+   * @throws AvroIOSchemaMatchException
+   * @throws AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOTypeException
    */
-  function testDatumRoundTrip($schema_json, $datum, $binary) {
-    $schema = AvroSchema::parse($schema_json);
+  function testDatumRoundTrip($schemaJson, $datum, $binary) {
+    $schema = AvroSchema::parse($schemaJson);
     $written = new AvroStringIO();
     $encoder = new AvroIOBinaryEncoder($written);
 
@@ -148,6 +161,14 @@ class DatumIOTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider defaultProvider
+   * @param $field_schema_json
+   * @param $default_json
+   * @param $default_value
+   *
+   * @throws AvroException
+   * @throws AvroSchemaParseException
+   * @throws AvroIOSchemaMatchException
+   * @throws AvroIOException
    */
   function testFieldDefaultValue($field_schema_json,
                                  $default_json, $default_value) {

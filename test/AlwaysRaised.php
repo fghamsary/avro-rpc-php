@@ -19,6 +19,7 @@ class AlwaysRaised extends AvroErrorRecord {
    * @param string $exception
    */
   public function __construct($exception = null) {
+    parent::__construct();
     $this->exception = $exception;
   }
 

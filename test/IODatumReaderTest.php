@@ -24,6 +24,9 @@ require_once('test_helper.php');
 class IODatumReaderTest extends PHPUnit\Framework\TestCase
 {
 
+  /**
+   * @throws \Avro\Exception\AvroSchemaParseException
+   */
   public function testSchemaMatching()
   {
     $writers_schema = <<<JSON

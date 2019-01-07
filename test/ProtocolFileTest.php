@@ -25,12 +25,16 @@ require_once('test_helper.php');
 // near-verbatim port of test_protocol.py
 class ProtocolFileTest extends PHPUnit\Framework\TestCase {
 
+  /**
+   * @throws \Avro\Protocol\AvroProtocolParseException
+   */
   public function testParsing() {
     $cnt = count($this->protParseable);
     for ($i = 0; $i < $cnt; $i++) {
       try {
         //print($i . " " . ($this->prot_parseable[$i]?"true":"false") . " \n");
-        $prot = AvroProtocol::parse($this->protData[$i]);
+        $protocol = AvroProtocol::parse($this->protData[$i]);
+        $this->assertNotNull($protocol);
         $this->assertTrue($this->protParseable[$i]);
       } catch (AvroSchemaParseException $x) {
         // exception ok if we expected this protocol spec to be unparseable

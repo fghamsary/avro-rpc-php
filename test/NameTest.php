@@ -63,6 +63,7 @@ class NameTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider fullnameProvider
+   * @param NameExample $ex
    */
   function testFullname(NameExample $ex) {
     try
@@ -93,8 +94,10 @@ class NameTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider nameProvider
+   * @param $name
+   * @param $isWellFormed
    */
-  function testName($name, $is_well_formed) {
-    $this->assertEquals(AvroName::isWellFormedName($name), $is_well_formed, (string)$name);
+  function testName($name, $isWellFormed) {
+    $this->assertEquals(AvroName::isWellFormedName($name), $isWellFormed, (string)$name);
   }
 }

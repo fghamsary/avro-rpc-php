@@ -63,6 +63,13 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->removeDataFiles();
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadNothingRoundTrip() {
     $dataFile = $this->addDataFile('data-wr-nothing-null.avr');
     $writersSchema = '"null"';
@@ -76,6 +83,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals(null, $readData);
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadNullRoundTrip() {
     $data_file = $this->addDataFile('data-wr-null.avr');
     $writers_schema = '"null"';
@@ -91,6 +106,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals($data, $read_data);
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadStringRoundTrip() {
     $data_file = $this->addDataFile('data-wr-str.avr');
     $writers_schema = '"string"';
@@ -106,6 +129,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals($data, $read_data);
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadRoundTrip() {
     $data_file = $this->addDataFile('data-wr-int.avr');
     $writers_schema = '"int"';
@@ -122,6 +153,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals($data, $read_data);
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadTrueRoundTrip() {
     $data_file = $this->addDataFile('data-wr-true.avr');
     $writers_schema = '"boolean"';
@@ -137,6 +176,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals($datum, $read_datum);
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadFalseRoundTrip() {
     $data_file = $this->addDataFile('data-wr-false.avr');
     $writers_schema = '"boolean"';
@@ -152,6 +199,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals($datum, $read_datum);
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testWriteReadIntArrayRoundTrip() {
     $data_file = $this->addDataFile('data-wr-int-ary.avr');
     $writers_schema = '"int"';
@@ -168,6 +223,14 @@ class DataFileTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals($data, $read_data, sprintf("in: %s\nout: %s", json_encode($data), json_encode($read_data)));
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testDifferingSchemasWithPrimitives() {
     $dataFile = $this->addDataFile('data-prim.avr');
 
@@ -203,6 +266,14 @@ JSON;
     }
   }
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
   public function testDifferingSchemasWithComplexObjects() {
     $dataFile = $this->addDataFile('data-complex.avr');
 
@@ -252,15 +323,15 @@ JSON;
     }
     $dw->close();
 
-    foreach ([
-               'fixed',
-               'enum',
-               'record',
-               'error',
-               'array',
-               'map',
-               'union'
-             ] as $s) {
+//    foreach ([
+//               'fixed',
+//               'enum',
+//               'record',
+//               'error',
+//               'array',
+//               'map',
+//               'union'
+//             ] as $s) {
       $readersSchema = json_decode($writersSchema, true);
       $dr = AvroDataIO::openFile($dataFile, 'r', json_encode($readersSchema));
       foreach ($dr->data() as $idx => $obj) {
@@ -270,7 +341,7 @@ JSON;
         }
       }
       $dr->close();
-    }
+//    }
 
   }
 

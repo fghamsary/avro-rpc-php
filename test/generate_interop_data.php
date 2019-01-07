@@ -43,6 +43,10 @@ $datum = array('nullField' => null,
                                               'children' => array()))));
 
 $schema_json = file_get_contents(AVRO_INTEROP_SCHEMA);
-$io_writer = AvroDataIO::openFile($data_file, 'w', $schema_json);
-$io_writer->append($datum);
-$io_writer->close();
+try {
+  $io_writer = AvroDataIO::openFile($data_file, 'w', $schema_json);
+  $io_writer->append($datum);
+  $io_writer->close();
+} catch (\Exception $ignored) {
+
+}

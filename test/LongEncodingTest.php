@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnusedParameterInspection */
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,6 +27,9 @@ require_once('test_helper.php');
 
 class LongEncodingTest extends PHPUnit\Framework\TestCase {
 
+  /**
+   * @throws \Avro\Exception\AvroException
+   */
   function setUp() {
     AvroSpec::checkPlatform();
   }
@@ -56,21 +60,33 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider bitShiftProvider
+   * @param $val
+   * @param $shift
+   * @param $expectedLVal
+   * @param $expectedRVal
+   * @param $lBin
+   * @param $rBin
    */
-  function testBitShift($val, $shift, $expected_lval, $expected_rval, $lbin, $rbin) {
+  function testBitShift($val, $shift, $expectedLVal, $expectedRVal, $lBin, $rBin) {
 
     $this->skip64BitTestOn32Bit();
 
     $lval = (int) ((int) $val << $shift);
-    $this->assertBitShift($expected_lval, strval($lval),
-      'lshift', $lbin, decbin($lval));
+    $this->assertBitShift($expectedLVal, strval($lval),
+      'lshift', $lBin, decbin($lval));
     $rval = ((int) $val >> $shift);
-    $this->assertBitShift($expected_rval, strval($rval),
-      'rshift', $rbin, decbin($rval));
+    $this->assertBitShift($expectedRVal, strval($rval),
+      'rshift', $rBin, decbin($rval));
   }
 
   /**
    * @dataProvider bitShiftProvider
+   * @param $val
+   * @param $shift
+   * @param $expected_lval
+   * @param $expected_rval
+   * @param $lbin
+   * @param $rbin
    */
   function testLeftShiftGmp($val, $shift,
                             $expected_lval, $expected_rval,
@@ -82,24 +98,34 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider bitShiftProvider
+   * @param $val
+   * @param $shift
+   * @param $expectedLVal
+   * @param $expectedRVal
+   * @param $lBin
+   * @param $rBin
    */
-  function testRightShiftGmp($val, $shift, $expected_lval, $expected_rval, $lbin, $rbin) {
+  function testRightShiftGmp($val, $shift, $expectedLVal, $expectedRVal, $lBin, $rBin) {
     $this->skipIfNoGmp();
     $rval = gmp_strval(AvroGMP::shiftRight($val, $shift));
-    $this->assertBitShift($expected_rval, $rval, 'gmp right shift', $rbin, decbin((int) $rval));
+    $this->assertBitShift($expectedRVal, $rval, 'gmp right shift', $rBin, decbin((int) $rval));
   }
 
   /**
    * @dataProvider longProvider
+   * @param $val
+   * @param $expectedBytes
    */
-  function testEncodeLong($val, $expected_bytes) {
+  function testEncodeLong($val, $expectedBytes) {
     $this->skip64BitTestOn32Bit();
     $bytes = AvroIOBinaryEncoder::encodeLong($val);
-    $this->assertEquals($expected_bytes, $bytes);
+    $this->assertEquals($expectedBytes, $bytes);
   }
 
   /**
    * @dataProvider longProvider
+   * @param $val
+   * @param $expected_bytes
    */
   function testGmpEncodeLong($val, $expected_bytes) {
     $this->skipIfNoGmp();
@@ -109,22 +135,26 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider longProvider
+   * @param $expectedVal
+   * @param $bytes
    */
-  function testDecodeLongFromArray($expected_val, $bytes) {
+  function testDecodeLongFromArray($expectedVal, $bytes) {
     $this->skip64BitTestOn32Bit();
     $ary = array_map('ord', str_split($bytes));
     $val = AvroIOBinaryDecoder::decodeLongFromArray($ary);
-    $this->assertEquals($expected_val, $val);
+    $this->assertEquals($expectedVal, $val);
   }
 
   /**
    * @dataProvider longProvider
+   * @param $expectedVal
+   * @param $bytes
    */
-  function testGmpDecodeLongFromArray($expected_val, $bytes) {
+  function testGmpDecodeLongFromArray($expectedVal, $bytes) {
     $this->skipIfNoGmp();
     $ary = array_map('ord', str_split($bytes));
     $val = AvroGMP::decodeLongFromArray($ary);
-    $this->assertEquals($expected_val, $val);
+    $this->assertEquals($expectedVal, $val);
   }
 
   function longProvider() {

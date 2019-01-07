@@ -110,6 +110,9 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider specialValsProvider
+   * @param $type
+   * @param $val
+   * @param $bits
    */
   function testEncodingSpecialValues($type, $val, $bits) {
     $this->assertEncodeValues($type, $val, $bits);
@@ -125,20 +128,23 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider nanValsProvider
+   * @param $type
+   * @param $val
+   * @param $bits
    */
   function testEncodingNanValues($type, $val, $bits) {
     $this->assertEncodeNanValues($type, $val, $bits);
   }
 
   function normalValsProvider() {
-    $rubyToGenerateVals = <<<_RUBY
-      def d2lb(d); [d].pack('E') end
-      dary = (-10..10).to_a + [-1234.2132, -211e23]
-      dary.each {|x| b = d2lb(x); puts %/array(self::DOUBLE_TYPE, (double) #{x}, #{b.inspect}, '#{b.unpack('h*')[0]}'),/}
-      def f2ib(f); [f].pack('e') end
-      fary = (-10..10).to_a + [-1234.5, -211.3e6]
-      fary.each {|x| b = f2ib(x); puts %/array(self::FLOAT_TYPE, (float) #{x}, #{b.inspect}, '#{b.unpack('h*')[0]}'),/}
-_RUBY;
+//    $rubyToGenerateVals = <<<_RUBY
+//      def d2lb(d); [d].pack('E') end
+//      dary = (-10..10).to_a + [-1234.2132, -211e23]
+//      dary.each {|x| b = d2lb(x); puts %/array(self::DOUBLE_TYPE, (double) #{x}, #{b.inspect}, '#{b.unpack('h*')[0]}'),/}
+//      def f2ib(f); [f].pack('e') end
+//      fary = (-10..10).to_a + [-1234.5, -211.3e6]
+//      fary.each {|x| b = f2ib(x); puts %/array(self::FLOAT_TYPE, (float) #{x}, #{b.inspect}, '#{b.unpack('h*')[0]}'),/}
+//_RUBY;
 
     return [
       [self::DOUBLE_TYPE, (double) -10, "\000\000\000\000\000\000$\300", '000000000000420c'],
@@ -216,6 +222,9 @@ _RUBY;
 
   /**
    * @dataProvider floatValsProvider
+   * @param $type
+   * @param $val
+   * @param $bits
    */
   function testEncodingFloatValues($type, $val, $bits) {
     $this->assertEncodeValues($type, $val, $bits);
@@ -223,6 +232,9 @@ _RUBY;
 
   /**
    * @dataProvider doubleValsProvider
+   * @param $type
+   * @param $val
+   * @param $bits
    */
   function testEncodingDoubleValues($type, $val, $bits) {
     $this->assertEncodeValues($type, $val, $bits);
