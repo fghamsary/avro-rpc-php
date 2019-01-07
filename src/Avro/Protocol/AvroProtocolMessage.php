@@ -77,6 +77,12 @@ class AvroProtocolMessage {
     if ($response !== null) {
       if (!is_array($response)) {
         $this->response = $protocol->getSchemata()->schemaByName(new AvroName($response, null, $namespace));
+        if ($this->response === null && AvroSchema::isPrimitiveType($response)) {
+          // this is a primitive type so we create new primitive type directly
+          $this->response = new AvroPrimitiveSchema($response);
+        } else {
+          throw new AvroSchemaParseException("Response $response is not known for $name message!");
+        }
       } else {
         $this->response = AvroSchema::realParse($response, $namespace, $protocol->getSchemata());
       }
@@ -172,14 +178,14 @@ class AvroProtocolMessage {
       $avro["response"] = "null";
       $avro["one-way"] = true;
     } else {
-      if ($this->response !== null) {
-        $avro["response"] = $this->response->getSchemaName();
+      if ($this->getResponse() !== null) {
+        $avro["response"] = $this->getResponse()->getSchemaName();
       } else {
         throw new AvroProtocolParseException("Message '{$this->name}' has no declared response but is not a one-way message.");
       }
-      if ($this->errors !== null) {
+      if ($this->getErrors() !== null) {
         $avro["errors"] = [];
-        foreach ($this->errors->getSchemas() as $error) {
+        foreach ($this->getErrors()->getSchemas() as $error) {
           $avro["errors"][] = $error->getSchemaName();
         }
         // default string error which is results to AvroRemoteException and is really a string type is not necessary to be declared
