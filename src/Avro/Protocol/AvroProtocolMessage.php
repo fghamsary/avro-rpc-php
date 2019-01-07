@@ -144,7 +144,14 @@ class AvroProtocolMessage {
   }
 
   /**
-   * @return AvroUnionSchema|null the errors defintion of the method
+   * @return string|void the document for this method defined in the schema
+   */
+  public function getDocumentation() {
+    return $this->doc;
+  }
+
+  /**
+   * @return AvroUnionSchema|null the errors definition of the method
    */
   public function getErrors() {
     return $this->errors;

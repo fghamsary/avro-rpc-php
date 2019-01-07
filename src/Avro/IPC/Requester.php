@@ -157,7 +157,7 @@ class Requester {
       return;
     }
     $remoteName = $this->transceiver->remoteName();
-    $localHash = $this->localProtocol->md5();
+    $localHash = $this->localProtocol->getMd5();
     $remoteHash = AvroUtil::arrayValue($this->remoteHash, $remoteName);
     if ($remoteHash === null) {
       $remoteHash = $localHash;

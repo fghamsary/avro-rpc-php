@@ -51,7 +51,7 @@ abstract class Responder {
    */
   public function __construct(AvroProtocol $localProtocol) {
     $this->localProtocol = $localProtocol;
-    $this->localHash = $localProtocol->md5();
+    $this->localHash = $localProtocol->getMd5();
     $this->setProtocolCache($this->localHash, $localProtocol);
 
     $this->handshakeResponderWriterSchema = AvroSchema::parse(AvroDataIO::HANDSHAKE_RESPONSE_SCHEMA_JSON);

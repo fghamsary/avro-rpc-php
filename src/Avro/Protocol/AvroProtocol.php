@@ -44,7 +44,10 @@ class AvroProtocol {
    */
   private $messages = [];
 
-  private $md5string = null;
+  /**
+   * @var string the md5String corresponding to the current protocol
+   */
+  private $md5String = null;
 
   /**
    * @param string $json The definition of the avro schema to be used
@@ -112,6 +115,13 @@ class AvroProtocol {
   }
 
   /**
+   * @return string the name of the protocol used
+   */
+  public function getName() {
+    return $this->name;
+  }
+
+  /**
    * @return string the namespace defined for this protocol
    */
   public function getNamespace() {
@@ -119,10 +129,17 @@ class AvroProtocol {
   }
 
   /**
-   * @return AvroNamedSchemata the list of the schema recrods seen on the protocol
+   * @return AvroNamedSchemata the list of the schema records seen on the protocol
    */
   public function getSchemata() {
     return $this->schemata;
+  }
+
+  /**
+   * @return AvroProtocolMessage[] the list of functions defined in the protocol indexed by their name
+   */
+  public function getMessages() {
+    return $this->messages;
   }
 
   /**
@@ -130,8 +147,26 @@ class AvroProtocol {
    *
    * @throws AvroProtocolParseException
    */
-  public function md5() {
-    return ($this->md5string !== null) ? pack("H*", $this->md5string) : md5($this->__toString(), true);
+  public function getMd5() {
+    return ($this->md5String !== null) ? pack("H*", $this->md5String) : md5($this->__toString(), true);
+  }
+
+  /**
+   * Returns the currenty generated md5 saved on this avro protocol which may not be the current with the protocol
+   *
+   * @return string the md5 hash string of the current protocol
+   */
+  public function getMd5String() {
+    return $this->md5String;
+  }
+
+  /**
+   * This function generates md5String of the protocol and saves it to the local variable for later use
+   *
+   * @throws AvroProtocolParseException
+   */
+  public function generateMd5String() {
+    $this->md5String = md5($this->__toString());
   }
 
   /**
