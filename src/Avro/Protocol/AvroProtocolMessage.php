@@ -77,11 +77,13 @@ class AvroProtocolMessage {
     if ($response !== null) {
       if (!is_array($response)) {
         $this->response = $protocol->getSchemata()->schemaByName(new AvroName($response, null, $namespace));
-        if ($this->response === null && AvroSchema::isPrimitiveType($response)) {
-          // this is a primitive type so we create new primitive type directly
-          $this->response = new AvroPrimitiveSchema($response);
-        } else {
-          throw new AvroSchemaParseException("Response $response is not known for $name message!");
+        if ($this->response === null) {
+          if (AvroSchema::isPrimitiveType($response)) {
+            // this is a primitive type so we create new primitive type directly
+            $this->response = new AvroPrimitiveSchema($response);
+          } else {
+            throw new AvroSchemaParseException("Response $response is not known for $name message!");
+          }
         }
       } else {
         $this->response = AvroSchema::realParse($response, $namespace, $protocol->getSchemata());
