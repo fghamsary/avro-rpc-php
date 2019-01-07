@@ -85,7 +85,7 @@ class AvroProtocolMessage {
     }
 
     $this->isOneWay = AvroUtil::arrayValue($avro, 'one-way') === true;
-    if ($this->isOneWay && $this->response->getType() !== AvroSchema::NULL_TYPE) {
+    if ($this->isOneWay && $this->getResponse() !== null && $this->getResponse()->getType() !== AvroSchema::NULL_TYPE) {
       throw new AvroProtocolParseException("One way message $name can't have a response");
     }
 
