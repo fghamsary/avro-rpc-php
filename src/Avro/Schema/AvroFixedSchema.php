@@ -28,12 +28,11 @@ class AvroFixedSchema extends AvroNamedSchema {
 
   /**
    * @param AvroName $name
-   * @param string $doc Set to null, as fixed schemas don't have doc strings
    * @param int $size byte count of this fixed schema data value
    * @param AvroNamedSchemata|null $schemata
    * @throws AvroSchemaParseException
    */
-  public function __construct(AvroName $name, $doc, $size, $schemata = null) {
+  public function __construct(AvroName $name, $size, $schemata = null) {
     if (!is_integer($size)) {
       throw new AvroSchemaParseException('Fixed Schema requires a valid integer for "size" attribute');
     }

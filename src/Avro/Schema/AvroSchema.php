@@ -323,7 +323,7 @@ abstract class AvroSchema {
         switch ($type) {
           case self::FIXED_SCHEMA:
             $size = AvroUtil::arrayValue($avro, self::SIZE_ATTR);
-            return new AvroFixedSchema($newAvroName, $doc, $size, $schemata);
+            return new AvroFixedSchema($newAvroName, $size, $schemata);
           case self::ENUM_SCHEMA:
             $symbols = AvroUtil::arrayValue($avro, self::SYMBOLS_ATTR);
             return new AvroEnumSchema($newAvroName, $doc, $symbols, $schemata);

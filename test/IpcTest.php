@@ -57,6 +57,7 @@ class TestTransceiver extends SocketTransceiver {
   /**
    * Writes a message into the channel. Blocks until the message has been written.
    * @param string $message
+   * @throws AvroException
    */
   public function writeMessage($message) {
     $this->response = null;
@@ -94,11 +95,14 @@ class TestServer {
     $this->transceiver = new TestTransceiver();
   }
 
+  /**
+   * @param $callRequest
+   * @return string|null
+   * @throws AvroException
+   */
   public function start($callRequest) {
     $callResponse = $this->responder->respond($callRequest, $this->transceiver);
-    if ($callResponse !== null) {
-      return $callResponse;
-    }
+    return $callResponse;
   }
 }
 
@@ -113,6 +117,8 @@ class TestProtocolResponder extends Responder {
         } else {
           if ($request["message"]["subject"] == "pong") {
             return ["response" => "ping"];
+          } else {
+            return ["response" => "no Idea what to say"];
           }
         }
         break;
@@ -124,7 +130,7 @@ class TestProtocolResponder extends Responder {
         return ["response" => "no incoming parameters"];
 
       case "testNotification":
-        break;
+        return null;
 
       case "testRequestResponseException":
         if ($request["exception"]["cause"] == "callback") {
@@ -215,6 +221,7 @@ class IpcTest extends PHPUnit\Framework\TestCase {
     $exception_raised = false;
     try {
       $response = $requester->request('testRequestResponseException', ["exception" => ["cause" => "callback"]]);
+      $this->assertNull($response);
     } catch (AlwaysRaised $e) {
       $exception_raised = true;
       $exception_datum = $e->getException();
@@ -225,6 +232,7 @@ class IpcTest extends PHPUnit\Framework\TestCase {
     $exception_raised = false;
     try {
       $response = $requester->request('testRequestResponseException', ["exception" => ["cause" => "system"]]);
+      $this->assertNull($response);
     } catch (AvroRemoteException $e) {
       $exception_raised = true;
       $exception_datum = $e->getMessage();

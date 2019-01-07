@@ -62,6 +62,7 @@ class AvroSpec {
   /**
    * Wrapper method to call each required check.
    *
+   * @throws AvroException
    */
   public static function checkPlatform() {
     self::check64Bit();
