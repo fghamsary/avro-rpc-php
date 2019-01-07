@@ -9,6 +9,7 @@
 namespace Avro\Protocol;
 
 use Avro\AvroUtil;
+use Avro\Exception\AvroSchemaParseException;
 use Avro\Schema\AvroNamedSchemata;
 use Avro\Schema\AvroSchema;
 
@@ -47,8 +48,11 @@ class AvroProtocol {
 
   /**
    * @param string $json The definition of the avro schema to be used
+   *
    * @return AvroProtocol The protocol parsed based on the entry json
+   *
    * @throws AvroProtocolParseException
+   * @throws AvroSchemaParseException
    */
   public static function parse(string $json) {
     if ($json === null) {
@@ -60,6 +64,12 @@ class AvroProtocol {
     return $protocol;
   }
 
+  /**
+   * @param array $avro
+   *
+   * @throws AvroProtocolParseException
+   * @throws AvroSchemaParseException
+   */
   private function realParse(array $avro) {
     $this->name = $avro["protocol"];
     $this->namespace = $avro["namespace"];
@@ -117,13 +127,17 @@ class AvroProtocol {
 
   /**
    * @return string a md5 hash of this Avro Protocol
+   *
+   * @throws AvroProtocolParseException
    */
   public function md5() {
-    return ($this->md5string != null) ? pack("H*", $this->md5string) : md5($this->__toString(), true);
+    return ($this->md5string !== null) ? pack("H*", $this->md5string) : md5($this->__toString(), true);
   }
 
   /**
-   * @returns string the JSON-encoded representation of this Avro schema.
+   * @return string the JSON-encoded representation of this Avro schema.
+   *
+   * @throws AvroProtocolParseException
    */
   public function __toString() {
     return json_encode($this->toAvro(), JSON_UNESCAPED_SLASHES);
@@ -131,7 +145,9 @@ class AvroProtocol {
 
   /**
    * Internal representation of this Avro Protocol.
-   * @returns mixed
+   * @return mixed
+   *
+   * @throws AvroProtocolParseException
    */
   public function toAvro() {
     $avro = [

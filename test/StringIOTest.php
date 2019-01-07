@@ -20,6 +20,7 @@
 use Avro\IO\Data\AvroDataIOReader;
 use Avro\IO\Data\AvroDataIOWriter;
 use Avro\AvroDebug;
+use Avro\IO\Exception\AvroIOException;
 use Avro\Schema\AvroSchema;
 use Avro\IO\AvroStringIO;
 
@@ -27,6 +28,9 @@ require_once('test_helper.php');
 
 class StringIOTest extends PHPUnit\Framework\TestCase {
 
+  /**
+   * @throws AvroIOException
+   */
   public function testWrite() {
     $strio = new AvroStringIO();
     $this->assertEquals(0, $strio->tell());
@@ -48,6 +52,13 @@ class StringIOTest extends PHPUnit\Framework\TestCase {
     $this->markTestIncomplete('This test has not been implemented yet.');
   }
 
+  /**
+   * @throws AvroIOException
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   */
   public function testStringRep() {
     $writersSchemaJson = '"null"';
     $writersSchema = AvroSchema::parse($writersSchemaJson);

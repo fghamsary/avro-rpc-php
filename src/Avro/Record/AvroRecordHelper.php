@@ -11,7 +11,6 @@ namespace Avro\Record;
 
 use Avro\Exception\AvroException;
 use Avro\Schema\AvroEnumSchema;
-use Avro\Schema\AvroNamedSchema;
 use Avro\Schema\AvroRecordSchema;
 
 class AvroRecordHelper {

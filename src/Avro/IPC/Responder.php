@@ -11,10 +11,14 @@ namespace Avro\IPC;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroRemoteException;
+use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOSchemaMatchException;
+use Avro\IO\AvroIOTypeException;
 use Avro\IO\AvroStringIO;
 use Avro\IO\Binary\AvroIOBinaryDecoder;
 use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Data\AvroDataIO;
+use Avro\IO\Exception\AvroIOException;
 use Avro\Protocol\AvroProtocol;
 use Avro\Protocol\AvroProtocolMessage;
 use Avro\Protocol\AvroProtocolParseException;
@@ -39,6 +43,12 @@ abstract class Responder {
 
   protected $systemErrorSchema;
 
+  /**
+   * Responder constructor.
+   * @param AvroProtocol $localProtocol
+   * @throws AvroSchemaParseException
+   * @throws AvroProtocolParseException
+   */
   public function __construct(AvroProtocol $localProtocol) {
     $this->localProtocol = $localProtocol;
     $this->localHash = $localProtocol->md5();
@@ -141,7 +151,7 @@ abstract class Responder {
       $bufferWriter = new AvroStringIO();
       $encoder = new AvroIOBinaryEncoder($bufferWriter);
       $this->metadataSchema->write($responseMetadata, $encoder);
-      $encoder->write_boolean($error !== null);
+      $encoder->writeBoolean($error !== null);
       $this->systemErrorSchema->write($error->getMessage(), $encoder);
     }
 
@@ -153,11 +163,15 @@ abstract class Responder {
    *
    * @param AvroIOBinaryDecoder $decoder Where to read from
    * @param AvroIOBinaryEncoder $encoder Where to write to.
-   * @param \Avro\IPC\Transceiver $transceiver the transceiver used for the response
+   * @param Transceiver $transceiver the transceiver used for the response
    *
    * @return AvroProtocol The requested Protocol.
-
+   *
+   * @throws AvroException
    * @throws AvroProtocolParseException
+   * @throws AvroIOSchemaMatchException
+   * @throws AvroIOTypeException
+   * @throws AvroIOException
    */
   public function processHandshake(AvroIOBinaryDecoder $decoder, AvroIOBinaryEncoder $encoder, Transceiver $transceiver) {
     if ($transceiver->isConnected()) {

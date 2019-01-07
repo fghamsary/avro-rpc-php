@@ -8,6 +8,8 @@
 
 namespace Avro;
 
+use Avro\Exception\AvroException;
+
 /**
  * Class AvroDebug
  *
@@ -35,6 +37,7 @@ class AvroDebug {
    * @returns boolean true if the given $debug_level is equivalent
    *                  or more verbose than than the current debug level
    *                  and false otherwise.
+   * @return bool
    */
   static function isDebug($debug_level = self::DEBUG1) {
     return (self::DEBUG_LEVEL >= $debug_level);
@@ -114,6 +117,7 @@ class AvroDebug {
    * - hex: bytes represented in hexadecimal ('%02X')
    * - dec: bytes represented in decimal ('%03d')
    * @return string[] array of bytes represented in the given format.
+   * @throws AvroException
    */
   static function asciiArray($str, $format = 'ctrl') {
     if (!in_array($format, ['ctrl', 'hex', 'dec'])) {
@@ -205,8 +209,9 @@ class AvroDebug {
    * @param string $joiner
    * @return string of bytes joined by $joiner
    * @uses asciiArray()
+   * @throws AvroException
    */
-  static function asciiString($str, $format = 'ctrl', $joiner = ' ') {
+  static function asciiString($str, $format = 'ctrl', $joiner = ' '): string {
     return join($joiner, self::asciiArray($str, $format));
   }
 }

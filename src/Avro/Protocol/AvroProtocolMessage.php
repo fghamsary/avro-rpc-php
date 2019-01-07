@@ -150,6 +150,10 @@ class AvroProtocolMessage {
     return $this->errors;
   }
 
+  /**
+   * @return array
+   * @throws AvroProtocolParseException
+   */
   public function toAvro() {
     $avro = [];
     if ($this->doc !== null) {

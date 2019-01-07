@@ -470,7 +470,7 @@ abstract class AvroSchema {
     }
     if ($this instanceof AvroUnionSchema || $readersSchema instanceof AvroUnionSchema) {
       // union case is special so we consider that they are compatible for now, and we will check in more detail while reading the data really
-      return true;
+      return $this->readData($decoder, $this);
     }
     if (!$this->schemaMatches($readersSchema)) {
       throw new AvroIOSchemaMatchException($this, $readersSchema);

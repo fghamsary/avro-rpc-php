@@ -11,12 +11,16 @@ namespace Avro\IPC;
 use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroRemoteException;
+use Avro\Exception\AvroSchemaParseException;
+use Avro\IO\AvroIOTypeException;
 use Avro\IO\AvroStringIO;
 use Avro\IO\Binary\AvroIOBinaryDecoder;
 use Avro\IO\Binary\AvroIOBinaryEncoder;
 use Avro\IO\Data\AvroDataIO;
+use Avro\IO\Exception\AvroIOException;
 use Avro\Protocol\AvroProtocol;
 use Avro\Protocol\AvroProtocolParseException;
+use Avro\Record\AvroErrorRecord;
 use Avro\Record\AvroRecordHelper;
 use Avro\Schema\AvroSchema;
 
@@ -72,8 +76,11 @@ class Requester {
 
   /**
    * Initializes a new requester object
+   *
    * @param AvroProtocol $localProtocol Avro Protocol describing the messages sent and received.
    * @param Transceiver $transceiver Transceiver instance to channel messages through.
+   *
+   * @throws AvroSchemaParseException
    */
   public function __construct(AvroProtocol $localProtocol, Transceiver $transceiver) {
     $this->localProtocol = $localProtocol;
@@ -138,7 +145,12 @@ class Requester {
 
   /**
    * Write the handshake request.
+   *
    * @param AvroIOBinaryEncoder $encoder : Encoder to write the handshake request into.
+   *
+   * @throws AvroIOTypeException
+   * @throws AvroIOException
+   * @throws AvroProtocolParseException
    */
   public function writeHandshakeRequest(AvroIOBinaryEncoder $encoder) {
     if ($this->transceiver->isConnected()) {
@@ -227,6 +239,7 @@ class Requester {
   /**
    * @param array $handshakeResponse
    * @throws AvroProtocolParseException
+   * @throws AvroSchemaParseException
    */
   protected function setRemote(array $handshakeResponse) {
     $this->remoteProtocol[$this->transceiver->remoteName()] = AvroProtocol::parse($handshakeResponse["serverProtocol"]);

@@ -15,7 +15,6 @@ use Avro\IO\AvroIO;
 use Avro\IO\AvroIOSchemaMatchException;
 use Avro\IO\Exception\AvroDataIOException;
 use Avro\IO\Exception\AvroIOException;
-use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroSchema;
 
 /**
