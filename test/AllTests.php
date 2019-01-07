@@ -19,6 +19,7 @@
 
 require_once('DataFileTest.php');
 require_once('SchemaTest.php');
+require_once('SchemaJavaStringTest.php');
 require_once('NameTest.php');
 require_once('StringIOTest.php');
 require_once('IODatumReaderTest.php');
@@ -43,6 +44,7 @@ class AllTests {
     $suite->addTestSuite('DatumIOTest');
     $suite->addTestSuite('ProtocolFileTest');
     $suite->addTestSuite('IpcTest');
+    $suite->addTestSuite('SchemaJavaStringTest');
     return $suite;
   }
 
