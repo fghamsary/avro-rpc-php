@@ -144,7 +144,7 @@ class AvroProtocolMessage {
   }
 
   /**
-   * @return string|void the document for this method defined in the schema
+   * @return string|null the document for this method defined in the schema
    */
   public function getDocumentation() {
     return $this->doc;
