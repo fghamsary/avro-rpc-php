@@ -79,8 +79,6 @@ class Requester {
    *
    * @param AvroProtocol $localProtocol Avro Protocol describing the messages sent and received.
    * @param Transceiver $transceiver Transceiver instance to channel messages through.
-   *
-   * @throws AvroSchemaParseException
    */
   public function __construct(AvroProtocol $localProtocol, Transceiver $transceiver) {
     $this->localProtocol = $localProtocol;
@@ -88,9 +86,13 @@ class Requester {
     array_walk($namespaceTokens, function(&$token) { $token = ucfirst($token); });
     $this->namespace =  implode("\\", $namespaceTokens) . "\\";
     $this->transceiver = $transceiver;
-    $this->handshakeRequesterWriterSchema = AvroSchema::parse(AvroDataIO::HANDSHAKE_REQUEST_SCHEMA_JSON);
-    $this->handshakeRequesterReaderSchema = AvroSchema::parse(AvroDataIO::HANDSHAKE_RESPONSE_SCHEMA_JSON);
-    $this->metadataSchema = AvroSchema::parse(AvroDataIO::METADATA_SCHEMA_JSON);
+    try {
+      $this->handshakeRequesterWriterSchema = AvroSchema::parse(AvroDataIO::HANDSHAKE_REQUEST_SCHEMA_JSON);
+      $this->handshakeRequesterReaderSchema = AvroSchema::parse(AvroDataIO::HANDSHAKE_RESPONSE_SCHEMA_JSON);
+      $this->metadataSchema = AvroSchema::parse(AvroDataIO::METADATA_SCHEMA_JSON);
+    } catch (AvroSchemaParseException $ignored) {
+      // here all the schema used are constants so we are sure to be correct :)
+    }
   }
 
   public function getLocalProtocol() {
