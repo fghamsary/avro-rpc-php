@@ -61,7 +61,7 @@ class AvroDebug {
    * @param string $str
    * @return string[] array of hex representation of each byte of $str
    */
-  static function hex_array($str) {
+  static function hexArray($str) {
     return self::bytesArray($str);
   }
 
@@ -72,7 +72,7 @@ class AvroDebug {
    * joined by $joiner
    */
   static function hexString($str, $joiner = ' ') {
-    return join($joiner, self::hex_array($str));
+    return join($joiner, self::hexArray($str));
   }
 
   /**
@@ -102,7 +102,7 @@ class AvroDebug {
    * @return string of bytes of $str represented in decimal format
    * @uses decArray()
    */
-  static function dec_string($str, $joiner = ' ') {
+  static function decString($str, $joiner = ' ') {
     return join($joiner, self::decArray($str));
   }
 
