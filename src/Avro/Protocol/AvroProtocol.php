@@ -12,7 +12,9 @@ use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\Record\AvroRecord;
+use Avro\Schema\AvroArraySchema;
 use Avro\Schema\AvroEnumSchema;
+use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroNamedSchemata;
 use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
@@ -190,12 +192,33 @@ class AvroProtocol {
     $serializedObject = [];
     if ($schema instanceof AvroRecordSchema) {
       foreach ($schema->getFields() as $name => $field) {
-        if ($field->getFieldType() instanceof AvroEnumSchema) {
+        $fieldType = $field->getFieldType();
+        if ($fieldType instanceof AvroEnumSchema) {
           $serializedObject[$name] = (string)$record->_internalGetValue($name);
         } else {
           $serializedObject[$name] = $record->_internalGetValue($name);
-          if ($deepSerialization && $serializedObject[$name] instanceof AvroRecordSchema) {
-            $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
+          if ($deepSerialization) {
+            if ($serializedObject[$name] instanceof AvroRecordSchema) {
+              $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
+            } elseif ($fieldType instanceof AvroArraySchema) {
+              if ($fieldType->getItemsSchema() instanceof AvroRecordSchema) {
+                $serializedObject[$name] = array_map(function ($item) {
+                  $this->serializeObject($item, true);
+                }, $serializedObject[$name]);
+              }
+            } elseif ($fieldType instanceof AvroMapSchema) {
+              if ($fieldType->getValuesSchema() instanceof AvroRecordSchema) {
+                if (is_array($serializedObject[$name])) {
+                  /**
+                   * @var string $key
+                   * @var AvroRecord $value
+                   */
+                  foreach ($serializedObject[$name] as $key => $value) {
+                    $serializedObject[$name][$key] = $this->serializeObject($value, true);
+                  }
+                }
+              }
+            }
           }
         }
       }
