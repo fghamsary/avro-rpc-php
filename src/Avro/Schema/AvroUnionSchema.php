@@ -50,11 +50,11 @@ class AvroUnionSchema extends AvroSchema {
     $this->schemaFromSchemataIndices = [];
     $schemaTypes = [];
     foreach ($schemas as $index => $schema) {
-      $is_schema_from_schemata = false;
+      $isInSchemata = false;
       $newSchema = null;
       if (is_string($schema) &&
         ($newSchema = $schemata->getSchemaByName(new AvroName($schema, null, $defaultNamespace)))) {
-        $is_schema_from_schemata = true;
+        $isInSchemata = true;
       } else {
         $newSchema = self::subParse($schema, $defaultNamespace, $schemata);
         if ($newSchema instanceof AvroPrimitiveSchema && $newSchema->isString()) {
@@ -72,7 +72,7 @@ class AvroUnionSchema extends AvroSchema {
       } else {
         $schemaTypes[] = $schemaType;
         $this->schemas[] = $newSchema;
-        if ($is_schema_from_schemata) {
+        if ($isInSchemata) {
           $this->schemaFromSchemataIndices[] = $index;
         }
       }
@@ -128,20 +128,20 @@ class AvroUnionSchema extends AvroSchema {
    * @throws AvroIOTypeException in case the value passed is not compatible with the current union
    */
   public function writeDatum($datum, AvroIOBinaryEncoder $encoder) {
-    $datum_schema_index = -1;
-    $datum_schema = null;
+    $datumSchemaIndex = -1;
+    $datumSchema = null;
     foreach ($this->getSchemas() as $index => $schema) {
       if ($schema->isValidDatum($datum)) {
-        $datum_schema_index = $index;
-        $datum_schema = $schema;
+        $datumSchemaIndex = $index;
+        $datumSchema = $schema;
         break;
       }
     }
-    if ($datum_schema === null) {
+    if ($datumSchema === null) {
       throw new AvroIOTypeException($this, $datum);
     }
-    $encoder->writeLong($datum_schema_index);
-    $datum_schema->writeDatum($datum, $encoder);
+    $encoder->writeLong($datumSchemaIndex);
+    $datumSchema->writeDatum($datum, $encoder);
   }
 
   /**

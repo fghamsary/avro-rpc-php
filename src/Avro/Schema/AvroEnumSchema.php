@@ -23,6 +23,7 @@ use Avro\Record\AvroRecordHelper;
  * @package Avro\Schema
  */
 class AvroEnumSchema extends AvroNamedSchema {
+  
   /**
    * @var string[] array of symbols
    */

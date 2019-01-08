@@ -18,6 +18,7 @@ use Avro\Exception\AvroSchemaParseException;
  * @package Avro\Schema
  */
 abstract class AvroNamedSchema extends AvroSchema {
+
   /**
    * @var AvroName $name
    */

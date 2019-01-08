@@ -32,7 +32,7 @@ class AvroArraySchema extends AvroSchema {
    * FIXME: couldn't we derive this from whether or not $this->items
    *        is an AvroName or an AvroSchema?
    */
-  private $is_items_schema_from_schemata;
+  private $alreadyInSchemata;
 
   /**
    * @param string|mixed $items AvroNamedSchema name or object form
@@ -46,11 +46,11 @@ class AvroArraySchema extends AvroSchema {
     if ($schemata === null) {
       $schemata = new AvroNamedSchemata();
     }
-    $this->is_items_schema_from_schemata = false;
+    $this->alreadyInSchemata = false;
     $itemsSchema = null;
     if (is_string($items) &&
       $itemsSchema = $schemata->getSchemaByName(new AvroName($items, null, $defaultNamespace))) {
-      $this->is_items_schema_from_schemata = true;
+      $this->alreadyInSchemata = true;
     } else {
       $itemsSchema = AvroSchema::subParse($items, $defaultNamespace, $schemata);
     }
@@ -188,7 +188,7 @@ class AvroArraySchema extends AvroSchema {
    */
   public function toAvro() {
     $avro = parent::toAvro();
-    $avro[AvroSchema::ITEMS_ATTR] = $this->is_items_schema_from_schemata ?
+    $avro[AvroSchema::ITEMS_ATTR] = $this->alreadyInSchemata ?
       $this->itemsSchema->getQualifiedName() :
       $this->itemsSchema->toAvro();
     return $avro;

@@ -37,7 +37,7 @@ class AvroMapSchema extends AvroSchema {
    * XXX Couldn't we derive this based on whether or not
    * $this->values is a string?
    */
-  private $is_values_schema_from_schemata;
+  private $alreadyInSchema;
 
   /**
    * @param string|AvroSchema $values
@@ -51,11 +51,11 @@ class AvroMapSchema extends AvroSchema {
       $schemata = new AvroNamedSchemata();
     }
 
-    $this->is_values_schema_from_schemata = false;
+    $this->alreadyInSchema = false;
     $valueSchema = null;
     if (is_string($values) &&
       $valueSchema = $schemata->getSchemaByName(new AvroName($values, null, $defaultNamespace))) {
-      $this->is_values_schema_from_schemata = true;
+      $this->alreadyInSchema = true;
       $this->containsString = false;
     } else {
       $valueSchema = AvroSchema::subParse($values, $defaultNamespace, $schemata);
@@ -203,7 +203,7 @@ class AvroMapSchema extends AvroSchema {
    */
   public function toAvro() {
     $avro = parent::toAvro();
-    $avro[AvroSchema::VALUES_ATTR] = $this->is_values_schema_from_schemata
+    $avro[AvroSchema::VALUES_ATTR] = $this->alreadyInSchema
       ? $this->valuesSchema->getQualifiedName() : $this->valuesSchema->toAvro();
     if ($this->containsString && AvroPrimitiveSchema::isJavaStringType()) {
       $avro[self::JAVA_STRING_ANNOTATION] = self::JAVA_STRING_TYPE;
