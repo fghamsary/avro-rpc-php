@@ -198,24 +198,16 @@ class AvroProtocol {
         } else {
           $serializedObject[$name] = $record->_internalGetValue($name);
           if ($deepSerialization) {
-            if ($serializedObject[$name] instanceof AvroRecordSchema) {
+            if ($serializedObject[$name] instanceof AvroRecord) {
               $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
-            } elseif ($fieldType instanceof AvroArraySchema) {
-              if ($fieldType->getItemsSchema() instanceof AvroRecordSchema) {
-                $serializedObject[$name] = array_map(function ($item) {
-                  $this->serializeObject($item, true);
-                }, $serializedObject[$name]);
-              }
-            } elseif ($fieldType instanceof AvroMapSchema) {
-              if ($fieldType->getValuesSchema() instanceof AvroRecordSchema) {
-                if (is_array($serializedObject[$name])) {
-                  /**
-                   * @var string $key
-                   * @var AvroRecord $value
-                   */
-                  foreach ($serializedObject[$name] as $key => $value) {
-                    $serializedObject[$name][$key] = $this->serializeObject($value, true);
-                  }
+            } elseif (is_array($serializedObject[$name])) {
+              if (array_values($serializedObject[$name])[0] instanceof AvroRecord) {
+                /**
+                 * @var string $key
+                 * @var AvroRecord $value
+                 */
+                foreach ($serializedObject[$name] as $key => $value) {
+                  $serializedObject[$name][$key] = $this->serializeObject($value, true);
                 }
               }
             }
