@@ -24,12 +24,19 @@ class SocketServer {
    */
   protected $responder;
   protected $socket;
-  protected $use_netty_framed_transceiver;
+  protected $netty;
 
-  public function __construct($host, $port, Responder $responder, $use_netty_framed_transceiver = false) {
+  /**
+   * SocketServer constructor.
+   * @param string $host the host for this server
+   * @param int $port the port for this server
+   * @param Responder $responder the responder to be used for this server
+   * @param bool $netty true if NettyFramedSocketTransceiver should be used and false if Transceiver should be used
+   */
+  public function __construct($host, $port, Responder $responder, $netty = false) {
     $this->responder = $responder;
     $this->socket = socket_create(AF_INET, SOCK_STREAM, 0);
-    $this->use_netty_framed_transceiver = $use_netty_framed_transceiver;
+    $this->netty = $netty;
     socket_bind($this->socket, $host, $port);
     socket_listen($this->socket, 3);
   }
@@ -54,7 +61,7 @@ class SocketServer {
       if (in_array($this->socket, $read)) {
         for ($i = 0; $i < $max_clients; $i++) {
           if (!isset($transceivers[$i])) {
-            $transceivers[$i] = ($this->use_netty_framed_transceiver)
+            $transceivers[$i] = $this->netty
               ? NettyFramedSocketTransceiver::accept($this->socket)
               : SocketTransceiver::accept($this->socket);
             break;
@@ -66,8 +73,8 @@ class SocketServer {
       for ($i = 0; $i < $max_clients; $i++) {
         if (isset($transceivers[$i]) && in_array($transceivers[$i]->socket(), $read)) {
           try {
-            $is_closed = $this->handle_request($transceivers[$i]);
-            if ($is_closed) {
+            $isClosed = $this->handleRequest($transceivers[$i]);
+            if ($isClosed) {
               unset($transceivers[$i]);
             }
           } catch (AvroException $e) {
@@ -86,15 +93,15 @@ class SocketServer {
    * @return bool
    * @throws AvroException
    */
-  public function handle_request(Transceiver $transceiver) {
+  public function handleRequest(Transceiver $transceiver) {
     // Read the message
-    $call_request = $transceiver->readMessage();
+    $request = $transceiver->readMessage();
 
     // Respond if the message is not empty
-    if ($call_request !== null) {
-      $call_response = $this->responder->respond($call_request, $transceiver);
-      if ($call_response !== null) {
-        $transceiver->writeMessage($call_response);
+    if ($request !== null) {
+      $response = $this->responder->respond($request, $transceiver);
+      if ($response !== null) {
+        $transceiver->writeMessage($response);
       }
       return false;
       // Else the client has disconnect

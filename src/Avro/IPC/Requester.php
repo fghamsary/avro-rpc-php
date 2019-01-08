@@ -187,8 +187,8 @@ class Requester {
    * @throws AvroException when $message_name is not registered on the local protocol
    */
   public function writeCallRequest($messageName, $requestDatum, AvroIOBinaryEncoder $encoder) {
-    $request_metadata = [];
-    $this->metadataSchema->write($request_metadata, $encoder);
+    $requestMetadata = [];
+    $this->metadataSchema->write($requestMetadata, $encoder);
     $message = $this->localProtocol->getRequestMessageByName($messageName);
     if ($message === null) {
       throw new AvroException("Unknown message: $messageName");

@@ -54,16 +54,16 @@ class NettyFramedSocketTransceiver extends SocketTransceiver {
       return $buf;
     }
 
-    $frame_count = unpack("Nserial/Ncount", $buf);
-    $frame_count = $frame_count["count"];
+    $frameCount = unpack("Nserial/Ncount", $buf);
+    $frameCount = $frameCount["count"];
     $message = "";
-    for ($i = 0; $i < $frame_count; $i++) {
+    for ($i = 0; $i < $frameCount; $i++) {
       socket_recv($this->socket, $buf, 4, MSG_WAITALL);
-      $frame_size = unpack("Nsize", $buf);
-      $frame_size = $frame_size["size"];
-      if ($frame_size > 0) {
-        socket_recv($this->socket, $bif, $frame_size, MSG_WAITALL);
-        $message .= $bif;
+      $frameSize = unpack("Nsize", $buf);
+      $frameSize = $frameSize["size"];
+      if ($frameSize > 0) {
+        socket_recv($this->socket, $buffer, $frameSize, MSG_WAITALL);
+        $message .= $buffer;
       }
     }
     return $message;
@@ -74,17 +74,17 @@ class NettyFramedSocketTransceiver extends SocketTransceiver {
    * @param string $message
    */
   public function writeMessage($message) {
-    $binary_length = strlen($message);
+    $binaryLength = strlen($message);
 
-    $max_binary_frame_length = self::BUFFER_SIZE - 4;
-    $socket_ended_length = 0;
+    $maxBinaryFrameLength = self::BUFFER_SIZE - 4;
+    $socketEndedLength = 0;
 
     $frames = array();
-    while ($socket_ended_length < $binary_length) {
-      $not_socket_ended_length = $binary_length - $socket_ended_length;
-      $binary_frame_length = ($not_socket_ended_length > $max_binary_frame_length) ? $max_binary_frame_length : $not_socket_ended_length;
-      $frames[] = substr($message, $socket_ended_length, $binary_frame_length);
-      $socket_ended_length += $binary_frame_length;
+    while ($socketEndedLength < $binaryLength) {
+      $notSocketEndedLength = $binaryLength - $socketEndedLength;
+      $binaryFrameLength = ($notSocketEndedLength > $maxBinaryFrameLength) ? $maxBinaryFrameLength : $notSocketEndedLength;
+      $frames[] = substr($message, $socketEndedLength, $binaryFrameLength);
+      $socketEndedLength += $binaryFrameLength;
     }
 
     $header = pack("N", self::$serial++) . pack("N", count($frames));

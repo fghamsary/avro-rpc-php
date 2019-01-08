@@ -10,6 +10,7 @@ namespace Avro\IO\Binary;
 
 use Avro\AvroGMP;
 use Avro\AvroSpec;
+use Avro\Exception\AvroException;
 use Avro\IO\AvroIO;
 use Avro\IO\Exception\AvroIOException;
 
@@ -25,7 +26,7 @@ class AvroIOBinaryEncoder {
   /**
    * Performs encoding of the given float value to a binary string
    *
-   * XXX: This is <b>not</b> endian-aware! The {@link AvroSpec::check_platform()}
+   * XXX: This is <b>not</b> endian-aware! The {@link AvroSpec::checkPlatform()}
    * called in {@link AvroIOBinaryEncoder::__construct()} should ensure the
    * library is only used on little-endian platforms, which ensure the little-endian
    * encoding required by the Avro spec.
@@ -42,7 +43,7 @@ class AvroIOBinaryEncoder {
    * Performs encoding of the given double value to a binary string
    *
    * XXX: This is <b>not</b> endian-aware! See comments in
-   * {@link AvroIOBinaryEncoder::float_to_int_bits()} for details.
+   * {@link AvroIOBinaryEncoder::floatToIntBits()} for details.
    *
    * @param double $double
    * @return string bytes
@@ -76,6 +77,7 @@ class AvroIOBinaryEncoder {
   /**
    * @param AvroIO $io object to which data is to be written.
    *
+   * @throws AvroException
    */
   function __construct($io) {
     AvroSpec::checkPlatform();
@@ -113,7 +115,7 @@ class AvroIOBinaryEncoder {
 
   /**
    * @param float $datum
-   * @uses self::float_to_int_bits()
+   * @uses self::floatToIntBits()
    * @throws AvroIOException
    */
   public function writeFloat($datum) {
@@ -122,7 +124,7 @@ class AvroIOBinaryEncoder {
 
   /**
    * @param float $datum
-   * @uses self::double_to_long_bits()
+   * @uses self::doubleToLongBits()
    * @throws AvroIOException
    */
   public function writeDouble($datum) {
@@ -131,7 +133,7 @@ class AvroIOBinaryEncoder {
 
   /**
    * @param string $str
-   * @uses self::write_bytes()
+   * @uses self::writeBytes()
    * @throws AvroIOException
    */
   function writeString($str) {

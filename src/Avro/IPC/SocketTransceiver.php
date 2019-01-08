@@ -78,12 +78,12 @@ class SocketTransceiver extends Transceiver {
       if ($buf == null) {
         return $buf;
       }
-      $frame_size = unpack("Nsize", $buf);
-      $frame_size = $frame_size["size"];
-      if ($frame_size == 0) {
+      $frameSize = unpack("Nsize", $buf);
+      $frameSize = $frameSize["size"];
+      if ($frameSize == 0) {
         return $message;
       }
-      socket_recv($this->socket, $buf, $frame_size, MSG_WAITALL);
+      socket_recv($this->socket, $buf, $frameSize, MSG_WAITALL);
       $message .= $buf;
     }
     return $message;
@@ -94,17 +94,17 @@ class SocketTransceiver extends Transceiver {
    * @param string $message
    */
   public function writeMessage($message) {
-    $binary_length = strlen($message);
+    $binaryLength = strlen($message);
 
-    $max_binary_frame_length = self::BUFFER_SIZE - 4;
-    $socket_ended_length = 0;
+    $maxBinaryFrameLength = self::BUFFER_SIZE - 4;
+    $socketEndedLength = 0;
 
     $frames = array();
-    while ($socket_ended_length < $binary_length) {
-      $not_socket_ended_length = $binary_length - $socket_ended_length;
-      $binary_frame_length = ($not_socket_ended_length > $max_binary_frame_length) ? $max_binary_frame_length : $not_socket_ended_length;
-      $frames[] = substr($message, $socket_ended_length, $binary_frame_length);
-      $socket_ended_length += $binary_frame_length;
+    while ($socketEndedLength < $binaryLength) {
+      $notSocketEndedLength = $binaryLength - $socketEndedLength;
+      $binaryFrameLength = ($notSocketEndedLength > $maxBinaryFrameLength) ? $maxBinaryFrameLength : $notSocketEndedLength;
+      $frames[] = substr($message, $socketEndedLength, $binaryFrameLength);
+      $socketEndedLength += $binaryFrameLength;
     }
 
     foreach ($frames as $frame) {
