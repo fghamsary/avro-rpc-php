@@ -218,27 +218,27 @@ class IpcTest extends PHPUnit\Framework\TestCase {
     $client = TestTransceiver::getTestClient($server);
     $requester = new Requester(AvroProtocol::parse($this->protocol), $client);
 
-    $exception_raised = false;
+    $exceptionRaised = false;
     try {
       $response = $requester->request('testRequestResponseException', ["exception" => ["cause" => "callback"]]);
       $this->assertNull($response);
     } catch (AlwaysRaised $e) {
-      $exception_raised = true;
-      $exception_datum = $e->getException();
-      $this->assertEquals("raised on callback cause", $exception_datum);
+      $exceptionRaised = true;
+      $exceptionDatum = $e->getException();
+      $this->assertEquals("raised on callback cause", $exceptionDatum);
     }
 
-    $this->assertTrue($exception_raised);
-    $exception_raised = false;
+    $this->assertTrue($exceptionRaised);
+    $exceptionRaised = false;
     try {
       $response = $requester->request('testRequestResponseException', ["exception" => ["cause" => "system"]]);
       $this->assertNull($response);
     } catch (AvroRemoteException $e) {
-      $exception_raised = true;
-      $exception_datum = $e->getMessage();
-      $this->assertEquals("System exception", $exception_datum);
+      $exceptionRaised = true;
+      $exceptionDatum = $e->getMessage();
+      $this->assertEquals("System exception", $exceptionDatum);
     }
-    $this->assertTrue($exception_raised);
+    $this->assertTrue($exceptionRaised);
   }
 
   private $protocol = <<<PROTO

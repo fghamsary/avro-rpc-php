@@ -71,29 +71,27 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase {
 
     $this->skip64BitTestOn32Bit();
 
-    $lval = (int) ((int) $val << $shift);
-    $this->assertBitShift($expectedLVal, strval($lval),
-      'lshift', $lBin, decbin($lval));
-    $rval = ((int) $val >> $shift);
-    $this->assertBitShift($expectedRVal, strval($rval),
-      'rshift', $rBin, decbin($rval));
+    $lVal = (int)((int)$val << $shift);
+    $this->assertBitShift($expectedLVal, strval($lVal), 'lshift', $lBin, decbin($lVal));
+    $rVal = ((int)$val >> $shift);
+    $this->assertBitShift($expectedRVal, strval($rVal), 'rshift', $rBin, decbin($rVal));
   }
 
   /**
    * @dataProvider bitShiftProvider
    * @param $val
    * @param $shift
-   * @param $expected_lval
-   * @param $expected_rval
-   * @param $lbin
-   * @param $rbin
+   * @param $expectedLVal
+   * @param $expectedRVal
+   * @param $lBin
+   * @param $rBin
    */
   function testLeftShiftGmp($val, $shift,
-                            $expected_lval, $expected_rval,
-                            $lbin, $rbin) {
+                            $expectedLVal, $expectedRVal,
+                            $lBin, $rBin) {
     $this->skipIfNoGmp();
-    $lval = gmp_strval(AvroGMP::shiftLeft($val, $shift));
-    $this->assertBitShift($expected_lval, $lval, 'gmp left shift', $lbin, decbin((int) $lval));
+    $lVal = gmp_strval(AvroGMP::shiftLeft($val, $shift));
+    $this->assertBitShift($expectedLVal, $lVal, 'gmp left shift', $lBin, decbin((int)$lVal));
   }
 
   /**
@@ -107,8 +105,8 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase {
    */
   function testRightShiftGmp($val, $shift, $expectedLVal, $expectedRVal, $lBin, $rBin) {
     $this->skipIfNoGmp();
-    $rval = gmp_strval(AvroGMP::shiftRight($val, $shift));
-    $this->assertBitShift($expectedRVal, $rval, 'gmp right shift', $rBin, decbin((int) $rval));
+    $rVal = gmp_strval(AvroGMP::shiftRight($val, $shift));
+    $this->assertBitShift($expectedRVal, $rVal, 'gmp right shift', $rBin, decbin((int)$rVal));
   }
 
   /**
@@ -175,7 +173,7 @@ class LongEncodingTest extends PHPUnit\Framework\TestCase {
   }
 
   function bitShiftProvider() {
-    // val shift lval rval
+    // val shift lVal rVal
     return [
       [
         '0',

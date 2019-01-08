@@ -23,18 +23,19 @@ use Avro\Exception\AvroSchemaParseException;
 require_once('test_helper.php');
 
 class NameExample {
-  var $is_valid;
+  var $isValid;
   var $name;
   var $namespace;
-  var $default_namespace;
-  var $expected_fullname;
-  function __construct($name, $namespace, $default_namespace, $is_valid,
-                       $expected_fullname = null) {
+  var $defaultNamespace;
+  var $expectedFullname;
+
+  function __construct($name, $namespace, $defaultNamespace, $isValid,
+                       $expectedFullname = null) {
     $this->name = $name;
     $this->namespace = $namespace;
-    $this->default_namespace = $default_namespace;
-    $this->is_valid = $is_valid;
-    $this->expected_fullname = $expected_fullname;
+    $this->defaultNamespace = $defaultNamespace;
+    $this->isValid = $isValid;
+    $this->expectedFullname = $expectedFullname;
   }
 
   function __toString() {
@@ -66,17 +67,14 @@ class NameTest extends PHPUnit\Framework\TestCase {
    * @param NameExample $ex
    */
   function testFullname(NameExample $ex) {
-    try
-    {
-      $name = new AvroName($ex->name, $ex->namespace, $ex->default_namespace);
-      $this->assertTrue($ex->is_valid);
-      $this->assertEquals($ex->expected_fullname, $name->getFullname());
-    }
-    catch (AvroSchemaParseException $e)
-    {
-      $this->assertFalse($ex->is_valid, sprintf("%s:\n%s",
-                                                $ex,
-                                                $e->getMessage()));
+    try {
+      $name = new AvroName($ex->name, $ex->namespace, $ex->defaultNamespace);
+      $this->assertTrue($ex->isValid);
+      $this->assertEquals($ex->expectedFullname, $name->getFullname());
+    } catch (AvroSchemaParseException $e) {
+      $this->assertFalse($ex->isValid, sprintf("%s:\n%s",
+        $ex,
+        $e->getMessage()));
     }
   }
 

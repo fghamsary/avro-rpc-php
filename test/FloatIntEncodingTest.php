@@ -42,12 +42,12 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase {
   static $INT_BITS_NEG_INF;
 
   static function makeSpecialVals() {
-    self::$DOUBLE_NAN = (double) NAN;
-    self::$DOUBLE_POS_INF = (double) INF;
-    self::$DOUBLE_NEG_INF = (double) -INF;
-    self::$FLOAT_NAN = (float) NAN;
-    self::$FLOAT_POS_INF = (float) INF;
-    self::$FLOAT_NEG_INF = (float) -INF;
+    self::$DOUBLE_NAN = (double)NAN;
+    self::$DOUBLE_POS_INF = (double)INF;
+    self::$DOUBLE_NEG_INF = (double)-INF;
+    self::$FLOAT_NAN = (float)NAN;
+    self::$FLOAT_POS_INF = (float)INF;
+    self::$FLOAT_NEG_INF = (float)-INF;
 
     self::$LONG_BITS_NAN = [
       strrev(pack('H*', '7ff8000000000000')),
@@ -147,56 +147,56 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase {
 //_RUBY;
 
     return [
-      [self::DOUBLE_TYPE, (double) -10, "\000\000\000\000\000\000$\300", '000000000000420c'],
-      [self::DOUBLE_TYPE, (double) -9, "\000\000\000\000\000\000\"\300", '000000000000220c'],
-      [self::DOUBLE_TYPE, (double) -8, "\000\000\000\000\000\000 \300", '000000000000020c'],
-      [self::DOUBLE_TYPE, (double) -7, "\000\000\000\000\000\000\034\300", '000000000000c10c'],
-      [self::DOUBLE_TYPE, (double) -6, "\000\000\000\000\000\000\030\300", '000000000000810c'],
-      [self::DOUBLE_TYPE, (double) -5, "\000\000\000\000\000\000\024\300", '000000000000410c'],
-      [self::DOUBLE_TYPE, (double) -4, "\000\000\000\000\000\000\020\300", '000000000000010c'],
+      [self::DOUBLE_TYPE, (double)-10, "\000\000\000\000\000\000$\300", '000000000000420c'],
+      [self::DOUBLE_TYPE, (double)-9, "\000\000\000\000\000\000\"\300", '000000000000220c'],
+      [self::DOUBLE_TYPE, (double)-8, "\000\000\000\000\000\000 \300", '000000000000020c'],
+      [self::DOUBLE_TYPE, (double)-7, "\000\000\000\000\000\000\034\300", '000000000000c10c'],
+      [self::DOUBLE_TYPE, (double)-6, "\000\000\000\000\000\000\030\300", '000000000000810c'],
+      [self::DOUBLE_TYPE, (double)-5, "\000\000\000\000\000\000\024\300", '000000000000410c'],
+      [self::DOUBLE_TYPE, (double)-4, "\000\000\000\000\000\000\020\300", '000000000000010c'],
       /**/
-      [self::DOUBLE_TYPE, (double) -3, "\000\000\000\000\000\000\010\300", '000000000000800c'],
-      [self::DOUBLE_TYPE, (double) -2, "\000\000\000\000\000\000\000\300", '000000000000000c'],
-      [self::DOUBLE_TYPE, (double) -1, "\000\000\000\000\000\000\360\277", '0000000000000ffb'],
-      [self::DOUBLE_TYPE, (double) 0, "\000\000\000\000\000\000\000\000", '0000000000000000'],
-      [self::DOUBLE_TYPE, (double) 1, "\000\000\000\000\000\000\360?", '0000000000000ff3'],
-      [self::DOUBLE_TYPE, (double) 2, "\000\000\000\000\000\000\000@", '0000000000000004'],
+      [self::DOUBLE_TYPE, (double)-3, "\000\000\000\000\000\000\010\300", '000000000000800c'],
+      [self::DOUBLE_TYPE, (double)-2, "\000\000\000\000\000\000\000\300", '000000000000000c'],
+      [self::DOUBLE_TYPE, (double)-1, "\000\000\000\000\000\000\360\277", '0000000000000ffb'],
+      [self::DOUBLE_TYPE, (double)0, "\000\000\000\000\000\000\000\000", '0000000000000000'],
+      [self::DOUBLE_TYPE, (double)1, "\000\000\000\000\000\000\360?", '0000000000000ff3'],
+      [self::DOUBLE_TYPE, (double)2, "\000\000\000\000\000\000\000@", '0000000000000004'],
       /**/
-      [self::DOUBLE_TYPE, (double) 3, "\000\000\000\000\000\000\010@", '0000000000008004'],
-      [self::DOUBLE_TYPE, (double) 4, "\000\000\000\000\000\000\020@", '0000000000000104'],
-      [self::DOUBLE_TYPE, (double) 5, "\000\000\000\000\000\000\024@", '0000000000004104'],
-      [self::DOUBLE_TYPE, (double) 6, "\000\000\000\000\000\000\030@", '0000000000008104'],
-      [self::DOUBLE_TYPE, (double) 7, "\000\000\000\000\000\000\034@", '000000000000c104'],
-      [self::DOUBLE_TYPE, (double) 8, "\000\000\000\000\000\000 @", '0000000000000204'],
-      [self::DOUBLE_TYPE, (double) 9, "\000\000\000\000\000\000\"@", '0000000000002204'],
-      [self::DOUBLE_TYPE, (double) 10, "\000\000\000\000\000\000$@", '0000000000004204'],
+      [self::DOUBLE_TYPE, (double)3, "\000\000\000\000\000\000\010@", '0000000000008004'],
+      [self::DOUBLE_TYPE, (double)4, "\000\000\000\000\000\000\020@", '0000000000000104'],
+      [self::DOUBLE_TYPE, (double)5, "\000\000\000\000\000\000\024@", '0000000000004104'],
+      [self::DOUBLE_TYPE, (double)6, "\000\000\000\000\000\000\030@", '0000000000008104'],
+      [self::DOUBLE_TYPE, (double)7, "\000\000\000\000\000\000\034@", '000000000000c104'],
+      [self::DOUBLE_TYPE, (double)8, "\000\000\000\000\000\000 @", '0000000000000204'],
+      [self::DOUBLE_TYPE, (double)9, "\000\000\000\000\000\000\"@", '0000000000002204'],
+      [self::DOUBLE_TYPE, (double)10, "\000\000\000\000\000\000$@", '0000000000004204'],
       /**/
-      [self::DOUBLE_TYPE, (double) -1234.2132, "\007\316\031Q\332H\223\300", '70ec9115ad84390c'],
-      [self::DOUBLE_TYPE, (double) -2.11e+25, "\311\260\276J\031t1\305", '9c0beba49147135c'],
+      [self::DOUBLE_TYPE, (double)-1234.2132, "\007\316\031Q\332H\223\300", '70ec9115ad84390c'],
+      [self::DOUBLE_TYPE, (double)-2.11e+25, "\311\260\276J\031t1\305", '9c0beba49147135c'],
 
-      [self::FLOAT_TYPE, (float) -10, "\000\000 \301", '0000021c'],
-      [self::FLOAT_TYPE, (float) -9, "\000\000\020\301", '0000011c'],
-      [self::FLOAT_TYPE, (float) -8, "\000\000\000\301", '0000001c'],
-      [self::FLOAT_TYPE, (float) -7, "\000\000\340\300", '00000e0c'],
-      [self::FLOAT_TYPE, (float) -6, "\000\000\300\300", '00000c0c'],
-      [self::FLOAT_TYPE, (float) -5, "\000\000\240\300", '00000a0c'],
-      [self::FLOAT_TYPE, (float) -4, "\000\000\200\300", '0000080c'],
-      [self::FLOAT_TYPE, (float) -3, "\000\000@\300", '0000040c'],
-      [self::FLOAT_TYPE, (float) -2, "\000\000\000\300", '0000000c'],
-      [self::FLOAT_TYPE, (float) -1, "\000\000\200\277", '000008fb'],
-      [self::FLOAT_TYPE, (float) 0, "\000\000\000\000", '00000000'],
-      [self::FLOAT_TYPE, (float) 1, "\000\000\200?", '000008f3'],
-      [self::FLOAT_TYPE, (float) 2, "\000\000\000@", '00000004'],
-      [self::FLOAT_TYPE, (float) 3, "\000\000@@", '00000404'],
-      [self::FLOAT_TYPE, (float) 4, "\000\000\200@", '00000804'],
-      [self::FLOAT_TYPE, (float) 5, "\000\000\240@", '00000a04'],
-      [self::FLOAT_TYPE, (float) 6, "\000\000\300@", '00000c04'],
-      [self::FLOAT_TYPE, (float) 7, "\000\000\340@", '00000e04'],
-      [self::FLOAT_TYPE, (float) 8, "\000\000\000A", '00000014'],
-      [self::FLOAT_TYPE, (float) 9, "\000\000\020A", '00000114'],
-      [self::FLOAT_TYPE, (float) 10, "\000\000 A", '00000214'],
-      [self::FLOAT_TYPE, (float) -1234.5, "\000P\232\304", '0005a94c'],
-      [self::FLOAT_TYPE, (float) -211300000.0, "\352\202I\315", 'ae2894dc'],
+      [self::FLOAT_TYPE, (float)-10, "\000\000 \301", '0000021c'],
+      [self::FLOAT_TYPE, (float)-9, "\000\000\020\301", '0000011c'],
+      [self::FLOAT_TYPE, (float)-8, "\000\000\000\301", '0000001c'],
+      [self::FLOAT_TYPE, (float)-7, "\000\000\340\300", '00000e0c'],
+      [self::FLOAT_TYPE, (float)-6, "\000\000\300\300", '00000c0c'],
+      [self::FLOAT_TYPE, (float)-5, "\000\000\240\300", '00000a0c'],
+      [self::FLOAT_TYPE, (float)-4, "\000\000\200\300", '0000080c'],
+      [self::FLOAT_TYPE, (float)-3, "\000\000@\300", '0000040c'],
+      [self::FLOAT_TYPE, (float)-2, "\000\000\000\300", '0000000c'],
+      [self::FLOAT_TYPE, (float)-1, "\000\000\200\277", '000008fb'],
+      [self::FLOAT_TYPE, (float)0, "\000\000\000\000", '00000000'],
+      [self::FLOAT_TYPE, (float)1, "\000\000\200?", '000008f3'],
+      [self::FLOAT_TYPE, (float)2, "\000\000\000@", '00000004'],
+      [self::FLOAT_TYPE, (float)3, "\000\000@@", '00000404'],
+      [self::FLOAT_TYPE, (float)4, "\000\000\200@", '00000804'],
+      [self::FLOAT_TYPE, (float)5, "\000\000\240@", '00000a04'],
+      [self::FLOAT_TYPE, (float)6, "\000\000\300@", '00000c04'],
+      [self::FLOAT_TYPE, (float)7, "\000\000\340@", '00000e04'],
+      [self::FLOAT_TYPE, (float)8, "\000\000\000A", '00000014'],
+      [self::FLOAT_TYPE, (float)9, "\000\000\020A", '00000114'],
+      [self::FLOAT_TYPE, (float)10, "\000\000 A", '00000214'],
+      [self::FLOAT_TYPE, (float)-1234.5, "\000P\232\304", '0005a94c'],
+      [self::FLOAT_TYPE, (float)-211300000.0, "\352\202I\315", 'ae2894dc'],
     ];
   }
 
@@ -267,7 +267,7 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase {
         'ROUND TRIP BITS', $val, $roundTripValue));
   }
 
-  function assertEncodeNanValues($type, $val, $bits_array) {
+  function assertEncodeNanValues($type, $val, $bitsArray) {
     if (self::FLOAT_TYPE == $type) {
       $decoder = [AvroIOBinaryDecoder::class, 'intBitsToFloat'];
       $encoder = [AvroIOBinaryEncoder::class, 'floatToIntBits'];
@@ -276,22 +276,22 @@ class FloatIntEncodingTest extends PHPUnit\Framework\TestCase {
       $encoder = [AvroIOBinaryEncoder::class, 'doubleToLongBits'];
     }
 
-    $decodedBitsVal = call_user_func($decoder, $bits_array[0]);
+    $decodedBitsVal = call_user_func($decoder, $bitsArray[0]);
     $this->assertTrue(is_nan($decodedBitsVal),
       sprintf("%s\n expected: '%f'\n    given: '%f'",
         'DECODED BITS', $val, $decodedBitsVal));
 
-    $decodedBitsVal = call_user_func($decoder, $bits_array[1]);
+    $decodedBitsVal = call_user_func($decoder, $bitsArray[1]);
     $this->assertTrue(is_nan($decodedBitsVal),
       sprintf("%s\n expected: '%f'\n    given: '%f'",
         'DECODED BITS', $val, $decodedBitsVal));
 
     $encodedValBits = call_user_func($encoder, $val);
-    $this->assertContains($encodedValBits, $bits_array,
+    $this->assertContains($encodedValBits, $bitsArray,
       sprintf("%s\n expected: '%s' OR '%s'\n    given: '%s'",
         'ENCODED VAL',
-        AvroDebug::hexString($bits_array[0]),
-        AvroDebug::hexString($bits_array[1]),
+        AvroDebug::hexString($bitsArray[0]),
+        AvroDebug::hexString($bitsArray[1]),
         AvroDebug::hexString($encodedValBits)));
 
     $roundTripValue = call_user_func($decoder, $encodedValBits);

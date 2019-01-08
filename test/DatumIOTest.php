@@ -57,8 +57,8 @@ class DatumIOTest extends PHPUnit\Framework\TestCase {
 
     $read = new AvroStringIO($binary);
     $decoder = new AvroIOBinaryDecoder($read);
-    $read_datum = $schema->read($decoder);
-    $this->assertEquals($datum, $read_datum);
+    $readDatum = $schema->read($decoder);
+    $this->assertEquals($datum, $readDatum);
   }
 
   function dataProvider() {
@@ -161,28 +161,28 @@ class DatumIOTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @dataProvider defaultProvider
-   * @param $field_schema_json
-   * @param $default_json
-   * @param $default_value
+   * @param $fieldSchemaJson
+   * @param $defaultJson
+   * @param $defaultValue
    *
    * @throws AvroException
    * @throws AvroSchemaParseException
    * @throws AvroIOSchemaMatchException
    * @throws AvroIOException
    */
-  function testFieldDefaultValue($field_schema_json,
-                                 $default_json, $default_value) {
-    $writers_schema_json = '{"name":"foo","type":"record","fields":[]}';
-    $writers_schema = AvroSchema::parse($writers_schema_json);
+  function testFieldDefaultValue($fieldSchemaJson,
+                                 $defaultJson, $defaultValue) {
+    $writersSchemaJson = '{"name":"foo","type":"record","fields":[]}';
+    $writersSchema = AvroSchema::parse($writersSchemaJson);
 
-    $readers_schema_json = sprintf(
+    $readersSchemaJson = sprintf(
       '{"name":"foo","type":"record","fields":[{"name":"f","type":%s,"default":%s}]}',
-      $field_schema_json, $default_json);
-    $readers_schema = AvroSchema::parse($readers_schema_json);
+      $fieldSchemaJson, $defaultJson);
+    $readersSchema = AvroSchema::parse($readersSchemaJson);
 
-    $record = $writers_schema->read(new AvroIOBinaryDecoder(new AvroStringIO()), $readers_schema);
+    $record = $writersSchema->read(new AvroIOBinaryDecoder(new AvroStringIO()), $readersSchema);
     if (array_key_exists('f', $record)) {
-      $this->assertEquals($default_value, $record['f']);
+      $this->assertEquals($defaultValue, $record['f']);
     } else {
       $this->assertTrue(false, sprintf('expected field record[f]: %s', print_r($record, true)));
     }

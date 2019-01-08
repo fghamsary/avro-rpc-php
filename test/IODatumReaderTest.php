@@ -21,19 +21,17 @@ use Avro\Schema\AvroSchema;
 
 require_once('test_helper.php');
 
-class IODatumReaderTest extends PHPUnit\Framework\TestCase
-{
+class IODatumReaderTest extends PHPUnit\Framework\TestCase {
 
   /**
    * @throws \Avro\Exception\AvroSchemaParseException
    */
-  public function testSchemaMatching()
-  {
-    $writers_schema = <<<JSON
+  public function testSchemaMatching() {
+    $writersSchema = <<<JSON
       { "type": "map",
         "values": "bytes" }
 JSON;
-    $readers_schema = $writers_schema;
-    $this->assertTrue(AvroSchema::parse($writers_schema)->schemaMatches(AvroSchema::parse($readers_schema)));
+    $readers_schema = $writersSchema;
+    $this->assertTrue(AvroSchema::parse($writersSchema)->schemaMatches(AvroSchema::parse($readers_schema)));
   }
 }
