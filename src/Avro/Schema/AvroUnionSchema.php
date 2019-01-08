@@ -53,7 +53,7 @@ class AvroUnionSchema extends AvroSchema {
       $is_schema_from_schemata = false;
       $newSchema = null;
       if (is_string($schema) &&
-        ($newSchema = $schemata->schemaByName(new AvroName($schema, null, $defaultNamespace)))) {
+        ($newSchema = $schemata->getSchemaByName(new AvroName($schema, null, $defaultNamespace)))) {
         $is_schema_from_schemata = true;
       } else {
         $newSchema = self::subParse($schema, $defaultNamespace, $schemata);

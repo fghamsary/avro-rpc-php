@@ -76,7 +76,7 @@ class AvroProtocolMessage {
     $response = AvroUtil::arrayValue($avro, 'response');
     if ($response !== null) {
       if (!is_array($response)) {
-        $this->response = $protocol->getSchemata()->schemaByName(new AvroName($response, null, $namespace));
+        $this->response = $protocol->getSchemata()->getSchemaByName(new AvroName($response, null, $namespace));
         if ($this->response === null) {
           if (AvroSchema::isPrimitiveType($response)) {
             // this is a primitive type so we create new primitive type directly
@@ -111,7 +111,7 @@ class AvroProtocolMessage {
           throw new AvroProtocolParseException("Errors must be an array");
         }
         foreach ($errorDefinitions as $errorType) {
-          $errorSchema = $protocol->getSchemata()->schemaByName(new AvroName($errorType, null, $namespace));
+          $errorSchema = $protocol->getSchemata()->getSchemaByName(new AvroName($errorType, null, $namespace));
           if ($errorSchema === null) {
             throw new AvroProtocolParseException("Error type $errorType is unknown");
           }

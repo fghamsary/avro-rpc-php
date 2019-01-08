@@ -54,7 +54,7 @@ class AvroMapSchema extends AvroSchema {
     $this->is_values_schema_from_schemata = false;
     $valueSchema = null;
     if (is_string($values) &&
-      $valueSchema = $schemata->schemaByName(new AvroName($values, null, $defaultNamespace))) {
+      $valueSchema = $schemata->getSchemaByName(new AvroName($values, null, $defaultNamespace))) {
       $this->is_values_schema_from_schemata = true;
       $this->containsString = false;
     } else {

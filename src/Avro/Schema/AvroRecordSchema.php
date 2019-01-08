@@ -81,7 +81,7 @@ class AvroRecordSchema extends AvroNamedSchema {
       $isSchemaFromSchemata = false;
       $fieldSchema = null;
       if (is_string($type) &&
-        $fieldSchema = $schemata->schemaByName(new AvroName($type, null, $defaultNamespace))) {
+        $fieldSchema = $schemata->getSchemaByName(new AvroName($type, null, $defaultNamespace))) {
         $isSchemaFromSchemata = true;
       } else {
         $fieldSchema = self::subParse($type, $defaultNamespace, $schemata);

@@ -9,8 +9,11 @@
 namespace Avro\Protocol;
 
 use Avro\AvroUtil;
+use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
+use Avro\Record\AvroRecord;
 use Avro\Schema\AvroNamedSchemata;
+use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
 
 /**
@@ -167,6 +170,26 @@ class AvroProtocol {
    */
   public function generateMd5String() {
     $this->md5String = md5($this->__toString());
+  }
+
+  /**
+   * @param AvroRecord $record the record which you want to serialize
+   * @return array serialized object based on the schema
+   * @throws AvroException if the $record is not defined in the current protocol definition
+   */
+  public function serializeObject(AvroRecord $record) {
+    $fullName = $this->getNamespace() . '.' . $record::_getSimpleAvroClassName();
+    if (!$this->getSchemata()->hasName($fullName)) {
+      throw new AvroException('Record ' . $record::_getSimpleAvroClassName() . ' does not exist on this protocol!');
+    }
+    $schema = $this->getSchemata()->getSchema($fullName);
+    $serializedObject = [];
+    if ($schema instanceof AvroRecordSchema) {
+      foreach ($schema->getFields() as $name => $field) {
+        $serializedObject[$name] = $record->_internalGetValue($name);
+      }
+    }
+    return $serializedObject;
   }
 
   /**

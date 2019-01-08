@@ -49,7 +49,7 @@ class AvroArraySchema extends AvroSchema {
     $this->is_items_schema_from_schemata = false;
     $itemsSchema = null;
     if (is_string($items) &&
-      $itemsSchema = $schemata->schemaByName(new AvroName($items, null, $defaultNamespace))) {
+      $itemsSchema = $schemata->getSchemaByName(new AvroName($items, null, $defaultNamespace))) {
       $this->is_items_schema_from_schemata = true;
     } else {
       $itemsSchema = AvroSchema::subParse($items, $defaultNamespace, $schemata);

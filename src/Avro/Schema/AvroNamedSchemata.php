@@ -48,19 +48,19 @@ class AvroNamedSchemata {
 
   /**
    * @param string $fullname
-   * @return AvroSchema|null the schema which has the given name,
+   * @return AvroNamedSchema|null the schema which has the given name,
    *         or null if there is no schema with the given name.
    */
-  public function schema($fullname) {
+  public function getSchema($fullname) {
     return AvroUtil::arrayValue($this->schemata, $fullname);
   }
 
   /**
    * @param AvroName $name
-   * @return AvroSchema|null
+   * @return AvroNamedSchema|null
    */
-  public function schemaByName(AvroName $name) {
-    return $this->schema($name->getFullname());
+  public function getSchemaByName(AvroName $name) {
+    return $this->getSchema($name->getFullname());
   }
 
   /**
