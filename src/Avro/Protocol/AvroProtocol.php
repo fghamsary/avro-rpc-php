@@ -12,7 +12,9 @@ use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\Record\AvroRecord;
+use Avro\Schema\AvroEnumSchema;
 use Avro\Schema\AvroNamedSchemata;
+use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
 
@@ -174,10 +176,12 @@ class AvroProtocol {
 
   /**
    * @param AvroRecord $record the record which you want to serialize
+   * @param bool $deepSerialization if true in case of having another AvroRecord as a field it will be serialized as well,
+   *             and in case of false (default) only the first level is serialized and inner objects are return as empty object
    * @return array serialized object based on the schema
    * @throws AvroException if the $record is not defined in the current protocol definition
    */
-  public function serializeObject(AvroRecord $record) {
+  public function serializeObject(AvroRecord $record, $deepSerialization = false) {
     $fullName = $this->getNamespace() . '.' . $record::_getSimpleAvroClassName();
     if (!$this->getSchemata()->hasName($fullName)) {
       throw new AvroException('Record ' . $record::_getSimpleAvroClassName() . ' does not exist on this protocol!');
@@ -186,7 +190,14 @@ class AvroProtocol {
     $serializedObject = [];
     if ($schema instanceof AvroRecordSchema) {
       foreach ($schema->getFields() as $name => $field) {
-        $serializedObject[$name] = $record->_internalGetValue($name);
+        if ($field->getFieldType() instanceof AvroEnumSchema) {
+          $serializedObject[$name] = (string)$record->_internalGetValue($name);
+        } else {
+          $serializedObject[$name] = $record->_internalGetValue($name);
+          if ($deepSerialization && $serializedObject[$name] instanceof AvroRecordSchema) {
+            $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
+          }
+        }
       }
     }
     return $serializedObject;
