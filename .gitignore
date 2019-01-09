@@ -1,7 +1,6 @@
 *komodo*
 .idea
-
-composer.lock
-tmp
+test/tmp/*
 vendor/*
-Supprimerait vendor/
+php_coverage.xml
+php_test.xml
