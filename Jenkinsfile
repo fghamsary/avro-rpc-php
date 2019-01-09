@@ -5,7 +5,7 @@ pipeline {
     agent any
     environment {
         COMPOSER_HOME = tool name: 'Auto_Composer', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-        PATH = "/opt/rh/rh-php72/root/usr/bin:$COMPOSER_HOME:$PATH" // PHP Path on Jenkins
+        PATH = "/opt/rh/rh-php71/root/usr/bin:$COMPOSER_HOME:$PATH" // PHP Path on Jenkins
     }
 
     post {
