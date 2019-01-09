@@ -21,6 +21,9 @@
   ],
   "require": {
   },
+  "require-dev": {
+    "phpunit/phpunit": "4.*"
+  },
 
   "suggest": {
     "v3d/avro-rpc-php-generator": "Generates an Avro RPC client as a PHP class based on your Avro protocol"
