@@ -22,7 +22,7 @@ use Avro\IO\Data\AvroDataIO;
 
 require_once('test_helper.php');
 
-$data_file = join(DIRECTORY_SEPARATOR, array(AVRO_DATA_DIR, 'php.avro'));
+$dataFile = join(DIRECTORY_SEPARATOR, array(AVRO_DATA_DIR, 'php.avro'));
 $datum = array('nullField' => null,
                'boolField' => true,
                'intField' => -42,
@@ -42,11 +42,11 @@ $datum = array('nullField' => null,
                                         array('label' => 'inner',
                                               'children' => array()))));
 
-$schema_json = file_get_contents(AVRO_INTEROP_SCHEMA);
+$schemaJson = file_get_contents(AVRO_INTEROP_SCHEMA);
 try {
-  $io_writer = AvroDataIO::openFile($data_file, 'w', $schema_json);
-  $io_writer->append($datum);
-  $io_writer->close();
+  $ioWriter = AvroDataIO::openFile($dataFile, 'w', $schemaJson);
+  $ioWriter->append($datum);
+  $ioWriter->close();
 } catch (\Exception $ignored) {
 
 }
