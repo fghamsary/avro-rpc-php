@@ -47,7 +47,7 @@ pipeline {
 
 
     options {
-        gitlabBuilds(builds: ['Global status','Prepare','Dependencies','Grunt','Verify submodules','Test','Test results'])
+        gitlabBuilds(builds: ['Global status','Prepare','Dependencies','Grunt','Test','Test results'])
     }
 
 

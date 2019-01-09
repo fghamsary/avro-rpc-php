@@ -2,5 +2,5 @@
 .idea
 test/tmp/*
 vendor/*
-php_converage.xml
+php_coverage.xml
 php_test.xml
