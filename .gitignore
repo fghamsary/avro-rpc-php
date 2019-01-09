@@ -1,5 +1,6 @@
 *komodo*
 .idea
-
+test/tmp/*
 vendor/*
-Supprimerait vendor/
+php_converage.xml
+php_test.xml
