@@ -134,7 +134,7 @@ pipeline {
                     def scannerHome = tool 'Auto_SonarQube_Scanner'
                     gitlabCommitStatus(name: "Sonar full analysis") {
                         withSonarQubeEnv('SonarQube server') {
-                            sh "${scannerHome}/bin/sonar-scanner  -Dsonar.gitlab.commit_sha=$GIT_COMMIT  -Dsonar.gitlab.ref_name=$gitlabSourceBranch   -Dsonar.gitlab.project_id=$GIT_URL   -Dsonar.php.tests.reportPath=php_test.xml  -Dsonar.php.coverage.reportPaths=php_coverage.xml  -Dsonar.tests=test  -Dsonar.sources=src"
+                            sh "${scannerHome}/bin/sonar-scanner  -Dsonar.gitlab.commit_sha=$GIT_COMMIT  -Dsonar.gitlab.ref_name=$gitlabSourceBranch   -Dsonar.gitlab.project_id=$GIT_URL   -Dsonar.php.tests.reportPath=php_test.xml  -Dsonar.php.coverage.reportPaths=php_coverage.xml  -Dsonar.tests=test  -Dsonar.sources=lib"
                         }
                     }
                 }
