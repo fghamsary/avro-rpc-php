@@ -200,7 +200,7 @@ class AvroProtocol {
           if ($deepSerialization) {
             if ($serializedObject[$name] instanceof AvroRecord) {
               $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
-            } elseif (is_array($serializedObject[$name])) {
+            } elseif (is_array($serializedObject[$name]) && count($serializedObject[$name]) > 0) {
               if (array_values($serializedObject[$name])[0] instanceof AvroRecord) {
                 /**
                  * @var string $key
