@@ -33,25 +33,25 @@ class AvroDebug {
   const DEBUG_LEVEL = self::DEBUG1;
 
   /**
-   * @var int $debug_level
+   * @var int $debugLevel
    * @returns boolean true if the given $debug_level is equivalent
    *                  or more verbose than than the current debug level
    *                  and false otherwise.
    * @return bool
    */
-  static function isDebug($debug_level = self::DEBUG1) {
-    return (self::DEBUG_LEVEL >= $debug_level);
+  static function isDebug($debugLevel = self::DEBUG1) {
+    return (self::DEBUG_LEVEL >= $debugLevel);
   }
 
   /**
    * @param string $format format string for the given arguments. Passed as is
    *                     to <code>vprintf</code>.
    * @param array $args array of arguments to pass to vsprinf.
-   * @param int $debug_level debug level at which to print this statement
+   * @param int $debugLevel debug level at which to print this statement
    * @return boolean true
    */
-  static function debug($format, $args, $debug_level = self::DEBUG1) {
-    if (self::isDebug($debug_level)) {
+  static function debug($format, $args, $debugLevel = self::DEBUG1) {
+    if (self::isDebug($debugLevel)) {
       vprintf($format . "\n", $args);
     }
     return true;
