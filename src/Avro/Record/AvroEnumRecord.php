@@ -36,7 +36,7 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    * @throws AvroException if the value is not valid for this enum
    */
   public static function getItem($value) {
-    if (self::hasValue($value)) {
+    if (static::hasValue($value)) {
       return new static($value);
     } else {
       throw new AvroException("$value is not valid for " . static::class . '!');
@@ -48,7 +48,7 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    * @return bool true if the value exists
    */
   public static function hasValue($value) {
-    return array_key_exists($value, self::getEnumValues());
+    return array_key_exists($value, static::getEnumValues());
   }
 
   /**
