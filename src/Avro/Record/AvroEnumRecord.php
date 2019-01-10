@@ -48,7 +48,7 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    * @return bool true if the value exists
    */
   public static function hasValue($value) {
-    return array_key_exists($value, static::getEnumValues());
+    return in_array($value, static::getEnumValues());
   }
 
   /**
