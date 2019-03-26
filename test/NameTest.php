@@ -17,90 +17,85 @@
  * limitations under the License.
  */
 
+use Avro\Schema\AvroName;
+use Avro\Exception\AvroSchemaParseException;
+
 require_once('test_helper.php');
 
-class NameExample
-{
-  var $is_valid;
+class NameExample {
+  var $isValid;
   var $name;
   var $namespace;
-  var $default_namespace;
-  var $expected_fullname;
-  function __construct($name, $namespace, $default_namespace, $is_valid,
-                       $expected_fullname=null)
-  {
+  var $defaultNamespace;
+  var $expectedFullname;
+
+  function __construct($name, $namespace, $defaultNamespace, $isValid,
+                       $expectedFullname = null) {
     $this->name = $name;
     $this->namespace = $namespace;
-    $this->default_namespace = $default_namespace;
-    $this->is_valid = $is_valid;
-    $this->expected_fullname = $expected_fullname;
+    $this->defaultNamespace = $defaultNamespace;
+    $this->isValid = $isValid;
+    $this->expectedFullname = $expectedFullname;
   }
 
-  function __toString()
-  {
+  function __toString() {
     return var_export($this, true);
   }
 }
 
-class NameTest extends PHPUnit_Framework_TestCase
-{
+class NameTest extends PHPUnit\Framework\TestCase {
 
-  function fullname_provider()
-  {
-    $examples = array(new NameExample('foo', null, null, true, 'foo'),
-                      new NameExample('foo', 'bar', null, true, 'bar.foo'),
-                      new NameExample('bar.foo', 'baz', null, true, 'bar.foo'),
-                      new NameExample('_bar.foo', 'baz', null, true, '_bar.foo'),
-                      new NameExample('bar._foo', 'baz', null, true, 'bar._foo'),
-                      new NameExample('3bar.foo', 'baz', null, false),
-                      new NameExample('bar.3foo', 'baz', null, false),
-                      new NameExample('b4r.foo', 'baz', null, true, 'b4r.foo'),
-                      new NameExample('bar.f0o', 'baz', null, true, 'bar.f0o'),
-                      new NameExample(' .foo', 'baz', null, false),
-                      new NameExample('bar. foo', 'baz', null, false),
-                      new NameExample('bar. ', 'baz', null, false)
-                      );
-    $exes = array();
-    foreach ($examples as $ex)
-      $exes []= array($ex);
-    return $exes;
+  function fullnameProvider() {
+    return [
+      [new NameExample('foo', null, null, true, 'foo')],
+      [new NameExample('foo', 'bar', null, true, 'bar.foo')],
+      [new NameExample('bar.foo', 'baz', null, true, 'bar.foo')],
+      [new NameExample('_bar.foo', 'baz', null, true, '_bar.foo')],
+      [new NameExample('bar._foo', 'baz', null, true, 'bar._foo')],
+      [new NameExample('3bar.foo', 'baz', null, false)],
+      [new NameExample('bar.3foo', 'baz', null, false)],
+      [new NameExample('b4r.foo', 'baz', null, true, 'b4r.foo')],
+      [new NameExample('bar.f0o', 'baz', null, true, 'bar.f0o')],
+      [new NameExample(' .foo', 'baz', null, false)],
+      [new NameExample('bar. foo', 'baz', null, false)],
+      [new NameExample('bar. ', 'baz', null, false)],
+    ];
   }
 
   /**
-   * @dataProvider fullname_provider
+   * @dataProvider fullnameProvider
+   * @param NameExample $ex
    */
-  function test_fullname($ex)
-  {
-    try
-    {
-      $name = new AvroName($ex->name, $ex->namespace, $ex->default_namespace);
-      $this->assertTrue($ex->is_valid);
-      $this->assertEquals($ex->expected_fullname, $name->fullname());
-    }
-    catch (AvroSchemaParseException $e)
-    {
-      $this->assertFalse($ex->is_valid, sprintf("%s:\n%s",
-                                                $ex,
-                                                $e->getMessage()));
+  function testFullname(NameExample $ex) {
+    try {
+      $name = new AvroName($ex->name, $ex->namespace, $ex->defaultNamespace);
+      $this->assertTrue($ex->isValid);
+      $this->assertEquals($ex->expectedFullname, $name->getFullname());
+    } catch (AvroSchemaParseException $e) {
+      $this->assertFalse($ex->isValid, sprintf("%s:\n%s",
+        $ex,
+        $e->getMessage()));
     }
   }
 
-  function name_provider()
-  {
-    return array(array('a', true),
-                 array('_', true),
-                 array('1a', false),
-                 array('', false),
-                 array(null, false),
-                 array(' ', false),
-                 array('Cons', true));
+  function nameProvider() {
+    return [
+      ['a', true],
+      ['_', true],
+      ['1a', false],
+      ['', false],
+      [null, false],
+      [' ', false],
+      ['Cons', true]
+    ];
   }
 
   /**
-   * @dataProvider name_provider
+   * @dataProvider nameProvider
+   * @param $name
+   * @param $isWellFormed
    */
-  function test_name($name, $is_well_formed)
-  {
-    $this->assertEquals(AvroName::is_well_formed_name($name), $is_well_formed, $name);
+  function testName($name, $isWellFormed) {
+    $this->assertEquals(AvroName::isWellFormedName($name), $isWellFormed, (string)$name);
   }
 }

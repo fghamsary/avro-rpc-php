@@ -19,6 +19,7 @@
 
 require_once('DataFileTest.php');
 require_once('SchemaTest.php');
+require_once('SchemaJavaStringTest.php');
 require_once('NameTest.php');
 require_once('StringIOTest.php');
 require_once('IODatumReaderTest.php');
@@ -29,11 +30,10 @@ require_once('ProtocolFileTest.php');
 require_once('IpcTest.php');
 // InterOpTest tests are run separately.
 
-class AllTests
-{
-  public static function suite()
-  {
-    $suite = new PHPUnit_Framework_TestSuite('AvroAllTests');
+class AllTests {
+
+  public static function suite() {
+    $suite = new PHPUnit\Framework\TestSuite('AvroAllTests');
     $suite->addTestSuite('DataFileTest');
     $suite->addTestSuite('SchemaTest');
     $suite->addTestSuite('NameTest');
@@ -44,6 +44,8 @@ class AllTests
     $suite->addTestSuite('DatumIOTest');
     $suite->addTestSuite('ProtocolFileTest');
     $suite->addTestSuite('IpcTest');
+    $suite->addTestSuite('SchemaJavaStringTest');
     return $suite;
   }
+
 }

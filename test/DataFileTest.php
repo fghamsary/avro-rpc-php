@@ -17,170 +17,224 @@
  * limitations under the License.
  */
 
+use Avro\IO\Data\AvroDataIO;
+
 require_once('test_helper.php');
 
-class DataFileTest extends PHPUnit_Framework_TestCase
-{
-  private $data_files;
+class DataFileTest extends PHPUnit\Framework\TestCase {
+
+  private $dataFiles = [];
   const REMOVE_DATA_FILES = true;
 
-  static function current_timestamp() { return strftime("%Y%m%dT%H%M%S"); }
+  static function currentTimestamp() {
+    return strftime("%Y%m%dT%H%M%S");
+  }
 
-  protected function add_data_file($data_file)
-  {
-    if (is_null($this->data_files))
-      $this->data_files = array();
-    $data_file = "$data_file.".self::current_timestamp();
-    $full = join(DIRECTORY_SEPARATOR, array(TEST_TEMP_DIR, $data_file));
-    $this->data_files []= $full;
+  protected function addDataFile($dataFile) {
+    $dataFile = "$dataFile." . self::currentTimestamp();
+    $full = join(DIRECTORY_SEPARATOR, [TEST_TEMP_DIR, $dataFile]);
+    $this->dataFiles[] = $full;
     return $full;
   }
 
-  protected static function remove_data_file($data_file)
-  {
-    if (file_exists($data_file))
-      unlink($data_file);
+  protected static function removeDataFile($dataFile) {
+    if (file_exists($dataFile)) {
+      unlink($dataFile);
+    }
   }
 
-  protected function remove_data_files()
-  {
+  protected function removeDataFiles() {
     if (self::REMOVE_DATA_FILES
-        && 0 < count($this->data_files))
-      foreach ($this->data_files as $data_file)
-        $this->remove_data_file($data_file);
+      && 0 < count($this->dataFiles)) {
+      foreach ($this->dataFiles as $dataFile) {
+        $this->removeDataFile($dataFile);
+      }
+    }
   }
 
-  protected function setUp()
-  {
-    if (!file_exists(TEST_TEMP_DIR))
+  protected function setUp() {
+    if (!file_exists(TEST_TEMP_DIR)) {
       mkdir(TEST_TEMP_DIR);
-    $this->remove_data_files();
-  }
-  protected function tearDown()
-  {
-    $this->remove_data_files();
+    }
+    $this->removeDataFiles();
   }
 
-  public function test_write_read_nothing_round_trip()
-  {
-    $data_file = $this->add_data_file('data-wr-nothing-null.avr');
-    $writers_schema = '"null"';
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
+  protected function tearDown() {
+    $this->removeDataFiles();
+  }
+
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadNothingRoundTrip() {
+    $dataFile = $this->addDataFile('data-wr-nothing-null.avr');
+    $writersSchema = '"null"';
+    $dw = AvroDataIO::openFile($dataFile, 'w', $writersSchema);
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($dataFile);
     $data = $dr->data();
-    $read_data = array_shift($data);
+    $readData = array_shift($data);
     $dr->close();
-    $this->assertEquals(null, $read_data);
+    $this->assertEquals(null, $readData);
   }
 
-  public function test_write_read_null_round_trip()
-  {
-    $data_file = $this->add_data_file('data-wr-null.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadNullRoundTrip() {
+    $data_file = $this->addDataFile('data-wr-null.avr');
     $writers_schema = '"null"';
     $data = null;
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
+    $dw = AvroDataIO::openFile($data_file, 'w', $writers_schema);
     $dw->append($data);
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($data_file);
     $dr_data = $dr->data();
     $read_data = array_shift($dr_data);
     $dr->close();
     $this->assertEquals($data, $read_data);
   }
 
-  public function test_write_read_string_round_trip()
-  {
-    $data_file = $this->add_data_file('data-wr-str.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadStringRoundTrip() {
+    $data_file = $this->addDataFile('data-wr-str.avr');
     $writers_schema = '"string"';
     $data = 'foo';
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
+    $dw = AvroDataIO::openFile($data_file, 'w', $writers_schema);
     $dw->append($data);
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($data_file);
     $dr_data = $dr->data();
     $read_data = array_shift($dr_data);
     $dr->close();
     $this->assertEquals($data, $read_data);
   }
 
-
-  public function test_write_read_round_trip()
-  {
-
-    $data_file = $this->add_data_file('data-wr-int.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadRoundTrip() {
+    $data_file = $this->addDataFile('data-wr-int.avr');
     $writers_schema = '"int"';
     $data = 1;
 
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
+    $dw = AvroDataIO::openFile($data_file, 'w', $writers_schema);
     $dw->append(1);
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($data_file);
     $dr_data = $dr->data();
     $read_data = array_shift($dr_data);
     $dr->close();
     $this->assertEquals($data, $read_data);
-
   }
 
-  public function test_write_read_true_round_trip()
-  {
-    $data_file = $this->add_data_file('data-wr-true.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadTrueRoundTrip() {
+    $data_file = $this->addDataFile('data-wr-true.avr');
     $writers_schema = '"boolean"';
     $datum = true;
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
+    $dw = AvroDataIO::openFile($data_file, 'w', $writers_schema);
     $dw->append($datum);
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($data_file);
     $dr_data = $dr->data();
     $read_datum = array_shift($dr_data);
     $dr->close();
     $this->assertEquals($datum, $read_datum);
   }
 
-  public function test_write_read_false_round_trip()
-  {
-    $data_file = $this->add_data_file('data-wr-false.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadFalseRoundTrip() {
+    $data_file = $this->addDataFile('data-wr-false.avr');
     $writers_schema = '"boolean"';
     $datum = false;
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
+    $dw = AvroDataIO::openFile($data_file, 'w', $writers_schema);
     $dw->append($datum);
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($data_file);
     $dr_data = $dr->data();
     $read_datum = array_shift($dr_data);
     $dr->close();
     $this->assertEquals($datum, $read_datum);
   }
-  public function test_write_read_int_array_round_trip()
-  {
-    $data_file = $this->add_data_file('data-wr-int-ary.avr');
+
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testWriteReadIntArrayRoundTrip() {
+    $data_file = $this->addDataFile('data-wr-int-ary.avr');
     $writers_schema = '"int"';
-    $data = array(10, 20, 30, 40, 50, 60, 70);
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
-    foreach ($data as $datum)
+    $data = [10, 20, 30, 40, 50, 60, 70];
+    $dw = AvroDataIO::openFile($data_file, 'w', $writers_schema);
+    foreach ($data as $datum) {
       $dw->append($datum);
+    }
     $dw->close();
 
-    $dr = AvroDataIO::open_file($data_file);
+    $dr = AvroDataIO::openFile($data_file);
     $read_data = $dr->data();
     $dr->close();
-    $this->assertEquals($data, $read_data,
-                        sprintf("in: %s\nout: %s",
-                                json_encode($data), json_encode($read_data)));
+    $this->assertEquals($data, $read_data, sprintf("in: %s\nout: %s", json_encode($data), json_encode($read_data)));
   }
 
-  public function test_differing_schemas_with_primitives()
-  {
-    $data_file = $this->add_data_file('data-prim.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testDifferingSchemasWithPrimitives() {
+    $dataFile = $this->addDataFile('data-prim.avr');
 
-    $writer_schema = <<<JSON
+    $writerSchema = <<<JSON
 { "type": "record",
   "name": "User",
   "fields" : [
@@ -189,34 +243,41 @@ class DataFileTest extends PHPUnit_Framework_TestCase
       {"name": "verified", "type": "boolean", "default": "false"}
       ]}
 JSON;
-    $data = array(array('username' => 'john', 'age' => 25, 'verified' => true),
-                  array('username' => 'ryan', 'age' => 23, 'verified' => false));
-    $dw = AvroDataIO::open_file($data_file, 'w', $writer_schema);
-    foreach ($data as $datum)
-    {
+    $data = [
+      ['username' => 'john', 'age' => 25, 'verified' => true],
+      ['username' => 'ryan', 'age' => 23, 'verified' => false]
+    ];
+    $dw = AvroDataIO::openFile($dataFile, 'w', $writerSchema);
+    foreach ($data as $datum) {
       $dw->append($datum);
     }
     $dw->close();
-    $reader_schema = <<<JSON
+    $readerSchema = <<<JSON
       { "type": "record",
         "name": "User",
         "fields" : [
       {"name": "username", "type": "string"}
       ]}
 JSON;
-    $dr = AvroDataIO::open_file($data_file, 'r', $reader_schema);
+    $dr = AvroDataIO::openFile($dataFile, 'r', $readerSchema);
     $dr_data = $dr->data();
-    foreach ($dr_data as $index => $record)
-    {
+    foreach ($dr_data as $index => $record) {
       $this->assertEquals($data[$index]['username'], $record['username']);
     }
   }
 
-  public function test_differing_schemas_with_complex_objects()
-  {
-    $data_file = $this->add_data_file('data-complex.avr');
+  /**
+   * @throws \Avro\Exception\AvroException
+   * @throws \Avro\Exception\AvroSchemaParseException
+   * @throws \Avro\IO\AvroIOSchemaMatchException
+   * @throws \Avro\IO\AvroIOTypeException
+   * @throws \Avro\IO\Exception\AvroDataIOException
+   * @throws \Avro\IO\Exception\AvroIOException
+   */
+  public function testDifferingSchemasWithComplexObjects() {
+    $dataFile = $this->addDataFile('data-complex.avr');
 
-    $writers_schema = <<<JSON
+    $writersSchema = <<<JSON
 { "type": "record",
   "name": "something",
   "fields": [
@@ -236,41 +297,51 @@ JSON;
 ]}
 JSON;
 
-    $data = array(array("username" => "john",
-                        "something_fixed" => "foo",
-                        "something_enum" => "hello",
-                        "something_array" => array(1,2,3),
-                        "something_map" => array("a" => 1, "b" => 2),
-                        "something_record" => array("inner" => 2),
-                        "something_error" => array("code" => 403)),
-                  array("username" => "ryan",
-                        "something_fixed" => "bar",
-                        "something_enum" => "goodbye",
-                        "something_array" => array(1,2,3),
-                        "something_map" => array("a" => 2, "b" => 6),
-                        "something_record" => array("inner" => 1),
-                        "something_error" => array("code" => 401)));
-    $dw = AvroDataIO::open_file($data_file, 'w', $writers_schema);
-    foreach ($data as $datum)
+    $data = [
+      [
+        "username" => "john",
+        "something_fixed" => "foo",
+        "something_enum" => "hello",
+        "something_array" => [1, 2, 3],
+        "something_map" => ["a" => 1, "b" => 2],
+        "something_record" => ["inner" => 2],
+        "something_error" => ["code" => 403]
+      ],
+      [
+        "username" => "ryan",
+        "something_fixed" => "bar",
+        "something_enum" => "goodbye",
+        "something_array" => [1, 2, 3],
+        "something_map" => ["a" => 2, "b" => 6],
+        "something_record" => ["inner" => 1],
+        "something_error" => ["code" => 401]
+      ]
+    ];
+    $dw = AvroDataIO::openFile($dataFile, 'w', $writersSchema);
+    foreach ($data as $datum) {
       $dw->append($datum);
+    }
     $dw->close();
 
-    foreach (array('fixed', 'enum', 'record', 'error',
-                   'array' , 'map', 'union') as $s)
-    {
-      $readers_schema = json_decode($writers_schema, true);
-      $dr = AvroDataIO::open_file($data_file, 'r', json_encode($readers_schema));
-      foreach ($dr->data() as $idx => $obj)
-      {
-        foreach ($readers_schema['fields'] as $field)
-        {
-          $field_name = $field['name'];
-          $this->assertEquals($data[$idx][$field_name], $obj[$field_name]);
+//    foreach ([
+//               'fixed',
+//               'enum',
+//               'record',
+//               'error',
+//               'array',
+//               'map',
+//               'union'
+//             ] as $s) {
+      $readersSchema = json_decode($writersSchema, true);
+      $dr = AvroDataIO::openFile($dataFile, 'r', json_encode($readersSchema));
+      foreach ($dr->data() as $idx => $obj) {
+        foreach ($readersSchema['fields'] as $field) {
+          $fieldName = $field['name'];
+          $this->assertEquals($data[$idx][$fieldName], $obj[$fieldName]);
         }
       }
       $dr->close();
-
-    }
+//    }
 
   }
 

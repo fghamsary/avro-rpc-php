@@ -17,31 +17,36 @@
  * limitations under the License.
  */
 
+use Avro\Exception\AvroSchemaParseException;
+use Avro\Protocol\AvroProtocol;
+
 require_once('test_helper.php');
 
 // near-verbatim port of test_protocol.py
-class ProtocolFileTest extends PHPUnit_Framework_TestCase
-{
-	protected function setUp() {
-	}
-	
-	public function testParsing() {
-		$cnt=count($this->prot_parseable);
-		for ($i=0; $i<$cnt; $i++) {
-			try {
-				//print($i . " " . ($this->prot_parseable[$i]?"true":"false") . " \n");
-				$prot=AvroProtocol::parse($this->prot_data[$i]);
-			} catch (AvroSchemaParseException $x) {
-				// exception ok if we expected this protocol spec to be unparseable
-				$this->assertEquals(false, $this->prot_parseable[$i]);
-			}
-		}
-	}
-	
-	// test data
-	private $prot_parseable=array(true, true, true, true, true, true, false, true, true);
-	private $prot_data = array(
-<<<'DATUM'
+class ProtocolFileTest extends PHPUnit\Framework\TestCase {
+
+  /**
+   * @throws \Avro\Protocol\AvroProtocolParseException
+   */
+  public function testParsing() {
+    $cnt = count($this->protParseable);
+    for ($i = 0; $i < $cnt; $i++) {
+      try {
+        //print($i . " " . ($this->prot_parseable[$i]?"true":"false") . " \n");
+        $protocol = AvroProtocol::parse($this->protData[$i]);
+        $this->assertNotNull($protocol);
+        $this->assertTrue($this->protParseable[$i]);
+      } catch (AvroSchemaParseException $x) {
+        // exception ok if we expected this protocol spec to be unparseable
+        $this->assertEquals(false, $this->protParseable[$i]);
+      }
+    }
+  }
+
+  // test data
+  private $protParseable = [true, true, true, true, true, true, false, true, true];
+  private $protData = [
+    <<<'DATUM'
 {
   "namespace": "com.acme",
   "protocol": "HelloWorld",
@@ -62,8 +67,8 @@ class ProtocolFileTest extends PHPUnit_Framework_TestCase
   }
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test",
  "protocol": "Simple",
 
@@ -118,8 +123,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test.namespace",
  "protocol": "TestNamespace",
 
@@ -149,8 +154,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test.namespace",
  "protocol": "TestImplicitNamespace",
 
@@ -184,8 +189,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test.namespace",
  "protocol": "TestNamespaceTwo",
 
@@ -222,8 +227,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test.namespace",
  "protocol": "TestValidRepeatedName",
 
@@ -256,8 +261,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test.namespace",
  "protocol": "TestInvalidRepeatedName",
 
@@ -289,8 +294,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {"namespace": "org.apache.avro.test",
  "protocol": "BulkData",
 
@@ -312,8 +317,8 @@ DATUM
 
 }
 DATUM
-,
-<<<'DATUM'
+    ,
+    <<<'DATUM'
 {
   "protocol" : "API",
   "namespace" : "xyz.api",
@@ -349,5 +354,5 @@ DATUM
   }
 }
 DATUM
-	);
+  ];
 }

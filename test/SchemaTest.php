@@ -17,69 +17,79 @@
  * limitations under the License.
  */
 
+use Avro\Schema\AvroPrimitiveSchema;
+use Avro\Schema\AvroSchema;
+use Avro\Exception\AvroSchemaParseException;
+
 require_once('test_helper.php');
 
-class SchemaExample
-{
-  var $schema_string;
-  var $is_valid;
+class SchemaExample {
+  var $schemaString;
+  var $isValid;
   var $name;
   var $comment;
-  var $normalized_schema_string;
-  function __construct($schema_string, $is_valid, $normalized_schema_string=null,
-                       $name=null, $comment=null)
-  {
-    $this->schema_string = $schema_string;
-    $this->is_valid = $is_valid;
-    $this->name = $name ? $name : $schema_string;
-    $this->normalized_schema_string = $normalized_schema_string
-      ? $normalized_schema_string : json_encode(json_decode($schema_string, true));
+  var $normalizedSchemaString;
+
+  function __construct($schemaString, $isValid, $normalizedSchemaString = null, $name = null, $comment = null) {
+    $this->schemaString = $schemaString;
+    $this->isValid = $isValid;
+    $this->name = $name ? $name : $schemaString;
+    $this->normalizedSchemaString = $normalizedSchemaString ? $normalizedSchemaString : json_encode(json_decode($schemaString, true));
     $this->comment = $comment;
   }
 }
 
-class SchemaTest extends PHPUnit_Framework_TestCase
-{
-  static $examples = array();
-  static $valid_examples = array();
+class SchemaTest extends PHPUnit\Framework\TestCase {
 
-  protected static function make_primitive_examples()
-  {
-    $examples = array();
-    foreach (array('null', 'boolean',
-                   'int', 'long',
-                   'float', 'double',
-                   'bytes', 'string')
-             as $type)
-    {
-      $examples []= new SchemaExample(sprintf('"%s"', $type), true);
-      $examples []= new SchemaExample(sprintf('{"type": "%s"}', $type), true, sprintf('"%s"', $type));
+  static $examples = [];
+  static $validExamples = [];
+
+  protected static function makePrimitiveExamples() {
+    AvroPrimitiveSchema::setJavaStringType(false);
+
+    $examples = [];
+    foreach ([
+               'null',
+               'boolean',
+               'int',
+               'long',
+               'float',
+               'double',
+               'bytes',
+               'string'
+             ]
+             as $type) {
+      $examples [] = new SchemaExample(sprintf('"%s"', $type), true);
+      $examples [] = new SchemaExample(sprintf('{"type": "%s"}', $type), true, sprintf('"%s"', $type));
     }
     return $examples;
   }
 
-  protected static function make_examples()
-  {
-    $primitive_examples = array_merge(array(new SchemaExample('"True"', false),
-                                            new SchemaExample('{"no_type": "test"}', false),
-                                            new SchemaExample('{"type": "panther"}', false)),
-                                        self::make_primitive_examples());
+  protected static function makeExamples() {
+    $primitiveExamples = array_merge([
+      new SchemaExample('"True"', false),
+      new SchemaExample('{"no_type": "test"}', false),
+      new SchemaExample('{"type": "panther"}', false)
+    ],
+      self::makePrimitiveExamples());
 
-    $array_examples = array(
+    $arrayExamples = [
       new SchemaExample('{"type": "array", "items": "long"}', true),
       new SchemaExample('
     {"type": "array",
      "items": {"type": "enum", "name": "Test", "symbols": ["A", "B"]}}
-    ', true));
+    ', true)
+    ];
 
-    $map_examples = array(
+    $mapExamples = [
       new SchemaExample('{"type": "map", "values": "long"}', true),
       new SchemaExample('
     {"type": "map",
      "values": {"type": "enum", "name": "Test", "symbols": ["A", "B"]}}
-    ', true));
+    ', true)
+    ];
 
-    $union_examples = array(
+    $unionExamples = [
       new SchemaExample('["string", "null", "long"]', true),
       new SchemaExample('["null", "null"]', false),
       new SchemaExample('["long", "long"]', false),
@@ -121,9 +131,9 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                 {"name":"dividend", "type":"int"}]},
       {"type": "array", "items": "string"}]
     ', true, '[{"type":"record","name":"subtract","namespace":"com.example","fields":[{"name":"minuend","type":"int"},{"name":"subtrahend","type":"int"}]},{"type":"record","name":"divide","namespace":"com.example","fields":[{"name":"quotient","type":"int"},{"name":"dividend","type":"int"}]},{"type":"array","items":"string"}]'),
-      );
+    ];
 
-    $fixed_examples = array(
+    $fixedExamples = [
       new SchemaExample('{"type": "fixed", "name": "Test", "size": 1}', true),
       new SchemaExample('
     {"type": "fixed",
@@ -140,28 +150,29 @@ class SchemaTest extends PHPUnit_Framework_TestCase
      "size": 314}
     ', false),
       new SchemaExample('{"type":"fixed","name":"ex","doc":"this should be ignored","size": 314}',
-                        true,
-                        '{"type":"fixed","name":"ex","size":314}'),
+        true,
+        '{"type":"fixed","name":"ex","size":314}'),
       new SchemaExample('{"name": "bar",
                           "namespace": "com.example",
                           "type": "fixed",
                           "size": 32 }', true,
-                        '{"type":"fixed","name":"bar","namespace":"com.example","size":32}'),
+        '{"type":"fixed","name":"bar","namespace":"com.example","size":32}'),
       new SchemaExample('{"name": "com.example.bar",
                           "type": "fixed",
                           "size": 32 }', true,
-        '{"type":"fixed","name":"bar","namespace":"com.example","size":32}'));
+        '{"type":"fixed","name":"bar","namespace":"com.example","size":32}')
+    ];
 
-    $fixed_examples []= new SchemaExample(
+    $recordExamples[] = new SchemaExample(
       '{"type":"fixed","name":"_x.bar","size":4}', true,
       '{"type":"fixed","name":"bar","namespace":"_x","size":4}');
-    $fixed_examples []= new SchemaExample(
+    $recordExamples[] = new SchemaExample(
       '{"type":"fixed","name":"baz._x","size":4}', true,
       '{"type":"fixed","name":"_x","namespace":"baz","size":4}');
-    $fixed_examples []= new SchemaExample(
+    $recordExamples[] = new SchemaExample(
       '{"type":"fixed","name":"baz.3x","size":4}', false);
 
-    $enum_examples = array(
+    $enumExamples = [
       new SchemaExample('{"type": "enum", "name": "Test", "symbols": ["A", "B"]}', true),
       new SchemaExample('
     {"type": "enum",
@@ -183,7 +194,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
      "symbols" : ["AA", "AA"]}
     ', false),
       new SchemaExample('{"type":"enum","name":"Test","symbols":["AA", 16]}',
-                        false),
+        false),
       new SchemaExample('
     {"type": "enum",
      "name": "blood_types",
@@ -196,42 +207,41 @@ class SchemaTest extends PHPUnit_Framework_TestCase
      "doc": 16,
      "symbols" : ["A", "AB", "B", "O"]}
     ', false)
-      );
+    ];
 
-
-    $record_examples = array();
-    $record_examples []= new SchemaExample('
+    $recordExamples = [];
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Test",
      "fields": [{"name": "f",
                  "type": "long"}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "error",
      "name": "Test",
      "fields": [{"name": "f",
                  "type": "long"}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Node",
      "fields": [{"name": "label", "type": "string"},
                 {"name": "children",
                  "type": {"type": "array", "items": "Node"}}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "ListLink",
      "fields": [{"name": "car", "type": "int"},
                 {"name": "cdr", "type": "ListLink"}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Lisp",
      "fields": [{"name": "value",
                  "type": ["null", "string"]}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Lisp",
      "fields": [{"name": "value",
@@ -241,7 +251,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                            "fields": [{"name": "car", "type": "string"},
                                       {"name": "cdr", "type": "string"}]}]}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Lisp",
      "fields": [{"name": "value",
@@ -251,7 +261,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                            "fields": [{"name": "car", "type": "Lisp"},
                                       {"name": "cdr", "type": "Lisp"}]}]}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "HandshakeRequest",
      "namespace": "org.apache.avro.ipc",
@@ -260,7 +270,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                 {"name": "meta",
                  "type": ["null", {"type": "map", "values": "bytes"}]}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "HandshakeRequest",
      "namespace": "org.apache.avro.ipc",
@@ -271,7 +281,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                 {"name": "meta",
                  "type": ["null", {"type": "map", "values": "bytes"}]}]}
     ', true);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "HandshakeResponse",
      "namespace": "org.apache.avro.ipc",
@@ -286,9 +296,9 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                 {"name": "meta",
                  "type": ["null", {"type": "map", "values": "bytes"}]}]}
     ', true,
-     '{"type":"record","name":"HandshakeResponse","namespace":"org.apache.avro.ipc","fields":[{"name":"match","type":{"type":"enum","name":"HandshakeMatch","symbols":["BOTH","CLIENT","NONE"]}},{"name":"serverProtocol","type":["null","string"]},{"name":"serverHash","type":["null",{"type":"fixed","name":"MD5","size":16}]},{"name":"meta","type":["null",{"type":"map","values":"bytes"}]}]}'
-      );
-    $record_examples []= new SchemaExample('{"type": "record",
+      '{"type":"record","name":"HandshakeResponse","namespace":"org.apache.avro.ipc","fields":[{"name":"match","type":{"type":"enum","name":"HandshakeMatch","symbols":["BOTH","CLIENT","NONE"]}},{"name":"serverProtocol","type":["null","string"]},{"name":"serverHash","type":["null",{"type":"fixed","name":"MD5","size":16}]},{"name":"meta","type":["null",{"type":"map","values":"bytes"}]}]}'
+    );
+    $recordExamples[] = new SchemaExample('{"type": "record",
  "namespace": "org.apache.avro",
  "name": "Interop",
  "fields": [{"type": {"fields": [{"type": {"items": "org.apache.avro.Node",
@@ -298,7 +308,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                       "name": "Node"},
              "name": "recordField"}]}
 ', true, '{"type":"record","name":"Interop","namespace":"org.apache.avro","fields":[{"name":"recordField","type":{"type":"record","name":"Node","fields":[{"name":"children","type":{"type":"array","items":"Node"}}]}}]}');
-    $record_examples [] = new SchemaExample('{"type": "record",
+    $recordExamples[] = new SchemaExample('{"type": "record",
  "namespace": "org.apache.avro",
  "name": "Interop",
  "fields": [{"type": {"symbols": ["A", "B", "C"], "type": "enum", "name": "Kind"},
@@ -310,7 +320,7 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                       "name": "Node"},
              "name": "recordField"}]}', true, '{"type":"record","name":"Interop","namespace":"org.apache.avro","fields":[{"name":"enumField","type":{"type":"enum","name":"Kind","symbols":["A","B","C"]}},{"name":"recordField","type":{"type":"record","name":"Node","fields":[{"name":"label","type":"string"},{"name":"children","type":{"type":"array","items":"Node"}}]}}]}');
 
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Interop",
      "namespace": "org.apache.avro",
@@ -348,116 +358,106 @@ class SchemaTest extends PHPUnit_Framework_TestCase
                                       "type": {"type": "array",
                                                "items": "Node"}}]}}]}
     ', true,
-    '{"type":"record","name":"Interop","namespace":"org.apache.avro","fields":[{"name":"intField","type":"int"},{"name":"longField","type":"long"},{"name":"stringField","type":"string"},{"name":"boolField","type":"boolean"},{"name":"floatField","type":"float"},{"name":"doubleField","type":"double"},{"name":"bytesField","type":"bytes"},{"name":"nullField","type":"null"},{"name":"arrayField","type":{"type":"array","items":"double"}},{"name":"mapField","type":{"type":"map","values":{"type":"record","name":"Foo","fields":[{"name":"label","type":"string"}]}}},{"name":"unionField","type":["boolean","double",{"type":"array","items":"bytes"}]},{"name":"enumField","type":{"type":"enum","name":"Kind","symbols":["A","B","C"]}},{"name":"fixedField","type":{"type":"fixed","name":"MD5","size":16}},{"name":"recordField","type":{"type":"record","name":"Node","fields":[{"name":"label","type":"string"},{"name":"children","type":{"type":"array","items":"Node"}}]}}]}');
-    $record_examples []= new SchemaExample('{"type": "record", "namespace": "org.apache.avro", "name": "Interop", "fields": [{"type": "int", "name": "intField"}, {"type": "long", "name": "longField"}, {"type": "string", "name": "stringField"}, {"type": "boolean", "name": "boolField"}, {"type": "float", "name": "floatField"}, {"type": "double", "name": "doubleField"}, {"type": "bytes", "name": "bytesField"}, {"type": "null", "name": "nullField"}, {"type": {"items": "double", "type": "array"}, "name": "arrayField"}, {"type": {"type": "map", "values": {"fields": [{"type": "string", "name": "label"}], "type": "record", "name": "Foo"}}, "name": "mapField"}, {"type": ["boolean", "double", {"items": "bytes", "type": "array"}], "name": "unionField"}, {"type": {"symbols": ["A", "B", "C"], "type": "enum", "name": "Kind"}, "name": "enumField"}, {"type": {"type": "fixed", "name": "MD5", "size": 16}, "name": "fixedField"}, {"type": {"fields": [{"type": "string", "name": "label"}, {"type": {"items": "org.apache.avro.Node", "type": "array"}, "name": "children"}], "type": "record", "name": "Node"}, "name": "recordField"}]}
+      '{"type":"record","name":"Interop","namespace":"org.apache.avro","fields":[{"name":"intField","type":"int"},{"name":"longField","type":"long"},{"name":"stringField","type":"string"},{"name":"boolField","type":"boolean"},{"name":"floatField","type":"float"},{"name":"doubleField","type":"double"},{"name":"bytesField","type":"bytes"},{"name":"nullField","type":"null"},{"name":"arrayField","type":{"type":"array","items":"double"}},{"name":"mapField","type":{"type":"map","values":{"type":"record","name":"Foo","fields":[{"name":"label","type":"string"}]}}},{"name":"unionField","type":["boolean","double",{"type":"array","items":"bytes"}]},{"name":"enumField","type":{"type":"enum","name":"Kind","symbols":["A","B","C"]}},{"name":"fixedField","type":{"type":"fixed","name":"MD5","size":16}},{"name":"recordField","type":{"type":"record","name":"Node","fields":[{"name":"label","type":"string"},{"name":"children","type":{"type":"array","items":"Node"}}]}}]}');
+    $recordExamples[] = new SchemaExample('{"type": "record", "namespace": "org.apache.avro", "name": "Interop", "fields": [{"type": "int", "name": "intField"}, {"type": "long", "name": "longField"}, {"type": "string", "name": "stringField"}, {"type": "boolean", "name": "boolField"}, {"type": "float", "name": "floatField"}, {"type": "double", "name": "doubleField"}, {"type": "bytes", "name": "bytesField"}, {"type": "null", "name": "nullField"}, {"type": {"items": "double", "type": "array"}, "name": "arrayField"}, {"type": {"type": "map", "values": {"fields": [{"type": "string", "name": "label"}], "type": "record", "name": "Foo"}}, "name": "mapField"}, {"type": ["boolean", "double", {"items": "bytes", "type": "array"}], "name": "unionField"}, {"type": {"symbols": ["A", "B", "C"], "type": "enum", "name": "Kind"}, "name": "enumField"}, {"type": {"type": "fixed", "name": "MD5", "size": 16}, "name": "fixedField"}, {"type": {"fields": [{"type": "string", "name": "label"}, {"type": {"items": "org.apache.avro.Node", "type": "array"}, "name": "children"}], "type": "record", "name": "Node"}, "name": "recordField"}]}
 ', true, '{"type":"record","name":"Interop","namespace":"org.apache.avro","fields":[{"name":"intField","type":"int"},{"name":"longField","type":"long"},{"name":"stringField","type":"string"},{"name":"boolField","type":"boolean"},{"name":"floatField","type":"float"},{"name":"doubleField","type":"double"},{"name":"bytesField","type":"bytes"},{"name":"nullField","type":"null"},{"name":"arrayField","type":{"type":"array","items":"double"}},{"name":"mapField","type":{"type":"map","values":{"type":"record","name":"Foo","fields":[{"name":"label","type":"string"}]}}},{"name":"unionField","type":["boolean","double",{"type":"array","items":"bytes"}]},{"name":"enumField","type":{"type":"enum","name":"Kind","symbols":["A","B","C"]}},{"name":"fixedField","type":{"type":"fixed","name":"MD5","size":16}},{"name":"recordField","type":{"type":"record","name":"Node","fields":[{"name":"label","type":"string"},{"name":"children","type":{"type":"array","items":"Node"}}]}}]}');
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "ipAddr",
      "fields": [{"name": "addr",
                  "type": [{"name": "IPv6", "type": "fixed", "size": 16},
                           {"name": "IPv4", "type": "fixed", "size": 4}]}]}
     ', true,
-    '{"type":"record","name":"ipAddr","fields":[{"name":"addr","type":[{"type":"fixed","name":"IPv6","size":16},{"type":"fixed","name":"IPv4","size":4}]}]}');
-    $record_examples []= new SchemaExample('
+      '{"type":"record","name":"ipAddr","fields":[{"name":"addr","type":[{"type":"fixed","name":"IPv6","size":16},{"type":"fixed","name":"IPv4","size":4}]}]}');
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Address",
      "fields": [{"type": "string"},
                 {"type": "string", "name": "City"}]}
     ', false);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "name": "Event",
      "fields": [{"name": "Sponsor"},
                 {"name": "City", "type": "string"}]}
     ', false);
-    $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type": "record",
      "fields": "His vision, from the constantly passing bars,"
      "name", "Rainer"}
     ', false);
-     $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"name": ["Tom", "Jerry"],
      "type": "record",
      "fields": [{"name": "name", "type": "string"}]}
     ', false);
-     $record_examples []= new SchemaExample('
+    $recordExamples[] = new SchemaExample('
     {"type":"record","name":"foo","doc":"doc string",
      "fields":[{"name":"bar", "type":"int", "order":"ascending", "default":1}]}
 ',
-                                            true,
-                                            '{"type":"record","name":"foo","doc":"doc string","fields":[{"name":"bar","type":"int","default":1,"order":"ascending"}]}');
-     $record_examples []= new SchemaExample('
+      true,
+      '{"type":"record","name":"foo","doc":"doc string","fields":[{"name":"bar","type":"int","default":1,"order":"ascending"}]}');
+    $recordExamples[] = new SchemaExample('
     {"type":"record", "name":"foo", "doc":"doc string",
      "fields":[{"name":"bar", "type":"int", "order":"bad"}]}
 ', false);
 
-    self::$examples = array_merge($primitive_examples,
-                                  $fixed_examples,
-                                  $enum_examples,
-                                  $array_examples,
-                                  $map_examples,
-                                  $union_examples,
-                                  $record_examples);
-    self::$valid_examples = array();
-    foreach (self::$examples as $example)
-    {
-      if ($example->is_valid)
-        self::$valid_examples []= $example;
+    self::$examples = array_merge($primitiveExamples,
+      $fixedExamples,
+      $enumExamples,
+      $arrayExamples,
+      $mapExamples,
+      $unionExamples,
+      $recordExamples);
+    self::$validExamples = [];
+    foreach (self::$examples as $example) {
+      if ($example->isValid) {
+        self::$validExamples[] = $example;
+      }
     }
   }
 
-  function test_json_decode()
-  {
+  function testJsonDecode() {
     $this->assertEquals(json_decode('null', true), null);
     $this->assertEquals(json_decode('32', true), 32);
     $this->assertEquals(json_decode('"32"', true), '32');
-    $this->assertEquals((array) json_decode('{"foo": 27}'), array("foo" => 27));
+    $this->assertEquals((array) json_decode('{"foo": 27}'), ["foo" => 27]);
     $this->assertTrue(is_array(json_decode('{"foo": 27}', true)));
-    $this->assertEquals(json_decode('{"foo": 27}', true), array("foo" => 27));
+    $this->assertEquals(json_decode('{"foo": 27}', true), ["foo" => 27]);
     $this->assertEquals(json_decode('["bar", "baz", "blurfl"]', true),
-                        array("bar", "baz", "blurfl"));
+      ["bar", "baz", "blurfl"]);
     $this->assertFalse(is_array(json_decode('null', true)));
-    $this->assertEquals(json_decode('{"type": "null"}', true), array("type" => 'null'));
+    $this->assertEquals(json_decode('{"type": "null"}', true), ["type" => 'null']);
     $this->assertEquals(json_decode('true', true), true);
-    foreach (array('True', 'TRUE', 'tRue') as $truthy)
-    {
+    foreach (['True', 'TRUE', 'tRue'] as $truthy) {
       $this->assertNull(json_decode($truthy, true), $truthy);
     }
     $this->assertEquals(json_decode('"boolean"'), 'boolean');
   }
 
-  function schema_examples_provider()
-  {
-    self::make_examples();
-    $ary = array();
-    foreach (self::$examples as $example)
-      $ary []= array($example);
+  function schemaExamplesProvider() {
+    self::makeExamples();
+    $ary = [];
+    foreach (self::$examples as $example) {
+      $ary[] = [$example];
+    }
     return $ary;
-    return array(array(1), array(2), array(3));
   }
 
   /**
-   * @dataProvider schema_examples_provider
+   * @dataProvider schemaExamplesProvider
+   * @param $example
    */
-  function test_parse($example)
-  {
-    $schema_string = $example->schema_string;
-    try
-    {
-      $normalized_schema_string = $example->normalized_schema_string;
-      $schema = AvroSchema::parse($schema_string);
-      $this->assertTrue($example->is_valid,
-                        sprintf("schema_string: %s\n",
-                                $schema_string));
-      $this->assertEquals($normalized_schema_string, strval($schema));
-    }
-    catch (AvroSchemaParseException $e)
-    {
-      $this->assertFalse($example->is_valid,
-                         sprintf("schema_string: %s\n%s",
-                                 $schema_string,
-                                 $e->getMessage()));
+  function testParse($example) {
+    AvroPrimitiveSchema::setJavaStringType(false);
+    $schemaString = $example->schemaString;
+    try {
+      $normalizedSchemaString = $example->normalizedSchemaString;
+      $schema = AvroSchema::parse($schemaString);
+      $this->assertTrue($example->isValid, sprintf("schemaString: %s\n", $schemaString));
+      $this->assertEquals($normalizedSchemaString, strval($schema));
+    } catch (AvroSchemaParseException $e) {
+      $this->assertFalse($example->isValid, sprintf("schemaString: %s\n%s", $schemaString, $e->getMessage()));
     }
   }
 

@@ -5,7 +5,7 @@ pipeline {
     agent any
     environment {
         COMPOSER_HOME = tool name: 'Auto_Composer', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-        PATH = "/opt/rh/rh-php71/root/usr/bin:$COMPOSER_HOME:$PATH" // PHP Path on Jenkins
+        PATH = "/opt/rh/rh-php72/root/usr/bin:$COMPOSER_HOME:$PATH" // PHP Path on Jenkins
     }
 
     post {
@@ -84,7 +84,7 @@ pipeline {
 
 // N.B. : we use a bootstrap file for these tests, and we actually need a configuration file to ignore PHP notices
 // we also exclude the 'integration' test-group, because we won't be able to run them
-                    sh "vendor/bin/phpunit -c test/phpunit.xml --log-junit php_test.xml test/AllTests.php --coverage-clover php_coverage.xml | tail -n 4 | head -n 1 | grep -v ERRORS"
+                    sh "vendor/bin/phpunit -c test/phpunit.xml --log-junit php_test.xml test/AllTests.php --coverage-clover php_coverage.xml --whitelist src | tail -n 4 | head -n 1 | grep -v ERRORS"
                 }
             }
         }
@@ -134,7 +134,7 @@ pipeline {
                     def scannerHome = tool 'Auto_SonarQube_Scanner'
                     gitlabCommitStatus(name: "Sonar full analysis") {
                         withSonarQubeEnv('SonarQube server') {
-                            sh "${scannerHome}/bin/sonar-scanner  -Dsonar.gitlab.commit_sha=$GIT_COMMIT  -Dsonar.gitlab.ref_name=$gitlabSourceBranch   -Dsonar.gitlab.project_id=$GIT_URL   -Dsonar.php.tests.reportPath=php_test.xml  -Dsonar.php.coverage.reportPaths=php_coverage.xml  -Dsonar.tests=test  -Dsonar.sources=lib"
+                            sh "${scannerHome}/bin/sonar-scanner  -Dsonar.gitlab.commit_sha=$GIT_COMMIT  -Dsonar.gitlab.ref_name=$gitlabSourceBranch   -Dsonar.gitlab.project_id=$GIT_URL   -Dsonar.php.tests.reportPath=php_test.xml  -Dsonar.php.coverage.reportPaths=php_coverage.xml  -Dsonar.tests=test  -Dsonar.sources=src"
                         }
                     }
                 }

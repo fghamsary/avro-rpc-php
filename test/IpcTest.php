@@ -17,7 +17,19 @@
  * limitations under the License.
  */
 
+use Avro\Exception\AvroException;
+use Avro\Exception\AvroSchemaParseException;
+use Avro\Protocol\AvroProtocol;
+use Avro\Exception\AvroRemoteException;
+use Avro\IPC\Requester;
+use Avro\IPC\Responder;
+use Avro\IPC\SocketTransceiver;
+use Avro\Protocol\AvroProtocolMessage;
+use Avro\Protocol\AvroProtocolParseException;
+use Avro\Test\AlwaysRaised;
+
 require_once('test_helper.php');
+require_once 'AlwaysRaised.php';
 
 /**
  * Basic Transceiver to connect to a TestServer
@@ -25,39 +37,40 @@ require_once('test_helper.php');
  */
 class TestTransceiver extends SocketTransceiver {
 
+  /**
+   * @var TestServer
+   */
   public $server = null;
   protected $response = null;
-  
-  public static function getTestClient($server)
-  {
+
+  public static function getTestClient(TestServer $server) {
     $transceiver = new TestTransceiver();
     $transceiver->server = $server;
-    
+
     return $transceiver;
   }
-  
-  public function read_message()
-  {
+
+  public function readMessage() {
     return $this->response;
   }
-  
+
   /**
    * Writes a message into the channel. Blocks until the message has been written.
    * @param string $message
+   * @throws AvroException
    */
-  public function write_message($message)
-  {
+  public function writeMessage($message) {
     $this->response = null;
-    if (!is_null($this->server))
+    if ($this->server !== null) {
       $this->response = $this->server->start($message);
+    }
   }
-  
+
   /**
    * Return the name of the socket remode side
    * @return string the remote name
    */
-  public function remote_name()
-  {
+  public function remoteName() {
     return 'TestTransceiver';
   }
 }
@@ -66,52 +79,67 @@ class TestTransceiver extends SocketTransceiver {
  * Basic test server that only call it's responder invoke function
  */
 class TestServer {
-  
+
+  /**
+   * @var Responder
+   */
   public $responder;
+
+  /**
+   * @var TestTransceiver
+   */
   public $transceiver;
-  
+
   public function __construct(Responder $responder) {
     $this->responder = $responder;
     $this->transceiver = new TestTransceiver();
   }
-  
-  public function start($call_request) {
-    $call_response = $this->responder->respond($call_request, $this->transceiver);
-    if (!is_null($call_response))
-      return $call_response;
+
+  /**
+   * @param $callRequest
+   * @return string|null
+   * @throws AvroException
+   */
+  public function start($callRequest) {
+    $callResponse = $this->responder->respond($callRequest, $this->transceiver);
+    return $callResponse;
   }
 }
 
 
 class TestProtocolResponder extends Responder {
-  public function invoke( $local_message, $request) {
-    switch ($local_message->name) {
-      
+
+  public function invoke(AvroProtocolMessage $localMessage, $request) {
+    switch ($localMessage->getName()) {
       case "testSimpleRequestResponse":
-        if ($request["message"]["subject"] == "ping")
-          return array("response" => "pong");
-        else if ($request["message"]["subject"] == "pong")
-          return array("response" => "ping");
-        break;
-      
-      case "testSimpleRequestParams":
-          return array("response" => "ping");
+        if ($request["message"]["subject"] == "ping") {
+          return ["response" => "pong"];
+        } else {
+          if ($request["message"]["subject"] == "pong") {
+            return ["response" => "ping"];
+          } else {
+            return ["response" => "no Idea what to say"];
+          }
+        }
         break;
 
+      case "testSimpleRequestParams":
+        return ["response" => "ping"];
+
       case "testSimpleRequestWithoutParameters":
-        return array("response" => "no incoming parameters");
-        break;
-      
+        return ["response" => "no incoming parameters"];
+
       case "testNotification":
-        break;
-      
+        return null;
+
       case "testRequestResponseException":
-        if ($request["exception"]["cause"] == "callback")
-          throw new AvroRemoteException(array("exception" => "raised on callback cause"));
-        else
+        if ($request["exception"]["cause"] == "callback") {
+          throw new AlwaysRaised("raised on callback cause");
+        } else {
           throw new AvroRemoteException("System exception");
+        }
         break;
-      
+
       default:
         throw new AvroRemoteException("Method unknown");
     }
@@ -119,85 +147,103 @@ class TestProtocolResponder extends Responder {
 }
 
 
-class IpcTest extends PHPUnit_Framework_TestCase
-{
-  
-  public function testSimpleRequestResponse()
-  {
-    
+class IpcTest extends PHPUnit\Framework\TestCase {
+
+  /**
+   * @throws AvroException
+   * @throws AvroProtocolParseException
+   * @throws AvroRemoteException
+   * @throws AvroSchemaParseException
+   */
+  public function testSimpleRequestResponse() {
     $server = new TestServer(new TestProtocolResponder(AvroProtocol::parse($this->protocol)));
     $client = TestTransceiver::getTestClient($server);
-    $requestor = new Requestor(AvroProtocol::parse($this->protocol), $client);
-    
-    $response = $requestor->request('testSimpleRequestResponse', array("message" => array("subject" => "ping")));
+    $requester = new Requester(AvroProtocol::parse($this->protocol), $client);
+
+    $response = $requester->request('testSimpleRequestResponse', ["message" => ["subject" => "ping"]]);
     $this->assertEquals("pong", $response["response"]);
-    $response = $requestor->request('testSimpleRequestResponse', array("message" => array("subject" => "pong")));
+    $response = $requester->request('testSimpleRequestResponse', ["message" => ["subject" => "pong"]]);
     $this->assertEquals("ping", $response["response"]);
-    
+
   }
-  
-  public function testNotification()
-  {
+
+  /**
+   * @throws AvroException
+   * @throws AvroProtocolParseException
+   * @throws AvroRemoteException
+   * @throws AvroSchemaParseException
+   */
+  public function testNotification() {
     $server = new TestServer(new TestProtocolResponder(AvroProtocol::parse($this->protocol)));
     $client = TestTransceiver::getTestClient($server);
-    $requestor = new Requestor(AvroProtocol::parse($this->protocol), $client);
-    
-    $response = $requestor->request('testNotification', array("notification" => array("subject" => "notify")));
+    $requester = new Requester(AvroProtocol::parse($this->protocol), $client);
+
+    $response = $requester->request('testNotification', ["notification" => ["subject" => "notify"]]);
     $this->assertTrue($response);
-    
   }
-  
-  public function testHandshake()
-  {
+
+  /**
+   * @throws AvroRemoteException
+   * @throws AvroException
+   * @throws AvroSchemaParseException
+   * @throws AvroProtocolParseException
+   */
+  public function testHandshake() {
     $server = new TestServer(new TestProtocolResponder(AvroProtocol::parse($this->protocol)));
     $client = TestTransceiver::getTestClient($server);
-    $requestor = new Requestor(AvroProtocol::parse($this->protocol), $client);
-    
-    $this->assertFalse($client->is_connected());
-    $this->assertFalse($server->transceiver->is_connected());
-    
-    $response = $requestor->request('testNotification', array("notification" => array("subject" => "notify")));
+    $requester = new Requester(AvroProtocol::parse($this->protocol), $client);
+
+    $this->assertFalse($client->isConnected());
+    $this->assertFalse($server->transceiver->isConnected());
+
+    $response = $requester->request('testNotification', ["notification" => ["subject" => "notify"]]);
     $this->assertTrue($response);
-    $this->assertTrue($client->is_connected());
-    $this->assertTrue($server->transceiver->is_connected());
-    
-    $response = $requestor->request('testSimpleRequestResponse', array("message" => array("subject" => "ping")));
+    $this->assertTrue($client->isConnected());
+    $this->assertTrue($server->transceiver->isConnected());
+
+    $response = $requester->request('testSimpleRequestResponse', ["message" => ["subject" => "ping"]]);
     $this->assertEquals("pong", $response["response"]);
-    $this->assertTrue($client->is_connected());
-    $this->assertTrue($server->transceiver->is_connected());
-    
+    $this->assertTrue($client->isConnected());
+    $this->assertTrue($server->transceiver->isConnected());
   }
-  
-  public function testRequestResponseException()
-  {
+
+  /**
+   * @throws AvroRemoteException
+   * @throws AvroException
+   * @throws AvroSchemaParseException
+   * @throws AvroProtocolParseException
+   */
+  public function testRequestResponseException() {
     $server = new TestServer(new TestProtocolResponder(AvroProtocol::parse($this->protocol)));
     $client = TestTransceiver::getTestClient($server);
-    $requestor = new Requestor(AvroProtocol::parse($this->protocol), $client);
-    
-    $exception_raised = false;
+    $requester = new Requester(AvroProtocol::parse($this->protocol), $client);
+
+    $exceptionRaised = false;
     try {
-      $response = $requestor->request('testRequestResponseException', array("exception" => array("cause" => "callback")));
-    } catch (AvroRemoteException $e) {
-      $exception_raised = true;
-      $exception_datum = $e->getDatum();
-      $this->assertEquals("raised on callback cause", $exception_datum["exception"]);
+      $response = $requester->request('testRequestResponseException', ["exception" => ["cause" => "callback"]]);
+      $this->assertNull($response);
+    } catch (AlwaysRaised $e) {
+      $exceptionRaised = true;
+      $exceptionDatum = $e->getException();
+      $this->assertEquals("raised on callback cause", $exceptionDatum);
     }
 
-    $this->assertTrue($exception_raised);
-    $exception_raised = false;
+    $this->assertTrue($exceptionRaised);
+    $exceptionRaised = false;
     try {
-      $response = $requestor->request('testRequestResponseException', array("exception" => array("cause" => "system")));
+      $response = $requester->request('testRequestResponseException', ["exception" => ["cause" => "system"]]);
+      $this->assertNull($response);
     } catch (AvroRemoteException $e) {
-      $exception_raised = true;
-      $exception_datum = $e->getDatum();
-      $this->assertEquals("System exception", $exception_datum);
+      $exceptionRaised = true;
+      $exceptionDatum = $e->getMessage();
+      $this->assertEquals("System exception", $exceptionDatum);
     }
-    $this->assertTrue($exception_raised);
+    $this->assertTrue($exceptionRaised);
   }
-  
+
   private $protocol = <<<PROTO
 {
- "namespace": "examples.protocol",
+ "namespace": "avro.test",
  "protocol": "TestProtocol",
 
  "types": [

@@ -3,7 +3,7 @@
   "description": "An Avro RPC client in PHP (compatible with the Avro RPC server in Java)",
   "keywords": ["avro", "rpc", "serialization"],
   "license": "proprietary",
-  "version": "1.8.1",
+  "version": "1.8.2-RC3",
   "type": "library",
   "homepage": "https://gitlab.v3d.fr/server/avro-rpc-php",
   
@@ -20,9 +20,12 @@
     }
   ],
   "require": {
+    "ext-json": "*",
+    "ext-gmp": "*",
+    "ext-sockets": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.*"
+    "phpunit/phpunit": "7.*"
   },
 
   "suggest": {
@@ -30,6 +33,8 @@
   },
   
   "autoload": {
-    "classmap": ["lib/"]
+    "psr-4" : {
+      "Avro\\": "src/Avro/"
+    }
   }
 }
