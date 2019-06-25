@@ -12,13 +12,14 @@ use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\Record\AvroRecord;
-use Avro\Schema\AvroArraySchema;
+use Avro\Record\AvroRecordHelper;
+use Avro\Record\IAvroRecordBase;
 use Avro\Schema\AvroEnumSchema;
-use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroNamedSchemata;
 use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
+use Countable;
 
 /**
  * Class AvroProtocol is the library of Avro for protocol
@@ -177,13 +178,13 @@ class AvroProtocol {
   }
 
   /**
-   * @param AvroRecord $record the record which you want to serialize
+   * @param IAvroRecordBase $record the record which you want to serialize
    * @param bool $deepSerialization if true in case of having another AvroRecord as a field it will be serialized as well,
    *             and in case of false (default) only the first level is serialized and inner objects are return as empty object
    * @return array serialized object based on the schema
    * @throws AvroException if the $record is not defined in the current protocol definition
    */
-  public function serializeObject(AvroRecord $record, $deepSerialization = false) {
+  public function serializeObject(IAvroRecordBase $record, $deepSerialization = false) {
     $fullName = $this->getNamespace() . '.' . $record::_getSimpleAvroClassName();
     if (!$this->getSchemata()->hasName($fullName)) {
       throw new AvroException('Record ' . $record::_getSimpleAvroClassName() . ' does not exist on this protocol!');
@@ -200,7 +201,8 @@ class AvroProtocol {
           if ($deepSerialization) {
             if ($serializedObject[$name] instanceof AvroRecord) {
               $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
-            } elseif (is_array($serializedObject[$name]) && count($serializedObject[$name]) > 0) {
+            } elseif ((is_array($serializedObject[$name]) || $serializedObject[$name] instanceof Countable)
+              && count($serializedObject[$name]) > 0) {
               if (array_values($serializedObject[$name])[0] instanceof AvroRecord) {
                 /**
                  * @var string $key
@@ -216,6 +218,39 @@ class AvroProtocol {
       }
     }
     return $serializedObject;
+  }
+
+  /**
+   * @param IAvroRecordBase $record the record which should be populated with the values in the array of serializedObject
+   * @param array $serializedObject the serialized representation of the item as an associative array
+   * @throws AvroException if the $record is not defined in the current protocol definition
+   */
+  public function deserializeObject(IAvroRecordBase $record, array $serializedObject) {
+    $fullName = $this->getNamespace() . '.' . $record::_getSimpleAvroClassName();
+    if (!$this->getSchemata()->hasName($fullName)) {
+      throw new AvroException('Record ' . $record::_getSimpleAvroClassName() . ' does not exist on this protocol!');
+    }
+    $schema = $this->getSchemata()->getSchema($fullName);
+    if ($schema instanceof AvroRecordSchema) {
+      foreach ($schema->getFields() as $name => $field) {
+        $fieldType = $field->getFieldType();
+          if (!empty($serializedObject[$name])) {
+            if ($fieldType instanceof AvroEnumSchema) {
+              $record->_internalSetValue($name, AvroRecordHelper::getNewEnumInstance($fieldType, $serializedObject[$name]));
+            } elseif ($fieldType instanceof AvroRecordSchema) {
+              // TODO this is not yet supported and should be correctly implemented
+//              $innerItem = AvroRecordHelper::getNewRecordInstance($fieldType);
+//              $this->deserializeObject($innerItem, $serializedObject[$name]);
+//              $record->_internalSetValue($name, $innerItem);
+            } elseif ($fieldType instanceof AvroPrimitiveSchema) {
+              $record->_internalSetValue($name, $serializedObject[$name]);
+            } // TODO this is not yet implemented as well
+//            else {
+//
+//            }
+          }
+      }
+    }
   }
 
   /**
