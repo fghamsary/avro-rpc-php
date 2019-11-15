@@ -37,5 +37,17 @@
     "psr-4" : {
       "Avro\\": "src/Avro/"
     }
+  },
+
+  "extra": {
+    "nexus-push": {
+      "url": "https://ovh-repo-01.v3d.fr/repository/v3d-php",
+      "ignore-by-git-attributes": true,
+      "ignore": [
+        "Jenkinsfile",
+        "sonar-project.properties",
+        "build.sh"
+      ]
+    }
   }
 }
