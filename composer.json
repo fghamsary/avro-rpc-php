@@ -44,9 +44,12 @@
       "url": "https://ovh-repo-01.v3d.fr/repository/v3d-php",
       "ignore-by-git-attributes": true,
       "ignore": [
+        "share/",
+        "test/",
         "Jenkinsfile",
         "sonar-project.properties",
-        "build.sh"
+        "build.sh",
+        "auth.json"
       ]
     }
   }
