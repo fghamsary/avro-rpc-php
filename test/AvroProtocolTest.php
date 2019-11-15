@@ -2,6 +2,7 @@
 
 use Avro\Exception\AvroException;
 use Avro\Protocol\AvroProtocol;
+use Avro\Record\AvroRecordHelper;
 
 require_once 'TestProtocol/ProtocolClasses.php';
 
@@ -14,6 +15,7 @@ class AvroProtocolTest extends PHPUnit\Framework\TestCase {
     parent::setUp();
     $this->protocol = AvroProtocol::parse(TestProtocol::PROTOCOL_JSON);
     $this->assertNotNull($this->protocol);
+    AvroRecordHelper::setDefaultNamespace('\\');
   }
 
   public function testSerializationDeserialization() {
