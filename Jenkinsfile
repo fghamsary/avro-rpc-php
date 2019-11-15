@@ -97,32 +97,6 @@ pipeline {
                 }
             }
         }
-        stage("Sonar preview analysis") {
-// this stage perform the Sonar preview analysis to get comments, when:
-// - we are in a MR commit (i.e. gitlabMergeRequestTitle is set)
-            when {
-                anyOf {
-                    not {
-                        environment name:'gitlabMergeRequestTitle', value:''
-                    }
-                    environment name:'gitlabActionType', value:'TAG_PUSH'
-                }
-            }
-            steps {
-// we first perform a preview analysis, so we can get new issues and show them in GitLab
-// we use variables provided by both Jenkins and the GitLab plgin in order to find the MR corresponding to the build, so that the GitLab plugin for Sonar can make comments
-// (see specific documentation for more information)
-// NB. : with PHP, every branch need to have a sonar-project.properties file, which contains informations about the project, such as current version, name, and so on...
-                script {
-                    def scannerHome = tool 'Auto_SonarQube_Scanner'
-                    gitlabCommitStatus(name: "Sonar preview analysis") {
-                        withSonarQubeEnv('SonarQube server') {
-                            sh "${scannerHome}/bin/sonar-scanner  -Dsonar.analysis.mode=preview  -Dsonar.gitlab.commit_sha=$GIT_COMMIT  -Dsonar.gitlab.ref_name=$gitlabSourceBranch   -Dsonar.gitlab.project_id=$GIT_URL"
-                        }
-                    }
-                }
-            }
-        }
         stage("Sonar full analysis") {
 // we perform a full analysis when we are commiting to master
             when {
