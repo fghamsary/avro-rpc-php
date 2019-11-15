@@ -137,6 +137,26 @@ class AvroRecordSchema extends AvroNamedSchema {
   }
 
   /**
+   * Deserialize the JSON array based on the field names to a corresponding object of class
+   * @param mixed $value the JSON array value
+   * @return IAvroRecordBase the record object based the values in the JSON value
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public function deserializeJson($value) {
+    if (!$this->isValidDatum($value)) {
+      throw new AvroException('Deserialization for schema of type record: ' . $this->__toString() . ' is not possible for: ' . json_encode($value));
+    }
+    $record = AvroRecordHelper::getNewRecordInstance($this);
+    foreach ($this->getFields() as $name => $field) {
+      $fieldType = $field->getFieldType();
+      if (array_key_exists($name, $value)) {
+        $record->_internalSetValue($name, $fieldType->deserializeJson($value[$name]));
+      }
+    }
+    return $record;
+  }
+
+  /**
    * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
    * @param AvroSchema $readersSchema other schema to be checked with
    * @return boolean true if this schema is compatible with the readersSchema supplied

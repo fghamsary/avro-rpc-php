@@ -19,6 +19,7 @@ use Avro\Schema\AvroNamedSchemata;
 use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
+use Avro\Schema\AvroUnionSchema;
 use Countable;
 
 /**
@@ -200,13 +201,13 @@ class AvroProtocol {
         } else {
           $serializedObject[$name] = $record->_internalGetValue($name);
           if ($deepSerialization) {
-            if ($serializedObject[$name] instanceof AvroRecord) {
+            if ($serializedObject[$name] instanceof IAvroRecordBase) {
               $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true, $keepKeys);
             } elseif ((is_array($serializedObject[$name]) || $serializedObject[$name] instanceof Countable)
               && count($serializedObject[$name]) > 0) {
               $innerValue = $serializedObject[$name];
-              $innerValue = is_array($innerValue) ? array_values($innerValue) : $innerValue;
-              if ($innerValue[0] instanceof IAvroRecordBase) {
+              $firstValue = is_array($innerValue) ? array_values($innerValue) : $innerValue;
+              if ($firstValue[0] instanceof IAvroRecordBase) {
                 $serializedObject[$name] = [];
                 /**
                  * @var string $key
@@ -243,21 +244,10 @@ class AvroProtocol {
     if ($schema instanceof AvroRecordSchema) {
       foreach ($schema->getFields() as $name => $field) {
         $fieldType = $field->getFieldType();
-          if (!empty($serializedObject[$name])) {
-            if ($fieldType instanceof AvroEnumSchema) {
-              $record->_internalSetValue($name, AvroRecordHelper::getNewEnumInstance($fieldType, $serializedObject[$name]));
-            } elseif ($fieldType instanceof AvroRecordSchema) {
-              // TODO this is not yet supported and should be correctly implemented
-//              $innerItem = AvroRecordHelper::getNewRecordInstance($fieldType);
-//              $this->deserializeObject($innerItem, $serializedObject[$name]);
-//              $record->_internalSetValue($name, $innerItem);
-            } elseif ($fieldType instanceof AvroPrimitiveSchema) {
-              $record->_internalSetValue($name, $serializedObject[$name]);
-            } // TODO this is not yet implemented as well
-//            else {
-//
-//            }
-          }
+        if (array_key_exists($name, $serializedObject)) {
+          $result = $fieldType->deserializeJson($serializedObject[$name]);
+          $record->_internalSetValue($name, $result);
+        }
       }
     }
   }

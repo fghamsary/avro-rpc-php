@@ -119,6 +119,15 @@ class AvroEnumSchema extends AvroNamedSchema {
   }
 
   /**
+   * @param mixed $value
+   * @return AvroEnumRecord|mixed|string
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public function deserializeJson($value) {
+    return AvroRecordHelper::getNewEnumInstance($this, $value);
+  }
+
+  /**
    * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
    * @param AvroSchema $readersSchema other schema to be checked with
    * @return boolean true if this schema is compatible with the readersSchema supplied

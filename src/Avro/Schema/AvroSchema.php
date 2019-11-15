@@ -455,6 +455,14 @@ abstract class AvroSchema {
   public abstract function writeDatum($datum, AvroIOBinaryEncoder $encoder);
 
   /**
+   * Deserialize JSON value to the corresponding object for this schema type
+   * @param mixed $value the value in JSON value
+   * @return mixed the result object corresponding to the schema type
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public abstract function deserializeJson($value);
+
+  /**
    * Reads data from the decoder with the current format
    * @param AvroIOBinaryDecoder $decoder the decoder to be used
    * @param AvroSchema|null $readersSchema the local schema which may be different from remote schema which is being used to read the data

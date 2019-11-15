@@ -50,10 +50,17 @@ class AvroPrimitiveSchema extends AvroSchema {
   }
 
   /**
-   * @return boolean true if this type is a string
+   * @return bool true if this type is a string
    */
-  public function isString() {
+  public function isString(): bool {
     return $this->getType() === self::STRING_TYPE;
+  }
+
+  /**
+   * @return bool true if this type is null
+   */
+  public function isNull(): bool {
+    return $this->getType() === self::NULL_TYPE;
   }
 
   /**
@@ -121,6 +128,19 @@ class AvroPrimitiveSchema extends AvroSchema {
       default:
         throw new AvroIOTypeException($this, $datum);
     }
+  }
+
+  /**
+   * Primitive types should be returned as they are
+   * @param mixed $value the JSON value
+   * @return mixed the result value
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public function deserializeJson($value) {
+    if (!$this->isValidDatum($value)) {
+      throw new AvroException('Deserialization for schema of type primitive: ' . $this->__toString() . ' is not possible for: ' . json_encode($value));
+    }
+    return $value;
   }
 
   /**

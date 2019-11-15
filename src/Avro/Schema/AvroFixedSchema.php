@@ -67,6 +67,19 @@ class AvroFixedSchema extends AvroNamedSchema {
   }
 
   /**
+   * Deserialize JSON value to the corresponding object for this schema type
+   * @param mixed $value the value in JSON value
+   * @return mixed the result object corresponding to the schema type
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public function deserializeJson($value) {
+    if (!$this->isValidDatum($value)) {
+      throw new AvroException('Deserialization for schema of type fixed: ' . $this->__toString() . ' is not possible for: ' . json_encode($value));
+    }
+    return $value;
+  }
+
+  /**
    * Reads data from the decoder with the current format
    * @param AvroSchema $readersSchema the local schema which may be different from remote schema which is being used to read the data
    * @return mixed the data read from the decoder based on current schema
