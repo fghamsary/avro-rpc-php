@@ -101,6 +101,26 @@ class AvroArraySchema extends AvroSchema {
   }
 
   /**
+   * Deserialize JSON array value to the corresponding any array of object for this schema type
+   * @param mixed $value the value in JSON value
+   * @return mixed the result array object corresponding to the schema type
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public function deserializeJson($value) {
+    if (!$this->isValidDatum($value)) {
+      throw new AvroException('Deserialization for schema of type array: ' . $this->__toString() . ' is not possible for: ' . json_encode($value));
+    }
+    $result = [];
+    if (is_array($value)) {
+      $itemSchemas = $this->getItemsSchema();
+      foreach ($value as $item) {
+        $result[] = $itemSchemas->deserializeJson($item);
+      }
+    }
+    return $result;
+  }
+
+  /**
    * Checks to see if the the readersSchema is compatible with the current writersSchema ($this)
    * @param AvroSchema $readersSchema other schema to be checked with
    * @return boolean true if this schema is compatible with the readersSchema supplied

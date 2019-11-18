@@ -4,3 +4,4 @@ test/tmp/*
 vendor/*
 php_coverage.xml
 php_test.xml
+auth.json

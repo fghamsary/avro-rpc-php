@@ -12,13 +12,15 @@ use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\Record\AvroRecord;
-use Avro\Schema\AvroArraySchema;
+use Avro\Record\AvroRecordHelper;
+use Avro\Record\IAvroRecordBase;
 use Avro\Schema\AvroEnumSchema;
-use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroNamedSchemata;
 use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
+use Avro\Schema\AvroUnionSchema;
+use Countable;
 
 /**
  * Class AvroProtocol is the library of Avro for protocol
@@ -177,13 +179,14 @@ class AvroProtocol {
   }
 
   /**
-   * @param AvroRecord $record the record which you want to serialize
+   * @param IAvroRecordBase $record the record which you want to serialize
    * @param bool $deepSerialization if true in case of having another AvroRecord as a field it will be serialized as well,
    *             and in case of false (default) only the first level is serialized and inner objects are return as empty object
+   * @param bool $keepKeys if true we keep the keys on maps if not we use a simple array
    * @return array serialized object based on the schema
    * @throws AvroException if the $record is not defined in the current protocol definition
    */
-  public function serializeObject(AvroRecord $record, $deepSerialization = false) {
+  public function serializeObject(IAvroRecordBase $record, $deepSerialization = false, $keepKeys = true) {
     $fullName = $this->getNamespace() . '.' . $record::_getSimpleAvroClassName();
     if (!$this->getSchemata()->hasName($fullName)) {
       throw new AvroException('Record ' . $record::_getSimpleAvroClassName() . ' does not exist on this protocol!');
@@ -198,16 +201,25 @@ class AvroProtocol {
         } else {
           $serializedObject[$name] = $record->_internalGetValue($name);
           if ($deepSerialization) {
-            if ($serializedObject[$name] instanceof AvroRecord) {
-              $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true);
-            } elseif (is_array($serializedObject[$name]) && count($serializedObject[$name]) > 0) {
-              if (array_values($serializedObject[$name])[0] instanceof AvroRecord) {
+            if ($serializedObject[$name] instanceof IAvroRecordBase) {
+              $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true, $keepKeys);
+            } elseif ((is_array($serializedObject[$name]) || $serializedObject[$name] instanceof Countable)
+              && count($serializedObject[$name]) > 0) {
+              $innerValue = $serializedObject[$name];
+              $firstValue = is_array($innerValue) ? array_values($innerValue) : $innerValue;
+              if ($firstValue[0] instanceof IAvroRecordBase) {
+                $serializedObject[$name] = [];
                 /**
                  * @var string $key
                  * @var AvroRecord $value
                  */
-                foreach ($serializedObject[$name] as $key => $value) {
-                  $serializedObject[$name][$key] = $this->serializeObject($value, true);
+                foreach ($innerValue as $key => $value) {
+                  $serializedValue = $this->serializeObject($value, true, $keepKeys);
+                  if ($keepKeys) {
+                    $serializedObject[$name][$key] = $serializedValue;
+                  } else {
+                    $serializedObject[$name][] = $serializedValue;
+                  }
                 }
               }
             }
@@ -216,6 +228,28 @@ class AvroProtocol {
       }
     }
     return $serializedObject;
+  }
+
+  /**
+   * @param IAvroRecordBase $record the record which should be populated with the values in the array of serializedObject
+   * @param array $serializedObject the serialized representation of the item as an associative array
+   * @throws AvroException if the $record is not defined in the current protocol definition
+   */
+  public function deserializeObject(IAvroRecordBase $record, array $serializedObject) {
+    $fullName = $this->getNamespace() . '.' . $record::_getSimpleAvroClassName();
+    if (!$this->getSchemata()->hasName($fullName)) {
+      throw new AvroException('Record ' . $record::_getSimpleAvroClassName() . ' does not exist on this protocol!');
+    }
+    $schema = $this->getSchemata()->getSchema($fullName);
+    if ($schema instanceof AvroRecordSchema) {
+      foreach ($schema->getFields() as $name => $field) {
+        $fieldType = $field->getFieldType();
+        if (array_key_exists($name, $serializedObject)) {
+          $result = $fieldType->deserializeJson($serializedObject[$name]);
+          $record->_internalSetValue($name, $result);
+        }
+      }
+    }
   }
 
   /**

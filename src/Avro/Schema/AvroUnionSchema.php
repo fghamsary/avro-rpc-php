@@ -82,14 +82,14 @@ class AvroUnionSchema extends AvroSchema {
   /**
    * @return boolean true if the union contains string
    */
-  public function hasString() {
+  public function hasString(): bool {
     return $this->containsString;
   }
 
   /**
    * @return AvroSchema[]
    */
-  public function getSchemas() {
+  public function getSchemas(): array {
     return $this->schemas;
   }
 
@@ -99,11 +99,22 @@ class AvroUnionSchema extends AvroSchema {
    * the given (zero-based) index.
    * @throws AvroSchemaParseException if the index is invalid for this schema.
    */
-  public function getSchemaByIndex($index) {
+  public function getSchemaByIndex($index): AvroSchema {
     if (count($this->schemas) > $index) {
       return $this->schemas[$index];
     }
     throw new AvroSchemaParseException('Invalid union schema index');
+  }
+
+  /**
+   * Returns true if this union can contain null as a value
+   * @return bool true if this union is nullable with other types as well
+   */
+  public function isNullable(): bool {
+    return count(array_filter($this->getSchemas(), function($schema) {
+      /** @var AvroSchema $schema */
+      return $schema instanceof AvroPrimitiveSchema && $schema->isNull();
+    })) === 1;
   }
 
   /**
@@ -142,6 +153,53 @@ class AvroUnionSchema extends AvroSchema {
     }
     $encoder->writeLong($datumSchemaIndex);
     $datumSchema->writeDatum($datum, $encoder);
+  }
+
+  /**
+   * Deserialize to appropriate object based on the supported values in the current Enum
+   * Only nullable object of another type is possible and correct value
+   * @param mixed $value the JSON value
+   * @return mixed the result of the deserialization
+   * @throws AvroException if the value is not possible for deserialization for this type
+   */
+  public function deserializeJson($value) {
+    $nullable = $this->isNullable();
+    // null is only possible if one of the union parts is null
+    if ($value === null && $nullable) {
+      return null;
+    }
+    $schemas = $this->getSchemas();
+    $schemaRecordCounts = [];
+    $possibleResults = [];
+    foreach ($schemas as $schema) {
+      try {
+        $record = $schema->deserializeJson($value);
+        $possibleResults[] = $record;
+        if ($schema instanceof AvroRecordSchema) {
+          $schemaRecordCounts[count($possibleResults) - 1] = count($record);
+        }
+      } catch (AvroException $exp) {
+        // if it's not possible to deserialize to this type we check other types of union
+      }
+    }
+    // if only one match is found we use it
+    if (count($possibleResults) === 1) {
+      return $possibleResults[0];
+    }
+    // if more than one possible value deserialization is possible we get the best guess
+    // in case of multiple classes the class with more set values and/or complete
+    // this can be used for inheritance cases
+    if (count($possibleResults) > 1) {
+      if (count($schemaRecordCounts) > 1) {
+        $bestChoiceIndex = array_keys($schemaRecordCounts, max($schemaRecordCounts));
+        return $possibleResults[$bestChoiceIndex[0]];
+      }
+      return $possibleResults[0]; // in case we couldn't determine the best choice we use the first
+    }
+    throw new AvroException('Deserialization is not possible for value: ' .
+      json_encode($value) .
+      ' as a union for: ' .
+      $this->__toString());
   }
 
   /**

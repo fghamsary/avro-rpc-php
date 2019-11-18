@@ -28,23 +28,26 @@ require_once('FloatIntEncodingTest.php');
 require_once('DatumIOTest.php');
 require_once('ProtocolFileTest.php');
 require_once('IpcTest.php');
+require_once('AvroProtocolTest.php');
+require_once('TestProtocol/ProtocolClasses.php');
 // InterOpTest tests are run separately.
 
 class AllTests {
 
   public static function suite() {
     $suite = new PHPUnit\Framework\TestSuite('AvroAllTests');
-    $suite->addTestSuite('DataFileTest');
-    $suite->addTestSuite('SchemaTest');
-    $suite->addTestSuite('NameTest');
-    $suite->addTestSuite('StringIOTest');
-    $suite->addTestSuite('IODatumReaderTest');
-    $suite->addTestSuite('LongEncodingTest');
-    $suite->addTestSuite('FloatIntEncodingTest');
-    $suite->addTestSuite('DatumIOTest');
-    $suite->addTestSuite('ProtocolFileTest');
-    $suite->addTestSuite('IpcTest');
-    $suite->addTestSuite('SchemaJavaStringTest');
+    $suite->addTestSuite(DataFileTest::class);
+    $suite->addTestSuite(SchemaTest::class);
+    $suite->addTestSuite(NameTest::class);
+    $suite->addTestSuite(StringIOTest::class);
+    $suite->addTestSuite(IODatumReaderTest::class);
+    $suite->addTestSuite(LongEncodingTest::class);
+    $suite->addTestSuite(FloatIntEncodingTest::class);
+    $suite->addTestSuite(DatumIOTest::class);
+    $suite->addTestSuite(ProtocolFileTest::class);
+    $suite->addTestSuite(IpcTest::class);
+    $suite->addTestSuite(SchemaJavaStringTest::class);
+    $suite->addTestSuite(AvroProtocolTest::class);
     return $suite;
   }
 

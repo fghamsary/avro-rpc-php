@@ -21,6 +21,11 @@ class AvroRecordHelper {
   private static $defaultNamespace = '\\';
 
   /**
+   * @var IAvroRecordInstantiator|null the instantiator which can be used instead of default record instantiator
+   */
+  private static $recordInstantiator = null;
+
+  /**
    * @return string The default namespace which should be used to search for classes while reading from binary
    */
   public static function getDefaultNamespace(): string {
@@ -32,6 +37,20 @@ class AvroRecordHelper {
    */
   public static function setDefaultNamespace(string $defaultNamespace): void {
     self::$defaultNamespace = $defaultNamespace;
+  }
+
+  /**
+   * @return IAvroRecordInstantiator|null the default instantiator for the schema defined
+   */
+  public static function getRecordInstantiator(): ?IAvroRecordInstantiator {
+    return self::$recordInstantiator;
+  }
+
+  /**
+   * @param IAvroRecordInstantiator|null $recordInstantiator the default instantiator for the defined schema
+   */
+  public static function setRecordInstantiator(?IAvroRecordInstantiator $recordInstantiator): void {
+    self::$recordInstantiator = $recordInstantiator;
   }
 
   /**
@@ -60,6 +79,12 @@ class AvroRecordHelper {
    * @return array|IAvroRecordBase the result will be an instance of IAvroRecordBase if the corresponding class exists and an array if not
    */
   public static function getNewRecordInstance(AvroRecordSchema $schema) {
+    if (self::$recordInstantiator !== null) {
+      $result = self::$recordInstantiator->getNewRecordInstance(self::getDefaultNamespace(), $schema);
+      if ($result !== null) {
+        return $result;
+      }
+    }
     /** @var IAvroRecordBase $recordClassName */
     $recordClassName = self::getDefaultNamespace() . $schema->getQualifiedName();
     if (class_exists($recordClassName)) {
