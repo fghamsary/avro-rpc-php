@@ -14,13 +14,13 @@ if [ "$TEST_FAIL" != '0' ]; then
   echo "Test didn't pass so we can't continue"
   exit 1
 fi
-echo "All Tests passed we can continue to deploy."
-echo "Push new tag to gitlab."
+echo "All Tests passed we can continue to deploy and updating to version $1."
 php -r "\$f=json_decode(file_get_contents('composer.json'), true);\$f['version']='$1';file_put_contents('composer.json', preg_replace('/  /', ' ', json_encode(\$f, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));"
 composer update
 git add composer.json composer.lock
 git commit -m "Release new version $1"
 git tag "$1"
+echo "Push new tag to gitlab."
 git push
 echo "Push new tag to nexus repository."
 composer nexus-push $1 \
