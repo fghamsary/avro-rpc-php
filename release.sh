@@ -23,12 +23,15 @@ git tag "$1"
 echo "Push new tag to gitlab."
 git push origin "$1"
 echo "Push new tag to nexus repository."
-composer nexus-push $1 \
-  --url https://ovh-repo-01.v3d.fr/repository/v3d-php \
-  --ignore-dirs share test \
-  --ignore sonar-project.properties Jenkinsfile release.sh \
-  --src-url "$(git remote get-url origin)" \
-  --src-ref "$(git rev-parse HEAD)" \
+composer nexus-push \
+  --url=https://ovh-repo-01.v3d.fr/repository/v3d-php \
+  --ignore=share \
+  --ignore=test \
+  --ignore=sonar-project.properties \
+  --ignore=Jenkinsfile \
+  --ignore=release.sh \
+  --src-url="$(git remote get-url origin)" \
+  --src-ref="$(git rev-parse HEAD)" \
   "$1"
 
 echo "All done."
