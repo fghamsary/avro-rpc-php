@@ -21,7 +21,7 @@ git add composer.json composer.lock
 git commit -m "Release new version $1"
 git tag "$1"
 echo "Push new tag to gitlab."
-git push
+git push origin "$1"
 echo "Push new tag to nexus repository."
 composer nexus-push $1 \
   --url https://ovh-repo-01.v3d.fr/repository/v3d-php \
