@@ -19,6 +19,7 @@ php -r "\$f=json_decode(file_get_contents('composer.json'), true);\$f['version']
 composer update
 git add composer.json composer.lock
 git commit -m "Release new version $1"
+git push
 git tag "$1"
 echo "Push new tag to gitlab."
 git push origin "$1"
