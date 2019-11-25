@@ -30,6 +30,8 @@ composer nexus-push \
   --ignore=sonar-project.properties \
   --ignore=Jenkinsfile \
   --ignore=release.sh \
+  --ignore=composer.lock \
+  --src-type=git \
   --src-url="$(git remote get-url origin)" \
   --src-ref="$(git rev-parse HEAD)" \
   "$1"
