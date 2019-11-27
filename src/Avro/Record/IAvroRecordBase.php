@@ -17,7 +17,7 @@ interface IAvroRecordBase extends \Countable {
   /**
    * @return string Get the name of the current record type
    */
-  public static function _getSimpleAvroClassName();
+  public static function _getSimpleAvroClassName(): string;
 
   /**
    * @return $this Instances new record based on the type selected
@@ -28,12 +28,12 @@ interface IAvroRecordBase extends \Countable {
    * @param string $field The field which we want the value for
    * @return mixed
    */
-  public function _internalGetValue($field);
+  public function _internalGetValue(string $field);
 
   /**
    * @param string $field The field which should be set
    * @param mixed $value The value which should be set
    * @return $this
    */
-  public function _internalSetValue($field, $value);
+  public function _internalSetValue(string $field, $value);
 }

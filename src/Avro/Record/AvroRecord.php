@@ -16,7 +16,7 @@ namespace Avro\Record;
 abstract class AvroRecord implements IAvroRecordBase {
   use TAvroRecordBase;
 
-  public abstract static function _getSimpleAvroClassName();
+  public abstract static function _getSimpleAvroClassName(): string;
 
   /**
    * @return static Creates new instance of the current record type

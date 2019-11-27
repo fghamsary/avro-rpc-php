@@ -16,26 +16,26 @@ use Avro\Exception\AvroException;
  * @package Avro\Record
  */
 abstract class AvroEnumRecord implements \JsonSerializable {
-  public abstract static function _getSimpleAvroClassName();
+  public abstract static function _getSimpleAvroClassName(): string;
 
   /** @var string */
   protected $value;
 
-  protected function __construct($value) {
+  protected function __construct(string $value) {
     $this->value = $value;
   }
 
   /**
    * @return string[] The list of available values for this enum
    */
-  protected abstract static function getEnumValues();
+  protected abstract static function getEnumValues(): array;
 
   /**
    * @param string $value the value which should be checked
    * @return AvroEnumRecord the enum object corresponding to requested value
    * @throws AvroException if the value is not valid for this enum
    */
-  public static function getItem($value) {
+  public static function getItem(string $value) {
     if (static::hasValue($value)) {
       return new static($value);
     } else {
@@ -47,14 +47,14 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    * @param string $value The value of the enum to be checked
    * @return bool true if the value exists
    */
-  public static function hasValue($value) {
+  public static function hasValue(string $value) {
     return in_array($value, static::getEnumValues());
   }
 
   /**
    * @return string the value of the enum
    */
-  public function __toString() {
+  public function __toString(): string {
     return $this->value;
   }
 

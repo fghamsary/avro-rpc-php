@@ -17,12 +17,12 @@ trait TAvroRecordBase {
 
   private $iFieldsSet = 0;
 
-  public function _internalGetValue($field) {
+  public function _internalGetValue(string $field) {
     $fieldGetter = 'get' . ucfirst($field);
     return $this->$fieldGetter();
   }
 
-  public function _internalSetValue($field, $value) {
+  public function _internalSetValue(string $field, $value) {
     $this->iFieldsSet++;
     $fieldSetter = 'set' . ucfirst($field);
     return $this->$fieldSetter($value);
@@ -31,7 +31,7 @@ trait TAvroRecordBase {
   /**
    * @return int the number of fields that have been set via _internalSetValue
    */
-  public function count() {
+  public function count(): int {
     return $this->iFieldsSet;
   }
 

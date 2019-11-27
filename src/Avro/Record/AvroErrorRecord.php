@@ -17,7 +17,7 @@ use Avro\Exception\AvroRemoteException;
 abstract class AvroErrorRecord extends AvroRemoteException implements IAvroRecordBase {
   use TAvroRecordBase;
 
-  public abstract static function _getSimpleAvroClassName();
+  public abstract static function _getSimpleAvroClassName(): string;
 
   /**
    * @return static Creates new instance of the current error type
