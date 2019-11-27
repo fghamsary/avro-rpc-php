@@ -27,7 +27,7 @@ class EnumTests extends \PHPUnit\Framework\TestCase {
 
 class TestEnum extends AvroEnumRecord {
 
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'TestEnum';
   }
 

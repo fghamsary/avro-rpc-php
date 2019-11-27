@@ -52,7 +52,7 @@ DATUM;
 }
 
 class FullName extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'FullName';
   }
   /**
@@ -93,7 +93,7 @@ class FullName extends AvroRecord {
   }
 }
 class GreetingFullNullable extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'GreetingFullNullable';
   }
   /**
@@ -130,7 +130,7 @@ class GreetingFullNullable extends AvroRecord {
   }
 }
 class GreetingFull extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'GreetingFull';
   }
   /**
@@ -167,7 +167,7 @@ class GreetingFull extends AvroRecord {
   }
 }
 class Greeting extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'Greeting';
   }
   /**
@@ -188,7 +188,7 @@ class Greeting extends AvroRecord {
   }
 }
 class UnionPrimitives extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'UnionPrimitives';
   }
   /** @var mixed */
@@ -252,7 +252,7 @@ abstract class SubParentType extends ParentType {
 }
 /** @method static InheritanceType1 newInstance() */
 class InheritanceType1 extends SubParentType {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return "InheritanceType1";
   }
   /** @var int|null */
@@ -279,7 +279,7 @@ class InheritanceType1 extends SubParentType {
 }
 /** @method static InheritanceType2 newInstance() */
 class InheritanceType2 extends SubParentType {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return "InheritanceType2";
   }
   /** @var float|null */
@@ -306,7 +306,7 @@ class InheritanceType2 extends SubParentType {
 }
 /** @method static InheritanceType3 newInstance() */
 class InheritanceType3 extends ParentType {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return "InheritanceType3";
   }
   /** @var string */
@@ -349,7 +349,7 @@ class InheritanceType3 extends ParentType {
   }
 }
 class UnionInheritance extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return "UnionInheritance";
   }
   /** @var ParentType|null */
@@ -368,7 +368,7 @@ class UnionInheritance extends AvroRecord {
   }
 }
 class MultiItems extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'MultiItems';
   }
   /** @var ParentType[] */
@@ -387,7 +387,7 @@ class MultiItems extends AvroRecord {
   }
 }
 class MultiMapItems extends AvroRecord {
-  public static function _getSimpleAvroClassName() {
+  public static function _getSimpleAvroClassName(): string {
     return 'MultiMapItems';
   }
   /** @var ParentType[] */
