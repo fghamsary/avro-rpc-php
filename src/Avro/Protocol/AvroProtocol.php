@@ -15,6 +15,7 @@ use Avro\Record\AvroRecord;
 use Avro\Record\AvroRecordHelper;
 use Avro\Record\IAvroRecordBase;
 use Avro\Schema\AvroEnumSchema;
+use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroNamedSchemata;
 use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
@@ -232,7 +233,7 @@ class AvroProtocol {
                   }
                 }
               } else {
-                $serializedObject[$name] = [];
+                $serializedObject[$name] = $fieldType instanceof AvroMapSchema ? new \stdClass() : [];
               }
             }
           }
