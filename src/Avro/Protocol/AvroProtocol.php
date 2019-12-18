@@ -203,24 +203,36 @@ class AvroProtocol {
           if ($deepSerialization) {
             if ($serializedObject[$name] instanceof IAvroRecordBase) {
               $serializedObject[$name] = $this->serializeObject($serializedObject[$name], true, $keepKeys);
-            } elseif ((is_array($serializedObject[$name]) || $serializedObject[$name] instanceof Countable)
-              && count($serializedObject[$name]) > 0) {
-              $innerValue = $serializedObject[$name];
-              $firstValue = is_array($innerValue) ? array_values($innerValue) : $innerValue;
-              if ($firstValue[0] instanceof IAvroRecordBase) {
-                $serializedObject[$name] = [];
-                /**
-                 * @var string $key
-                 * @var AvroRecord $value
-                 */
-                foreach ($innerValue as $key => $value) {
-                  $serializedValue = $this->serializeObject($value, true, $keepKeys);
-                  if ($keepKeys) {
-                    $serializedObject[$name][$key] = $serializedValue;
-                  } else {
-                    $serializedObject[$name][] = $serializedValue;
+            } elseif ((is_array($serializedObject[$name]) || $serializedObject[$name] instanceof Countable)) {
+              if (count($serializedObject[$name]) > 0) {
+                $innerValue = $serializedObject[$name];
+                $firstValue = null;
+                if (is_array($innerValue)) {
+                  $firstValue = array_values($innerValue)[0];
+                } elseif ($innerValue instanceof \IteratorAggregate) {
+                  $firstValue = $innerValue->getIterator()->current();
+                } elseif ($innerValue instanceof \ArrayIterator){
+                  $firstValue = $innerValue->current();
+                } else {
+                  $firstValue = null;
+                }
+                if ($firstValue instanceof IAvroRecordBase) {
+                  $serializedObject[$name] = [];
+                  /**
+                   * @var string $key
+                   * @var AvroRecord $value
+                   */
+                  foreach ($innerValue as $key => $value) {
+                    $serializedValue = $this->serializeObject($value, true, $keepKeys);
+                    if ($keepKeys) {
+                      $serializedObject[$name][$key] = $serializedValue;
+                    } else {
+                      $serializedObject[$name][] = $serializedValue;
+                    }
                   }
                 }
+              } else {
+                $serializedObject[$name] = [];
               }
             }
           }
