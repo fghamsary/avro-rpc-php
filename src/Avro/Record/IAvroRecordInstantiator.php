@@ -13,5 +13,5 @@ use Avro\Schema\AvroRecordSchema;
  * @package Avro\Record
  */
 interface IAvroRecordInstantiator {
-  function getNewRecordInstance(string $defaultNamespace, AvroRecordSchema $schema): IAvroRecordBase;
+  function getNewRecordInstance(string $defaultNamespace, AvroRecordSchema $schema): ?IAvroRecordBase;
 }
