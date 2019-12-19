@@ -118,6 +118,20 @@ class AvroUnionSchema extends AvroSchema {
   }
 
   /**
+   * Returns the type of nullable value if it's a nullable type union
+   * @return AvroSchema|null the other type other than null in this union
+   */
+  public function getNullableSchema(): ?AvroSchema {
+    if ($this->isNullable()) {
+      $nullableSchema = array_filter($this->getSchemas(), function ($innerItem) {
+        return !($innerItem instanceof AvroPrimitiveSchema && $innerItem->isNull());
+      });
+      return count($nullableSchema) === 1 ? $nullableSchema[0] : null;
+    }
+    return null;
+  }
+
+  /**
    * The datum should be one of the possible schemas in this union
    * @param mixed $datum the datum which should be checked
    * @return boolean true if the datum is compatible with the current union schema

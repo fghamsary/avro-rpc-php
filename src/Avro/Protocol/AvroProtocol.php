@@ -233,7 +233,9 @@ class AvroProtocol {
                   }
                 }
               } else {
-                $serializedObject[$name] = $fieldType instanceof AvroMapSchema ? new \stdClass() : [];
+                $isMapBased = $fieldType instanceof AvroMapSchema ||
+                  ($fieldType instanceof AvroUnionSchema && $fieldType->getNullableSchema() instanceof AvroMapSchema);
+                $serializedObject[$name] = $isMapBased ? new \stdClass() : [];
               }
             }
           }
