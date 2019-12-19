@@ -122,7 +122,7 @@ class AvroUnionSchema extends AvroSchema {
    * @return AvroSchema|null the other type other than null in this union
    */
   public function getNullableSchema(): ?AvroSchema {
-    if ($this->isNullable()) {
+    if (count($this->getSchemas()) === 2 && $this->isNullable()) {
       $nullableSchema = array_filter($this->getSchemas(), function ($innerItem) {
         return !($innerItem instanceof AvroPrimitiveSchema && $innerItem->isNull());
       });
