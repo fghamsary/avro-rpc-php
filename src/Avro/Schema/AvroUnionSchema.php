@@ -126,7 +126,7 @@ class AvroUnionSchema extends AvroSchema {
       $nullableSchema = array_filter($this->getSchemas(), function ($innerItem) {
         return !($innerItem instanceof AvroPrimitiveSchema && $innerItem->isNull());
       });
-      return count($nullableSchema) === 1 ? $nullableSchema[0] : null;
+      return count($nullableSchema) === 1 ? array_values($nullableSchema)[0] : null;
     }
     return null;
   }
