@@ -216,6 +216,7 @@ class AvroProtocol {
                   $firstValue = $innerValue->current();
                 } else {
                   $firstValue = null;
+                  error_log("There is a problem with value for JSON serialization in $name for the object of type $fieldType in schema $fullName: " . json_encode($innerValue));
                 }
                 if ($firstValue instanceof IAvroRecordBase) {
                   $serializedObject[$name] = [];
