@@ -7,7 +7,7 @@
     "serialization"
   ],
   "license": "proprietary",
-  "version": "1.8.3-dev",
+  "version": "1.8.3",
   "type": "library",
   "homepage": "https://gitlab.v3d.fr/server/avro-rpc-php",
   "authors": [
