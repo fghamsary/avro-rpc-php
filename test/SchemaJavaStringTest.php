@@ -121,27 +121,29 @@ class SchemaJavaStringTest extends PHPUnit\Framework\TestCase {
       {"type": "array", "items": "string"}]
     ', true, '[{"type":"record","name":"subtract","namespace":"com.example","fields":[{"name":"minuend","type":"int"},{"name":"subtrahend","type":"int"}]},{"type":"record","name":"divide","namespace":"com.example","fields":[{"name":"quotient","type":"int"},{"name":"dividend","type":"int"}]},{"type":"array","items":{"type":"string","avro.java.string":"String"}}]'),
       new SchemaStringExample('
-      [{"name":"MScoreChart", "namespace":"fr.v3d",
-        "type":"record",
+      [{"name":"MScoreChart", "namespace":"fr.v3d", "type":"record",
         "fields":[
-          {
-            "name": "eventTooltip",
-            "type": [
-              "null",
-              {
-                "type": "map",
-                "values": [
-                  "null",
-                  {
-                    "type": "array",
-                    "items": ["null", "string"]
-                  }
-                ]
-              }
-            ]
-          }
+          {"name":"eventTooltip","type":["null",{"type":"map","values":["null",{"type":"array","items":["null", "string"]}]}]}
         ]
-       }]', true, '[{"type":"record","name":"MScoreChart","namespace":"fr.v3d","fields":[{"name":"eventTooltip","type":["null",{"type":"map","values":["null",{"type":"array","items":["null",{"type":"string","avro.java.string":"String"}]}],"avro.java.string":"String"}]}]}]')
+       }]', true, '[{"type":"record","name":"MScoreChart","namespace":"fr.v3d","fields":[{"name":"eventTooltip","type":["null",{"type":"map","values":["null",{"type":"array","items":["null",{"type":"string","avro.java.string":"String"}]}],"avro.java.string":"String"}]}]}]'),
+      new SchemaStringExample('
+      [{"name":"MapOfMapOfString", "namespace":"fr.v3d", "type":"record",
+        "fields":[
+          {"name":"testForMapOfMapOfString","type": ["null", {"type": "map", "values": {"type": "map", "values": ["null", "string"]}}]}
+        ]
+       }]', true, '[{"type":"record","name":"MapOfMapOfString","namespace":"fr.v3d","fields":[{"name":"testForMapOfMapOfString","type":["null",{"type":"map","values":{"type":"map","values":["null",{"type":"string","avro.java.string":"String"}],"avro.java.string":"String"},"avro.java.string":"String"}]}]}]'),
+      new SchemaStringExample('
+      [{"name":"MapOfNullableMapOfNullableArrayString", "namespace":"fr.v3d", "type":"record",
+        "fields":[
+          {"name":"testForMapOfMapOfStringArrayNullable","type":["null", {"type": "map", "values": {"type": "map", "values": ["null", {"type":"array", "items": ["null", "string"]}]}}]}
+        ]
+       }]', true, '[{"type":"record","name":"MapOfNullableMapOfNullableArrayString","namespace":"fr.v3d","fields":[{"name":"testForMapOfMapOfStringArrayNullable","type":["null",{"type":"map","values":{"type":"map","values":["null",{"type":"array","items":["null",{"type":"string","avro.java.string":"String"}]}],"avro.java.string":"String"},"avro.java.string":"String"}]}]}]'),
+      new SchemaStringExample('
+      [{"name":"MapOfNullableMapOfNullableArrayString", "namespace":"fr.v3d", "type":"record",
+        "fields":[
+          {"name":"testForMapOfMapOfStringArrayNullable","type":["null", {"type": "map", "values": ["null", {"type": "map", "values": ["null", {"type":"array", "items": ["null", "string"]}]}]}]}
+        ]
+       }]', true, '[{"type":"record","name":"MapOfNullableMapOfNullableArrayString","namespace":"fr.v3d","fields":[{"name":"testForMapOfMapOfStringArrayNullable","type":["null",{"type":"map","values":["null",{"type":"map","values":["null",{"type":"array","items":["null",{"type":"string","avro.java.string":"String"}]}],"avro.java.string":"String"}],"avro.java.string":"String"}]}]}]')
     ];
 
     $fixedExamples = [

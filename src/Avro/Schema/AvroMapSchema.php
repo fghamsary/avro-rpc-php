@@ -72,6 +72,13 @@ class AvroMapSchema extends AvroSchema {
   }
 
   /**
+   * @return bool true if this map contains string which will be used in another map
+   */
+  public function hasString(): bool {
+    return $this->containsString;
+  }
+
+  /**
    * The datum should be array (map) and it should be of the type specified on the schema and the key should be string
    * @param array $datum the array which should be checked based on the current schema
    * @return bool true if all values on the datum are valid for this type
