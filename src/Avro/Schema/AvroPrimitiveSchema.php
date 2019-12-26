@@ -50,6 +50,13 @@ class AvroPrimitiveSchema extends AvroSchema {
   }
 
   /**
+   * @return bool true if this is a string type
+   */
+  public function hasString(): bool {
+    return $this->isString();
+  }
+
+  /**
    * @return bool true if this type is a string
    */
   public function isString(): bool {

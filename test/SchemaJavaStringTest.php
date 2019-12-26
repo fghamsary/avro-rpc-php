@@ -120,6 +120,28 @@ class SchemaJavaStringTest extends PHPUnit\Framework\TestCase {
                 {"name":"dividend", "type":"int"}]},
       {"type": "array", "items": "string"}]
     ', true, '[{"type":"record","name":"subtract","namespace":"com.example","fields":[{"name":"minuend","type":"int"},{"name":"subtrahend","type":"int"}]},{"type":"record","name":"divide","namespace":"com.example","fields":[{"name":"quotient","type":"int"},{"name":"dividend","type":"int"}]},{"type":"array","items":{"type":"string","avro.java.string":"String"}}]'),
+      new SchemaStringExample('
+      [{"name":"MScoreChart", "namespace":"fr.v3d",
+        "type":"record",
+        "fields":[
+          {
+            "name": "eventTooltip",
+            "type": [
+              "null",
+              {
+                "type": "map",
+                "values": [
+                  "null",
+                  {
+                    "type": "array",
+                    "items": ["null", "string"]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+       }]', true, '[{"type":"record","name":"MScoreChart","namespace":"fr.v3d","fields":[{"name":"eventTooltip","type":["null",{"type":"map","values":["null",{"type":"array","items":["null",{"type":"string","avro.java.string":"String"}]}],"avro.java.string":"String"}]}]}]')
     ];
 
     $fixedExamples = [

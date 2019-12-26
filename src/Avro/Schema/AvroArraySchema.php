@@ -65,6 +65,13 @@ class AvroArraySchema extends AvroSchema {
   }
 
   /**
+   * @return boolean true if the array contains a part which contains string
+   */
+  public function hasString(): bool {
+    return $this->getItemsSchema()->hasString();
+  }
+
+  /**
    * The datum should be array and it should be of the type specified on the schema
    * @param array $datum the array which should be checked based on the current schema
    * @return bool true if all values on the datum are valid for this type

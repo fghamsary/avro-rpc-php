@@ -439,6 +439,14 @@ abstract class AvroSchema {
   }
 
   /**
+   * This function will be over written in the types which may contain string which should be passed on top
+   * @return boolean true if the schema contains string and should be used for javaString type
+   */
+  public function hasString(): bool {
+    return false;
+  }
+
+  /**
    * Checks to see if the $datum is valid for this kind of schema
    * @param mixed $datum the value to be checked
    * @return boolean true if the datum is valid for this schema type and false otherwise

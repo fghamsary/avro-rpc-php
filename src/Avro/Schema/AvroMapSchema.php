@@ -59,10 +59,7 @@ class AvroMapSchema extends AvroSchema {
       $this->containsString = false;
     } else {
       $valueSchema = AvroSchema::subParse($values, $defaultNamespace, $schemata);
-      if (($valueSchema instanceof AvroPrimitiveSchema && $valueSchema->isString()) ||
-          ($valueSchema instanceof AvroUnionSchema && $valueSchema->hasString())) {
-        $this->containsString = true;
-      }
+      $this->containsString = $valueSchema->hasString();
     }
     $this->valuesSchema = $valueSchema;
   }

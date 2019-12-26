@@ -12,12 +12,10 @@ use Avro\AvroUtil;
 use Avro\Exception\AvroException;
 use Avro\Exception\AvroSchemaParseException;
 use Avro\Record\AvroRecord;
-use Avro\Record\AvroRecordHelper;
 use Avro\Record\IAvroRecordBase;
 use Avro\Schema\AvroEnumSchema;
 use Avro\Schema\AvroMapSchema;
 use Avro\Schema\AvroNamedSchemata;
-use Avro\Schema\AvroPrimitiveSchema;
 use Avro\Schema\AvroRecordSchema;
 use Avro\Schema\AvroSchema;
 use Avro\Schema\AvroUnionSchema;
@@ -162,7 +160,7 @@ class AvroProtocol {
   }
 
   /**
-   * Returns the currenty generated md5 saved on this avro protocol which may not be the current with the protocol
+   * Returns the currently generated md5 saved on this avro protocol which may not be the current with the protocol
    *
    * @return string the md5 hash string of the current protocol
    */

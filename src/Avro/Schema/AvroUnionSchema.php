@@ -57,7 +57,7 @@ class AvroUnionSchema extends AvroSchema {
         $isInSchemata = true;
       } else {
         $newSchema = self::subParse($schema, $defaultNamespace, $schemata);
-        if ($newSchema instanceof AvroPrimitiveSchema && $newSchema->isString()) {
+        if ($newSchema->hasString()) {
           $this->containsString = true;
         }
       }
