@@ -26,7 +26,7 @@ abstract class AvroEnumRecord implements \JsonSerializable {
   }
 
   /**
-   * @return string[] The list of available values for this enum
+   * @return AvroEnumRecord[] of all instances possible hashed by their values as key for this enum
    */
   protected abstract static function getEnumValues(): array;
 
@@ -36,8 +36,9 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    * @throws AvroException if the value is not valid for this enum
    */
   public static function getItem(string $value) {
-    if (static::hasValue($value)) {
-      return new static($value);
+    $values = static::getEnumValues();
+    if (array_key_exists($value, $values)) {
+      return $values[$value];
     } else {
       throw new AvroException("$value is not valid for " . static::class . '!');
     }
@@ -48,7 +49,7 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    * @return bool true if the value exists
    */
   public static function hasValue(string $value) {
-    return in_array($value, static::getEnumValues());
+    return array_key_exists($value, static::getEnumValues());
   }
 
   /**
@@ -63,5 +64,17 @@ abstract class AvroEnumRecord implements \JsonSerializable {
    */
   public function jsonSerialize() {
     return $this->value;
+  }
+
+  /**
+   * @param AvroEnumRecord|null $that the other value to be checked if it has the same value
+   * @return bool true if the value is the same
+   */
+  public function equals(?AvroEnumRecord $that): bool {
+    if ($that !== null) {
+      return $this::_getSimpleAvroClassName() === $this::_getSimpleAvroClassName() &&
+        $this->value === $that->value;
+    }
+    return false;
   }
 }
