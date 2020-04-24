@@ -4,8 +4,9 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 pipeline {
     agent any
     environment {
-        COMPOSER_HOME = tool name: 'Auto_Composer', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-        PATH = "/opt/rh/rh-php72/root/usr/bin:$COMPOSER_HOME:$PATH" // PHP Path on Jenkins
+        COMPOSER_HOME = tool name: 'Auto_Composer_72', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+        PATH = "/opt/remi/php72/root/usr/bin:/opt/remi/php74/root/usr/sbin:$COMPOSER_HOME:$PATH" // PHP Path on Jenkins
+        LD_LIBRARY_PATH="/opt/remi/php72/root/usr/lib64:$LD_LIBRARY_PATH" // PHP Path for libraries used
     }
 
     post {
