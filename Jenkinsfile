@@ -12,14 +12,10 @@ pipeline {
     post {
         failure {
             echo 'Build failed'
-            slackSend color: "danger", message: ":negative_squared_cross_mark: *${env.JOB_NAME}* `${env.gitlabBranch}`: " +
-                    "#${env.BUILD_NUMBER} failed.\n${env.BUILD_URL}"
             updateGitlabCommitStatus name: 'Global status', state: 'failed'
         }
         success {
             echo 'Build successful'
-            slackSend color: "good", message: ":heavy_check_mark: *${env.JOB_NAME}* `${env.gitlabBranch}`: " +
-                    "#${env.BUILD_NUMBER} successful.\n${env.BUILD_URL}"
             updateGitlabCommitStatus name: 'Global status', state: 'success'
         }
         unstable {
@@ -32,16 +28,12 @@ pipeline {
                 def failed = sh(script : "wget -O - '${env.BUILD_URL}/api/xml?xpath=//*[@_class=\"hudson.tasks.junit.TestResultAction\"]/failCount' | sed 's/[^0-9]*//g'", returnStdout: true)
                 def total = sh(script : "wget -O - '${env.BUILD_URL}/api/xml?xpath=//*[@_class=\"hudson.tasks.junit.TestResultAction\"]/totalCount' | sed 's/[^0-9]*//g'", returnStdout: true)
 
-                slackSend color: "warning", message: ":warning: *${env.JOB_NAME}* `${env.gitlabBranch}`: " +
-                        "#${env.BUILD_NUMBER} unstable (${failed} failed / ${total} total).\n${env.BUILD_URL}"
                 addGitLabMRComment comment: "Build is unstable ! Failed tests: ${failed} / ${total}"
             }
 
         }
         aborted {
             echo 'Build aborted'
-            slackSend color: "danger", message: ":no_entry_sign: *${env.JOB_NAME}* `${env.gitlabBranch}`: " +
-                    "#${env.BUILD_NUMBER} aborted.\n${env.BUILD_URL}"
             updateGitlabCommitStatus name: 'Global status', state: 'canceled'
         }
     }
