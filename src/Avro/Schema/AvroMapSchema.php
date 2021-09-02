@@ -23,11 +23,6 @@ use Avro\IO\Exception\AvroIOException;
 class AvroMapSchema extends AvroSchema {
 
   /**
-   * @var bool true if the values of the map contains string as well, it may be a union which contain string as well
-   */
-  private $containsString = false;
-
-  /**
    * @var AvroNamedSchema|AvroSchema named schema name or AvroSchema of map schema values.
    */
   private $valuesSchema;
@@ -56,10 +51,8 @@ class AvroMapSchema extends AvroSchema {
     if (is_string($values) &&
       $valueSchema = $schemata->getSchemaByName(new AvroName($values, null, $defaultNamespace))) {
       $this->alreadyInSchema = true;
-      $this->containsString = false;
     } else {
       $valueSchema = AvroSchema::subParse($values, $defaultNamespace, $schemata);
-      $this->containsString = $valueSchema->hasString();
     }
     $this->valuesSchema = $valueSchema;
   }
@@ -75,7 +68,7 @@ class AvroMapSchema extends AvroSchema {
    * @return bool true if this map contains string which will be used in another map
    */
   public function hasString(): bool {
-    return $this->containsString;
+    return true;
   }
 
   /**
@@ -229,7 +222,7 @@ class AvroMapSchema extends AvroSchema {
     $avro = parent::toAvro();
     $avro[AvroSchema::VALUES_ATTR] = $this->alreadyInSchema
       ? $this->valuesSchema->getQualifiedName() : $this->valuesSchema->toAvro();
-    if ($this->containsString && AvroPrimitiveSchema::isJavaStringType()) {
+    if (AvroPrimitiveSchema::isJavaStringType()) {
       $avro[self::JAVA_STRING_ANNOTATION] = self::JAVA_STRING_TYPE;
     }
     return $avro;
